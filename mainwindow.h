@@ -13,6 +13,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QFile>
+#include <QDir>
 #include <QSettings>
 #include <QFileInfo>
 #include <QLineEdit>
@@ -41,12 +42,14 @@ private slots:
     void onStartPress();
     void onStopPress();
     void onOpenPress();
+    void onOpenDirPress();
     void onVolumeSliderChanged(int newValue);
     bool onFileChanged(QString newFile);
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
     void onMediaError(QMediaPlayer::Error error, const QString &errorString);
 private:
     bool checkFile(const QString& file);
+    bool checkDir(const QString& file);
     void setAudio(const QString& file);
     void configureLayout();
     void configureAudio();
@@ -62,6 +65,7 @@ private:
     QPushButton* btnPlay;
     QPushButton* btnStop;
     QPushButton* btnOpen;
+    QPushButton* btnOpenDir;
     QLabelElide* lFileName;
     QVBoxLayout* layout;
     QSlider* sldVolume;

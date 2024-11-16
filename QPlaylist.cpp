@@ -23,6 +23,19 @@ void QPlaylist::addFile(const QString& path) {
     }
 }
 
+void QPlaylist::addFiles(const QStringList& files) {
+    for (const auto& file : files) {
+        addFile(file);
+    }
+}
+
+void QPlaylist::addFolder(const QString& path) {
+    QDir dir(path);
+    for (const auto& fileInfo : dir.entryInfoList(QStringList({"*.mp3", "*.wav", "*.flac"}))) {
+        addFile(fileInfo.absoluteFilePath());
+    }
+}
+
 void QPlaylist::clear() {
     QTableWidget::clear();
     setRowCount(0);

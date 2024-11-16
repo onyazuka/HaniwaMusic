@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
     btnPlay = new QPushButton("Play", this);
     btnStop = new QPushButton("Stop", this);
     btnOpen = new QPushButton("Open", this);
+    btnOpenDir = new QPushButton("Open directory", this);
     lFileName = new QLabelElide("", this);
     //lFileName->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
     sldVolume = new QSlider(Qt::Orientation::Horizontal, this);
@@ -26,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(btnPlay, &QPushButton::released, this, &MainWindow::onStartPress);
     connect(btnStop, &QPushButton::released, this, &MainWindow::onStopPress);
     connect(btnOpen, &QPushButton::released, this, &MainWindow::onOpenPress);
+    connect(btnOpenDir, &QPushButton::released, this, &MainWindow::onOpenDirPress);
     connect(sldVolume, &QAbstractSlider::valueChanged, this, &MainWindow::onVolumeSliderChanged);
     connect(playlist, &QPlaylist::fileChanged, this, &MainWindow::onFileChanged);
     connect(player, &QMediaPlayer::mediaStatusChanged, this, &MainWindow::onMediaStatusChanged);
@@ -45,6 +47,7 @@ void MainWindow::configureLayout(){
     QHBoxLayout* l1 = new QHBoxLayout();
     QHBoxLayout* l2 = new QHBoxLayout();
     l1->addWidget(btnOpen);
+    l1->addWidget(btnOpenDir);
     l1->addWidget(lFileName);
     l2->addWidget(btnPlay);
     l2->addWidget(btnStop);
@@ -90,19 +93,34 @@ void MainWindow::onMediaError(QMediaPlayer::Error, const QString&) {
     changeFileNameLabel("File not selected", Qt::red);
 }
 
-bool MainWindow::checkFile(const QString& file) {
-    if (file.isEmpty()) {
+bool MainWindow::checkFile(const QString& path) {
+    if (path.isEmpty()) {
         QMessageBox msg;
-        msg.warning(this, "Error", "Empty file name");
+        msg.warning(this, "Error", "Empty file path");
         return false;
     }
-    else if (!QFile::exists(file)) {
+    if (!QFile::exists(path)) {
         QMessageBox msg;
-        msg.warning(this, "Error", "Invalid file name");
+        msg.warning(this, "Error", "Invalid file path");
         return false;
     }
     return true;
 }
+
+bool MainWindow::checkDir(const QString& path) {
+    if (path.isEmpty()) {
+        QMessageBox msg;
+        msg.warning(this, "Error", "Empty file path");
+        return false;
+    }
+    if (!QFile::exists(path)) {
+        QMessageBox msg;
+        msg.warning(this, "Error", "Invalid file path");
+        return false;
+    }
+    return true;
+}
+
 
 void MainWindow::setAudio(const QString& file) {
     player->setSource(QUrl::fromLocalFile(file));
@@ -138,6 +156,15 @@ void MainWindow::onOpenPress() {
         lastDir = QFileInfo(songPath).absolutePath();
         playlist->clear();
         playlist->addFile(songPath);
+    }
+}
+
+void MainWindow::onOpenDirPress() {
+    auto dir = QFileDialog::getExistingDirectory(this, "Open directory", lastDir);
+    if (checkDir(dir)) {
+        lastDir = dir;
+        playlist->clear();
+        playlist->addFolder(dir);
     }
 }
 

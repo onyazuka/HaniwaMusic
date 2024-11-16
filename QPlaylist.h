@@ -3,6 +3,8 @@
 
 #include <QTableWidget>
 #include <QHeaderView>
+#include <QDir>
+
 
 class QPlaylist : public QTableWidget {
     Q_OBJECT
@@ -15,8 +17,8 @@ public:
 
     QPlaylist();
     void addFile(const QString& path);
-    //void addFiles(const QStringList& files);
-    //void addFolder(const QString& path);
+    void addFiles(const QStringList& files);
+    void addFolder(const QString& path);
     void clear();
 signals:
     void fileChanged(QString path);
