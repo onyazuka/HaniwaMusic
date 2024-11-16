@@ -43,7 +43,11 @@ private slots:
     void onOpenPress();
     void onVolumeSliderChanged(int newValue);
     bool onFileChanged(QString newFile);
+    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
+    void onMediaError(QMediaPlayer::Error error, const QString &errorString);
 private:
+    bool checkFile(const QString& file);
+    void setAudio(const QString& file);
     void configureLayout();
     void configureAudio();
     void changeFileNameLabel(const QString& text, Qt::GlobalColor color);
@@ -63,7 +67,7 @@ private:
     QSlider* sldVolume;
     QPlaylist* playlist;
 
-    QString lastDir;
     QString songPath;
+    QString lastDir;
 };
 #endif // MAINWINDOW_H

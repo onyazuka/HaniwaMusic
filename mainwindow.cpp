@@ -28,6 +28,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(btnOpen, &QPushButton::released, this, &MainWindow::onOpenPress);
     connect(sldVolume, &QAbstractSlider::valueChanged, this, &MainWindow::onVolumeSliderChanged);
     connect(playlist, &QPlaylist::fileChanged, this, &MainWindow::onFileChanged);
+    connect(player, &QMediaPlayer::mediaStatusChanged, this, &MainWindow::onMediaStatusChanged);
+    connect(player, &QMediaPlayer::errorOccurred, this, &MainWindow::onMediaError);
 }
 
 
@@ -54,33 +56,57 @@ void MainWindow::configureLayout(){
 }
 
 void MainWindow::configureAudio() {
-    //songPath = "/media/onyazuka/New SSD/music/虹のコンキスタドール/HIGH FLYER.mp3";
     player = new QMediaPlayer;
     audioOutput = new QAudioOutput;
     player->setAudioOutput(audioOutput);
     audioOutput->setVolume(DEFAULT_VOLUME);
     sldVolume->setValue(DEFAULT_VOLUME * 100);
-    //player->setSource(QUrl::fromLocalFile(songPath));
 }
 
 bool MainWindow::onFileChanged(QString newFile) {
-    if (newFile.isEmpty()) {
+    bool ok = checkFile(newFile);
+    if (!ok) {
+        return false;
+    }
+    onStopPress();
+    songPath = newFile;
+    setAudio(newFile);
+    changeFileNameLabel(songPath, Qt::black);
+    onStartPress();
+    return ok;
+}
+
+void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
+    switch (status) {
+    case QMediaPlayer::MediaStatus::InvalidMedia:
+        changeFileNameLabel("File not selected", Qt::red);
+        break;
+    default:
+        break;
+    }
+}
+
+void MainWindow::onMediaError(QMediaPlayer::Error, const QString&) {
+    changeFileNameLabel("File not selected", Qt::red);
+}
+
+bool MainWindow::checkFile(const QString& file) {
+    if (file.isEmpty()) {
         QMessageBox msg;
         msg.warning(this, "Error", "Empty file name");
         return false;
     }
-    else if (!QFile::exists(newFile)) {
+    else if (!QFile::exists(file)) {
         QMessageBox msg;
         msg.warning(this, "Error", "Invalid file name");
         return false;
     }
-    player->setSource(QUrl::fromLocalFile(newFile));
-    if (player->error()) {
-        QMessageBox msg;
-        msg.warning(this, "Error", "Invalid or unsupported audio file");
-        return false;
-    }
     return true;
+}
+
+void MainWindow::setAudio(const QString& file) {
+    player->setSource(QUrl::fromLocalFile(file));
+    // error handling in slot;
 }
 
 void MainWindow::changeFileNameLabel(const QString& text, Qt::GlobalColor color) {
@@ -107,23 +133,15 @@ void MainWindow::saveSettings() {
 }
 
 void MainWindow::onOpenPress() {
-    songPath = QFileDialog::getOpenFileName(this, "Select audio file", lastDir, "Audio (*.mp3 *.wav *.flac)");
-    if (onFileChanged(songPath)) {
-        changeFileNameLabel(songPath, Qt::black);
+    QString songPath = QFileDialog::getOpenFileName(this, "Select audio file", lastDir, "Audio (*.mp3 *.wav *.flac)");
+    if (checkFile(songPath)) {
         lastDir = QFileInfo(songPath).absolutePath();
         playlist->clear();
         playlist->addFile(songPath);
     }
-    else {
-        songPath = "";
-        changeFileNameLabel("File not selected", Qt::red);
-    }
 }
 
 void MainWindow::onStartPress() {
-    if (!player->hasAudio()) {
-        return;
-    }
     if (player->isPlaying()) {
         player->pause();
     }
@@ -133,9 +151,6 @@ void MainWindow::onStartPress() {
 }
 
 void MainWindow::onStopPress() {
-    if (!player->hasAudio()) {
-        return;
-    }
     player->stop();
 }
 
