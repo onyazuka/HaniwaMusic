@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     lFileName = new QLabelElide("", this);
     //lFileName->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
     sldVolume = new QSlider(Qt::Orientation::Horizontal, this);
+    playlist = new QPlaylist();
     setWindowTitle("Hello Qt");
     changeFileNameLabel("File not selected", Qt::red);
     loadSettings();
@@ -26,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(btnStop, &QPushButton::released, this, &MainWindow::onStopPress);
     connect(btnOpen, &QPushButton::released, this, &MainWindow::onOpenPress);
     connect(sldVolume, &QAbstractSlider::valueChanged, this, &MainWindow::onVolumeSliderChanged);
+    connect(playlist, &QPlaylist::fileChanged, this, &MainWindow::onFileChanged);
 }
 
 
@@ -47,6 +49,7 @@ void MainWindow::configureLayout(){
     layout->addLayout(l1);
     layout->addLayout(l2);
     layout->addWidget(sldVolume);
+    layout->addWidget(playlist);
     centralWidget->setLayout(layout);
 }
 
@@ -60,7 +63,7 @@ void MainWindow::configureAudio() {
     //player->setSource(QUrl::fromLocalFile(songPath));
 }
 
-bool MainWindow::onFileChanged(const QString& newFile) {
+bool MainWindow::onFileChanged(QString newFile) {
     if (newFile.isEmpty()) {
         QMessageBox msg;
         msg.warning(this, "Error", "Empty file name");
@@ -108,6 +111,8 @@ void MainWindow::onOpenPress() {
     if (onFileChanged(songPath)) {
         changeFileNameLabel(songPath, Qt::black);
         lastDir = QFileInfo(songPath).absolutePath();
+        playlist->clear();
+        playlist->addFile(songPath);
     }
     else {
         songPath = "";

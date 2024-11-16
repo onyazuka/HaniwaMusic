@@ -10,11 +10,13 @@ CONFIG += c++20
 
 SOURCES += \
     QLabelElide.cpp \
+    QPlaylist.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     QLabelElide.h \
+    QPlaylist.h \
     mainwindow.h
 
 FORMS += \

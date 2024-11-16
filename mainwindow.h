@@ -18,6 +18,7 @@
 #include <QLineEdit>
 
 #include "QLabelElide.h"
+#include "QPlaylist.h"
 
 #define ORGANIZATION_NAME "HaniwaSofuto"
 #define APP_NAME "HelloQt"
@@ -41,10 +42,10 @@ private slots:
     void onStopPress();
     void onOpenPress();
     void onVolumeSliderChanged(int newValue);
+    bool onFileChanged(QString newFile);
 private:
     void configureLayout();
     void configureAudio();
-    bool onFileChanged(const QString& newFile);
     void changeFileNameLabel(const QString& text, Qt::GlobalColor color);
     void loadSettings();
     void saveSettings();
@@ -60,6 +61,7 @@ private:
     QLabelElide* lFileName;
     QVBoxLayout* layout;
     QSlider* sldVolume;
+    QPlaylist* playlist;
 
     QString lastDir;
     QString songPath;
