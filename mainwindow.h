@@ -2,8 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QMediaPlayer>
-#include <QAudioOutput>
 #include <QPushButton>
 #include <QGridLayout>
 #include <QVBoxLayout>
@@ -18,6 +16,7 @@
 #include <QFileInfo>
 #include <QLineEdit>
 
+#include "AudioPlayer.h"
 #include "QLabelElide.h"
 #include "QPlaylist.h"
 
@@ -45,8 +44,7 @@ private slots:
     void onOpenDirPress();
     void onVolumeSliderChanged(int newValue);
     bool onFileChanged(QString newFile);
-    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
-    void onMediaError(QMediaPlayer::Error error, const QString &errorString);
+    void onAudioError(AudioPlayer::Error error);
 private:
     bool checkFile(const QString& file);
     bool checkDir(const QString& file);
@@ -60,8 +58,6 @@ private:
     Ui::MainWindow *ui;
 
     QWidget* centralWidget;
-    QMediaPlayer* player;
-    QAudioOutput* audioOutput;
     QPushButton* btnPlay;
     QPushButton* btnStop;
     QPushButton* btnOpen;
@@ -70,6 +66,7 @@ private:
     QVBoxLayout* layout;
     QSlider* sldVolume;
     QPlaylist* playlist;
+    std::shared_ptr<AudioPlayer> player;
 
     QString songPath;
     QString lastDir;

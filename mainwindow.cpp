@@ -1,8 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "QAudioPlayer.h"
 
-static constexpr float DEFAULT_VOLUME = 0.5;
 static constexpr std::string DEFAULT_PATH = "/home";
+static constexpr float DEFAULT_VOLUME = 0.5;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -30,8 +31,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(btnOpenDir, &QPushButton::released, this, &MainWindow::onOpenDirPress);
     connect(sldVolume, &QAbstractSlider::valueChanged, this, &MainWindow::onVolumeSliderChanged);
     connect(playlist, &QPlaylist::fileChanged, this, &MainWindow::onFileChanged);
-    connect(player, &QMediaPlayer::mediaStatusChanged, this, &MainWindow::onMediaStatusChanged);
-    connect(player, &QMediaPlayer::errorOccurred, this, &MainWindow::onMediaError);
 }
 
 
@@ -59,10 +58,8 @@ void MainWindow::configureLayout(){
 }
 
 void MainWindow::configureAudio() {
-    player = new QMediaPlayer;
-    audioOutput = new QAudioOutput;
-    player->setAudioOutput(audioOutput);
-    audioOutput->setVolume(DEFAULT_VOLUME);
+    player.reset(new QAudioPlayer());
+    player->setVolume(DEFAULT_VOLUME);
     sldVolume->setValue(DEFAULT_VOLUME * 100);
 }
 
@@ -79,18 +76,14 @@ bool MainWindow::onFileChanged(QString newFile) {
     return ok;
 }
 
-void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
-    switch (status) {
-    case QMediaPlayer::MediaStatus::InvalidMedia:
+void MainWindow::onAudioError(AudioPlayer::Error error) {
+    if (error == AudioPlayer::Error::InvalidMedia) {
         changeFileNameLabel("File not selected", Qt::red);
-        break;
-    default:
-        break;
+        QMessageBox::warning(this, "Error", "Invalid media file");
     }
-}
-
-void MainWindow::onMediaError(QMediaPlayer::Error, const QString&) {
-    changeFileNameLabel("File not selected", Qt::red);
+    else {
+        QMessageBox::critical(this, "Error", "Unknown error");
+    }
 }
 
 bool MainWindow::checkFile(const QString& path) {
@@ -123,7 +116,7 @@ bool MainWindow::checkDir(const QString& path) {
 
 
 void MainWindow::setAudio(const QString& file) {
-    player->setSource(QUrl::fromLocalFile(file));
+    player->open(file.toStdString());
     // error handling in slot;
 }
 
@@ -169,12 +162,7 @@ void MainWindow::onOpenDirPress() {
 }
 
 void MainWindow::onStartPress() {
-    if (player->isPlaying()) {
-        player->pause();
-    }
-    else {
-        player->play();
-    }
+    player->playOrPause();
 }
 
 void MainWindow::onStopPress() {
@@ -182,5 +170,5 @@ void MainWindow::onStopPress() {
 }
 
 void MainWindow::onVolumeSliderChanged(int newValue) {
-    audioOutput->setVolume((float)newValue / 100.0f);
+    player->setVolume((float)newValue / 100.0f);
 }
