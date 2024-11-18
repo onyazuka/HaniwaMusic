@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "QAudioPlayer.h"
+#include <QAudioPlayer.h>
 
 static constexpr std::string DEFAULT_PATH = "/home";
 static constexpr float DEFAULT_VOLUME = 0.5;
@@ -14,23 +14,33 @@ MainWindow::MainWindow(QWidget *parent)
     setCentralWidget(centralWidget);
     btnPlay = new QPushButton("Play", this);
     btnStop = new QPushButton("Stop", this);
+    btnNext = new QPushButton("Next", this);
+    btnPrev = new QPushButton("Prev", this);
     btnOpen = new QPushButton("Open", this);
     btnOpenDir = new QPushButton("Open directory", this);
     lFileName = new QLabelElide("", this);
     //lFileName->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
     sldVolume = new QSlider(Qt::Orientation::Horizontal, this);
+    sldProgress = new QSlider(Qt::Orientation::Horizontal, this);
+    sldProgress->setRange(1, 10000);
+    sldProgress->setTickInterval(1);
     playlist = new QPlaylist();
-    setWindowTitle("Hello Qt");
+    setWindowTitle("Haniwa Music");
     changeFileNameLabel("File not selected", Qt::red);
     loadSettings();
     configureAudio();
     configureLayout();
     connect(btnPlay, &QPushButton::released, this, &MainWindow::onStartPress);
     connect(btnStop, &QPushButton::released, this, &MainWindow::onStopPress);
+    connect(btnNext, &QPushButton::released, playlist, &QPlaylist::next);
+    connect(btnPrev, &QPushButton::released, playlist, &QPlaylist::prev);
     connect(btnOpen, &QPushButton::released, this, &MainWindow::onOpenPress);
     connect(btnOpenDir, &QPushButton::released, this, &MainWindow::onOpenDirPress);
     connect(sldVolume, &QAbstractSlider::valueChanged, this, &MainWindow::onVolumeSliderChanged);
-    connect(playlist, &QPlaylist::fileChanged, this, &MainWindow::onFileChanged);
+    connect(sldProgress, &QAbstractSlider::sliderReleased, this, [this]() {
+        player->setPosition((float)sldProgress->value() / (float)sldProgress->maximum());
+    });
+    connect(playlist, &QPlaylist::fileChanged, this, &MainWindow::onFileChanged);    
 }
 
 
@@ -50,15 +60,20 @@ void MainWindow::configureLayout(){
     l1->addWidget(lFileName);
     l2->addWidget(btnPlay);
     l2->addWidget(btnStop);
+    l2->addWidget(btnNext);
+    l2->addWidget(btnPrev);
     layout->addLayout(l1);
     layout->addLayout(l2);
     layout->addWidget(sldVolume);
+    layout->addWidget(sldProgress);
     layout->addWidget(playlist);
     centralWidget->setLayout(layout);
 }
 
 void MainWindow::configureAudio() {
     player.reset(new QAudioPlayer());
+    player->setOnErrorCb([this](AudioPlayer::Error error){ onAudioError(error); });
+    player->setOnProgressCb([this](float pos){ if(!sldProgress->isSliderDown()) sldProgress->setValue(1 + pos * 10000); });
     player->setVolume(DEFAULT_VOLUME);
     sldVolume->setValue(DEFAULT_VOLUME * 100);
 }
@@ -136,11 +151,14 @@ void MainWindow::loadSettings() {
     if (!dir.exists()) {
         lastDir = QString(DEFAULT_PATH.data());
     }
+    QStringList lastPlaylist = settings.value("Playlist", QStringList()).toStringList();
+    playlist->addFiles(lastPlaylist);
 }
 
 void MainWindow::saveSettings() {
     QSettings settings(ORGANIZATION_NAME, APP_NAME);
     settings.setValue("LastDir", lastDir);
+    settings.setValue("Playlist", playlist->toStringList());
 }
 
 void MainWindow::onOpenPress() {

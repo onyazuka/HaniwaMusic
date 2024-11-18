@@ -60,11 +60,14 @@ private:
     QWidget* centralWidget;
     QPushButton* btnPlay;
     QPushButton* btnStop;
+    QPushButton* btnNext;
+    QPushButton* btnPrev;
     QPushButton* btnOpen;
     QPushButton* btnOpenDir;
     QLabelElide* lFileName;
     QVBoxLayout* layout;
     QSlider* sldVolume;
+    QSlider* sldProgress;
     QPlaylist* playlist;
     std::shared_ptr<AudioPlayer> player;
 

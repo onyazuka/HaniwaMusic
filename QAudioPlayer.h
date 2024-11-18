@@ -20,14 +20,17 @@ public slots:
     int playOrPause() override;
     int stop() override;
     int setVolume(float volume) override;
-signals:
-    void error(Error err);
+    int setPosition(float pos) override;
+    void setOnErrorCb(OnErrorCb cb) override;
+    void setOnProgressCb(OnProgressCb cb) override;
 private slots:
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
     void onMediaError(QMediaPlayer::Error error, const QString &errorString);
 private:
     QMediaPlayer* player;
     QAudioOutput* audioOutput;
+    OnErrorCb onError = nullptr;
+    OnProgressCb onProgress = nullptr;
 };
 
 #endif // QAUDIOPLAYER_H

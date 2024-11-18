@@ -1,4 +1,5 @@
 #include "QPlaylist.h"
+#include <QResizeEvent>
 
 QPlaylist::QPlaylist()
     : QTableWidget()
@@ -15,6 +16,7 @@ QPlaylist::QPlaylist()
 void QPlaylist::addFile(const QString& path) {
     int row = rowCount();
     insertRow(rowCount());
+    setItem(row, Column::Number, new QTableWidgetItem(QString::number(row + 1)));
     setItem(row, Column::Title, new QTableWidgetItem(path));
     setItem(row, Column::Duration, new QTableWidgetItem("n/a"));
     for (int col = 0; col < Column::COUNT; ++col) {
@@ -36,18 +38,52 @@ void QPlaylist::addFolder(const QString& path) {
     }
 }
 
+QStringList QPlaylist::toStringList() const {
+    QStringList res;
+    for(int i = 0; i < rowCount(); ++i) {
+        res.append(item(i, Column::Title)->text());
+    }
+    return res;
+}
+
 void QPlaylist::clear() {
     QTableWidget::clear();
     setRowCount(0);
 }
 
+void QPlaylist::next() {
+    if (!activeItem) {
+        return;
+    }
+    int row = activeItem->row();
+    if (row == (rowCount() - 1)) {
+        return;
+    }
+    onCellDoubleClicked(row + 1, Column::Title);
+}
+
+void QPlaylist::prev() {
+    if (!activeItem) {
+        return;
+    }
+    int row = activeItem->row();
+    if (row == 0) {
+        return;
+    }
+    onCellDoubleClicked(row - 1, Column::Title);
+}
+
 void QPlaylist::onCellDoubleClicked(int row, int) {
+    activeItem = item(row, Column::Number);
+    selectRow(row);
     emit fileChanged(item(row, Column::Title)->text());
 }
 
-void QPlaylist::resizeEvent(QResizeEvent*) {
+void QPlaylist::resizeEvent(QResizeEvent* event) {
     QFontMetrics metrics(font());
-    QSize durationSz = metrics.size(0, "99:99:99");
-    setColumnWidth(0, width() - durationSz.width());
-    setColumnWidth(1, durationSz.width());
+    QSize numberSz = metrics.size(0, QString::number(rowCount() * 10));
+    QSize durationSz = metrics.size(0, " 99:99:99 ");
+    setColumnWidth(Column::Number, numberSz.width());
+    setColumnWidth(Column::Title, event->size().width() - numberSz.width() - durationSz.width());
+    setColumnWidth(Column::Duration, durationSz.width());
 }
