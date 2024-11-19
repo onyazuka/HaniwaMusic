@@ -1,9 +1,9 @@
 #include "QAudioPlayer.h"
+#include <QDebug>
+#include <iostream>
 
 QAudioPlayer::QAudioPlayer() {
     player = new QMediaPlayer;
-    audioOutput = new QAudioOutput;
-    player->setAudioOutput(audioOutput);
 
     connect(player, &QMediaPlayer::mediaStatusChanged, this, &QAudioPlayer::onMediaStatusChanged);
     connect(player, &QMediaPlayer::errorOccurred, this, &QAudioPlayer::onMediaError);
@@ -12,6 +12,7 @@ QAudioPlayer::QAudioPlayer() {
             onProgress((float)pos / (float)player->duration());
         }
     });
+    connect(player, &QMediaPlayer::durationChanged, this, &QAudioPlayer::onAudioDurationChanged);
 }
 
 QAudioPlayer::~QAudioPlayer() {
@@ -24,6 +25,8 @@ void QAudioPlayer::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
     case QMediaPlayer::MediaStatus::InvalidMedia:
         if (onError) onError(Error::InvalidMedia);
         break;
+    case QMediaPlayer::MediaStatus::EndOfMedia:
+        if (onAudioEnd) onAudioEnd();
     default:
         break;
     }
@@ -31,6 +34,16 @@ void QAudioPlayer::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
 
 void QAudioPlayer::onMediaError(QMediaPlayer::Error, const QString&) {
     if (onError) onError(Error::InvalidMedia);
+}
+
+void QAudioPlayer::onAudioDurationChanged(qint64 duration) {
+    qDebug() << QString("Duration changed: %1").arg(duration);
+}
+
+int QAudioPlayer::init() {
+    audioOutput = new QAudioOutput;
+    player->setAudioOutput(audioOutput);
+    return 0;
 }
 
 int QAudioPlayer::open(const std::string& path) {
@@ -83,4 +96,8 @@ void QAudioPlayer::setOnErrorCb(OnErrorCb cb) {
 
 void QAudioPlayer::setOnProgressCb(OnProgressCb cb) {
     onProgress = cb;
+}
+
+void QAudioPlayer::setOnAudioEndCb(OnAudioEndCb cb) {
+    onAudioEnd = cb;
 }

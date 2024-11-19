@@ -46,6 +46,11 @@ private slots:
     bool onFileChanged(QString newFile);
     void onAudioError(AudioPlayer::Error error);
 private:
+    struct Settings {
+        QString lastDir;
+        float volume = 0.0f;
+    } appSettings;
+
     bool checkFile(const QString& file);
     bool checkDir(const QString& file);
     void setAudio(const QString& file);
@@ -72,6 +77,5 @@ private:
     std::shared_ptr<AudioPlayer> player;
 
     QString songPath;
-    QString lastDir;
 };
 #endif // MAINWINDOW_H

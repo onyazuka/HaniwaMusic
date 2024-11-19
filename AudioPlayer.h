@@ -11,7 +11,9 @@ public:
     };
     using OnErrorCb = std::function<void(Error)>;
     using OnProgressCb = std::function<void(float)>;
+    using OnAudioEndCb = std::function<void()>;
     virtual ~AudioPlayer() {};
+    virtual int init() = 0;
     virtual int open(const std::string& path) = 0;
     virtual int play() = 0;
     virtual int pause() = 0;
@@ -22,6 +24,7 @@ public:
     virtual int setPosition(float pos) = 0;
     virtual void setOnErrorCb(OnErrorCb cb) = 0;
     virtual void setOnProgressCb(OnProgressCb cb) = 0;
+    virtual void setOnAudioEndCb(OnAudioEndCb cb) = 0;
 };
 
 #endif // AUDIOPLAYER_H

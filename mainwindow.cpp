@@ -20,10 +20,11 @@ MainWindow::MainWindow(QWidget *parent)
     btnOpenDir = new QPushButton("Open directory", this);
     lFileName = new QLabelElide("", this);
     //lFileName->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
-    sldVolume = new QSlider(Qt::Orientation::Horizontal, this);
+    sldVolume = new QSlider(Qt::Orientation::Vertical, this);
     sldProgress = new QSlider(Qt::Orientation::Horizontal, this);
     sldProgress->setRange(1, 10000);
     sldProgress->setTickInterval(1);
+    sldVolume->setMaximumHeight(sldProgress->height() * 2);
     playlist = new QPlaylist();
     setWindowTitle("Haniwa Music");
     changeFileNameLabel("File not selected", Qt::red);
@@ -55,6 +56,7 @@ void MainWindow::configureLayout(){
     layout = new QVBoxLayout(centralWidget);
     QHBoxLayout* l1 = new QHBoxLayout();
     QHBoxLayout* l2 = new QHBoxLayout();
+    QHBoxLayout* l3 = new QHBoxLayout();
     l1->addWidget(btnOpen);
     l1->addWidget(btnOpenDir);
     l1->addWidget(lFileName);
@@ -62,20 +64,23 @@ void MainWindow::configureLayout(){
     l2->addWidget(btnStop);
     l2->addWidget(btnNext);
     l2->addWidget(btnPrev);
+    l3->addWidget(sldProgress);
+    l3->addWidget(sldVolume);
     layout->addLayout(l1);
     layout->addLayout(l2);
-    layout->addWidget(sldVolume);
-    layout->addWidget(sldProgress);
+    layout->addLayout(l3);
     layout->addWidget(playlist);
     centralWidget->setLayout(layout);
 }
 
 void MainWindow::configureAudio() {
     player.reset(new QAudioPlayer());
+    player->init();
     player->setOnErrorCb([this](AudioPlayer::Error error){ onAudioError(error); });
     player->setOnProgressCb([this](float pos){ if(!sldProgress->isSliderDown()) sldProgress->setValue(1 + pos * 10000); });
-    player->setVolume(DEFAULT_VOLUME);
-    sldVolume->setValue(DEFAULT_VOLUME * 100);
+    player->setOnAudioEndCb([this](){ playlist->next(); });
+    player->setVolume(appSettings.volume);
+    sldVolume->setValue(appSettings.volume * 100);
 }
 
 bool MainWindow::onFileChanged(QString newFile) {
@@ -86,6 +91,7 @@ bool MainWindow::onFileChanged(QString newFile) {
     onStopPress();
     songPath = newFile;
     setAudio(newFile);
+
     changeFileNameLabel(songPath, Qt::black);
     onStartPress();
     return ok;
@@ -146,34 +152,36 @@ void MainWindow::changeFileNameLabel(const QString& text, Qt::GlobalColor color)
 
 void MainWindow::loadSettings() {
     QSettings settings(ORGANIZATION_NAME, APP_NAME);
-    lastDir = settings.value("LastDir", "/home").toString();
-    QDir dir(lastDir);
+    appSettings.lastDir = settings.value("LastDir", "/home").toString();
+    QDir dir(appSettings.lastDir);
     if (!dir.exists()) {
-        lastDir = QString(DEFAULT_PATH.data());
+        appSettings.lastDir = QString(DEFAULT_PATH.data());
     }
     QStringList lastPlaylist = settings.value("Playlist", QStringList()).toStringList();
     playlist->addFiles(lastPlaylist);
+    appSettings.volume = settings.value("Volume", DEFAULT_VOLUME).toFloat();
 }
 
 void MainWindow::saveSettings() {
     QSettings settings(ORGANIZATION_NAME, APP_NAME);
-    settings.setValue("LastDir", lastDir);
+    settings.setValue("LastDir", appSettings.lastDir);
     settings.setValue("Playlist", playlist->toStringList());
+    settings.setValue("Volume", (float)sldVolume->value() / 100.0f);
 }
 
 void MainWindow::onOpenPress() {
-    QString songPath = QFileDialog::getOpenFileName(this, "Select audio file", lastDir, "Audio (*.mp3 *.wav *.flac)");
+    QString songPath = QFileDialog::getOpenFileName(this, "Select audio file", appSettings.lastDir, "Audio (*.mp3 *.wav *.flac)");
     if (checkFile(songPath)) {
-        lastDir = QFileInfo(songPath).absolutePath();
+        appSettings.lastDir = QFileInfo(songPath).absolutePath();
         playlist->clear();
         playlist->addFile(songPath);
     }
 }
 
 void MainWindow::onOpenDirPress() {
-    auto dir = QFileDialog::getExistingDirectory(this, "Open directory", lastDir);
+    auto dir = QFileDialog::getExistingDirectory(this, "Open directory", appSettings.lastDir);
     if (checkDir(dir)) {
-        lastDir = dir;
+        appSettings.lastDir = dir;
         playlist->clear();
         playlist->addFolder(dir);
     }
