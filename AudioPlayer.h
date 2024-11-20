@@ -20,6 +20,7 @@ public:
     virtual int playOrPause() = 0;
     virtual int stop() = 0;
     virtual int setVolume(float volume) = 0;
+    virtual int duration() = 0;
     // pos: in percents
     virtual int setPosition(float pos) = 0;
     virtual void setOnErrorCb(OnErrorCb cb) = 0;

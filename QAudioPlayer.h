@@ -20,6 +20,7 @@ public slots:
     int pause() override;
     int playOrPause() override;
     int stop() override;
+    int duration() override;
     int setVolume(float volume) override;
     int setPosition(float pos) override;
     void setOnErrorCb(OnErrorCb cb) override;

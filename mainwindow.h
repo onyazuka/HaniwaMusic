@@ -49,6 +49,8 @@ private:
     struct Settings {
         QString lastDir;
         float volume = 0.0f;
+        QPoint pos;
+        QRect windowRect;
     } appSettings;
 
     bool checkFile(const QString& file);
@@ -73,6 +75,7 @@ private:
     QVBoxLayout* layout;
     QSlider* sldVolume;
     QSlider* sldProgress;
+    QLabel* lProgress;
     QPlaylist* playlist;
     std::shared_ptr<AudioPlayer> player;
 

@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     sldProgress = new QSlider(Qt::Orientation::Horizontal, this);
     sldProgress->setRange(1, 10000);
     sldProgress->setTickInterval(1);
+    lProgress = new QLabel("0:00", this);
     sldVolume->setMaximumHeight(sldProgress->height() * 2);
     playlist = new QPlaylist();
     setWindowTitle("Haniwa Music");
@@ -57,6 +58,7 @@ void MainWindow::configureLayout(){
     QHBoxLayout* l1 = new QHBoxLayout();
     QHBoxLayout* l2 = new QHBoxLayout();
     QHBoxLayout* l3 = new QHBoxLayout();
+    QVBoxLayout* l4 = new QVBoxLayout();
     l1->addWidget(btnOpen);
     l1->addWidget(btnOpenDir);
     l1->addWidget(lFileName);
@@ -64,20 +66,30 @@ void MainWindow::configureLayout(){
     l2->addWidget(btnStop);
     l2->addWidget(btnNext);
     l2->addWidget(btnPrev);
-    l3->addWidget(sldProgress);
+    l4->addWidget(sldProgress);
+    l4->addWidget(lProgress);
+    l3->addLayout(l4);
     l3->addWidget(sldVolume);
     layout->addLayout(l1);
     layout->addLayout(l2);
     layout->addLayout(l3);
     layout->addWidget(playlist);
     centralWidget->setLayout(layout);
+    if (!appSettings.windowRect.isEmpty()) {
+        setGeometry(appSettings.windowRect);
+    }
 }
 
 void MainWindow::configureAudio() {
     player.reset(new QAudioPlayer());
     player->init();
     player->setOnErrorCb([this](AudioPlayer::Error error){ onAudioError(error); });
-    player->setOnProgressCb([this](float pos){ if(!sldProgress->isSliderDown()) sldProgress->setValue(1 + pos * 10000); });
+    player->setOnProgressCb([this](float pos){
+        if (!sldProgress->isSliderDown()) {
+            sldProgress->setValue(1 + pos * 10000);
+        }
+        lProgress->setText(QTime(0,0,0).addMSecs(pos * player->duration()).toString("m:ss") + "/" + QTime(0,0,0).addMSecs(player->duration()).toString("m:ss"));
+    });
     player->setOnAudioEndCb([this](){ playlist->next(); });
     player->setVolume(appSettings.volume);
     sldVolume->setValue(appSettings.volume * 100);
@@ -144,7 +156,7 @@ void MainWindow::setAudio(const QString& file) {
 void MainWindow::changeFileNameLabel(const QString& text, Qt::GlobalColor color) {
     //QFontMetrics metrics(lFileName->font());
     //QString elidedText = metrics.elidedText(text, Qt::ElideRight, lFileName->width());
-    lFileName->elideText(text);
+    lFileName->elideText(QFileInfo(text).completeBaseName());
     QPalette palette = lFileName->palette();
     palette.setColor(lFileName->foregroundRole(), color);
     lFileName->setPalette(palette);
@@ -160,6 +172,7 @@ void MainWindow::loadSettings() {
     QStringList lastPlaylist = settings.value("Playlist", QStringList()).toStringList();
     playlist->addFiles(lastPlaylist);
     appSettings.volume = settings.value("Volume", DEFAULT_VOLUME).toFloat();
+    appSettings.windowRect = settings.value("WindowRect", QRect()).toRect();
 }
 
 void MainWindow::saveSettings() {
@@ -167,6 +180,7 @@ void MainWindow::saveSettings() {
     settings.setValue("LastDir", appSettings.lastDir);
     settings.setValue("Playlist", playlist->toStringList());
     settings.setValue("Volume", (float)sldVolume->value() / 100.0f);
+    settings.setValue("WindowRect", geometry());
 }
 
 void MainWindow::onOpenPress() {

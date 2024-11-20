@@ -8,10 +8,10 @@ DurationGatherer::DurationGatherer() {
 
 void DurationGatherer::init() {
     timer = new QTimer();
-    timer->setInterval(100);
+    //timer->setInterval(100);
     QObject::connect(timer, &QTimer::timeout, this, &DurationGatherer::onTimer);
     connect(utilityPlayer, &QMediaPlayer::durationChanged, this, &DurationGatherer::onDuration);
-    timer->start();
+    //timer->start();
 }
 
 void DurationGatherer::onTimer() {
@@ -22,8 +22,9 @@ void DurationGatherer::onTimer() {
         utilityPlayer->setSource(QUrl::fromLocalFile(curTask.path));
     }
     else {
-        timer->setInterval(100);
-        timer->start();
+        //timer->setInterval(100);
+        //timer->start();
+        timer->stop();
     }
 }
 
@@ -36,6 +37,10 @@ void DurationGatherer::onAddFile(const QString& path, int row) {
     if (!inited) {
         init();
         inited = true;
+    }
+    if (!timer->isActive()) {
+        timer->setInterval(100);
+        timer->start();
     }
     taskQueue.append({path,row,0});
 }
@@ -51,6 +56,7 @@ QPlaylist::QPlaylist()
     horizontalHeader()->hide();
     verticalHeader()->hide();
     initMenu();
+    setSelectionMode(QAbstractItemView::SingleSelection);
 
     durationGatherer = new DurationGatherer();
     durationGatherer->moveToThread(&durationGathererThread);
@@ -70,7 +76,9 @@ void QPlaylist::addFile(const QString& path) {
     int row = rowCount();
     insertRow(rowCount());
     setItem(row, Column::Number, new QTableWidgetItem(QString::number(row + 1)));
-    setItem(row, Column::Title, new QTableWidgetItem(path));
+    QTableWidgetItem* titleItem = new QTableWidgetItem(QFileInfo(path).completeBaseName());
+    titleItem->setData(Qt::UserRole, path);
+    setItem(row, Column::Title, titleItem);
     setItem(row, Column::Duration, new QTableWidgetItem(""));
     for (int col = 0; col < Column::COUNT; ++col) {
         auto curItem = item(row, col);
@@ -98,7 +106,7 @@ void QPlaylist::addFolder(const QString& path) {
 QStringList QPlaylist::toStringList() const {
     QStringList res;
     for(int i = 0; i < rowCount(); ++i) {
-        res.append(item(i, Column::Title)->text());
+        res.append(item(i, Column::Title)->data(Qt::UserRole).toString());
     }
     return res;
 }
@@ -106,6 +114,7 @@ QStringList QPlaylist::toStringList() const {
 void QPlaylist::clear() {
     QTableWidget::clear();
     setRowCount(0);
+    activeItem = nullptr;
 }
 
 void QPlaylist::next() {
@@ -131,9 +140,19 @@ void QPlaylist::prev() {
 }
 
 void QPlaylist::onCellDoubleClicked(int row, int) {
+    if (activeItem) {
+        QTableWidgetItem* it = item(activeItem->row(), Column::Title);
+        QFont font = it->font();
+        font.setBold(false);
+        it->setFont(font);
+    }
     activeItem = item(row, Column::Number);
+    QTableWidgetItem* it = item(row, Column::Title);
+    QFont font = it->font();
+    font.setBold(true);
+    it->setFont(font);
     selectRow(row);
-    emit fileChanged(item(row, Column::Title)->text());
+    emit fileChanged(item(row, Column::Title)->data(Qt::UserRole).toString());
 }
 
 void QPlaylist::onUpdateDuration(qint64 duration, int row) {
@@ -156,6 +175,7 @@ void QPlaylist::handleContextMenu(const QPoint& pos) {
 
 void QPlaylist::resizeEvent(QResizeEvent* event) {
     updateColumnWidths(event->size().width());
+    QTableWidget::resizeEvent(event);
 }
 
 void QPlaylist::mousePressEvent(QMouseEvent* event) {
