@@ -9,6 +9,8 @@
 #include <QMediaPlayer>
 #include <QQueue>
 #include <QTimer>
+#include <QMenu>
+#include <QAction>
 
 class DurationGatherer : public QObject {
         Q_OBJECT
@@ -64,10 +66,14 @@ private slots:
     void handleContextMenu(const QPoint& pos);
 private:
     void resizeEvent(QResizeEvent *event) override;
+    void mousePressEvent(QMouseEvent* event) override;
     void updateColumnWidths(int totalTableWidth);
+    void initMenu();
     QTableWidgetItem* activeItem = nullptr;
     QThread durationGathererThread;
     DurationGatherer* durationGatherer;
+    QMenu* itemRightClickMenu = nullptr;;
+    QAction* itemRemoveAction = nullptr;
 };
 
 #endif // QPLAYLIST_H

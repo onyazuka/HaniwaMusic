@@ -1,6 +1,6 @@
 #include "QPlaylist.h"
 #include <QResizeEvent>
-#include <QSignalSpy>
+#include <QMenu>
 
 DurationGatherer::DurationGatherer() {
     utilityPlayer = new QMediaPlayer();
@@ -50,13 +50,14 @@ QPlaylist::QPlaylist()
     connect(this, &QTableWidget::cellDoubleClicked, this, &QPlaylist::onCellDoubleClicked);
     horizontalHeader()->hide();
     verticalHeader()->hide();
+    initMenu();
 
     durationGatherer = new DurationGatherer();
     durationGatherer->moveToThread(&durationGathererThread);
     connect(&durationGathererThread, &QThread::finished, durationGatherer, &QObject::deleteLater);
     connect(this, &QPlaylist::fileAdded, durationGatherer, &DurationGatherer::onAddFile);
     connect(durationGatherer, &DurationGatherer::gotDuration, this, &QPlaylist::onUpdateDuration);
-    //connect(this, &QTableWidget::customContextMenuRequested, this, &QPlaylist::handleContextMenu);
+    connect(this, &QWidget::customContextMenuRequested, this, &QPlaylist::handleContextMenu);
     durationGathererThread.start();
 }
 
@@ -70,7 +71,7 @@ void QPlaylist::addFile(const QString& path) {
     insertRow(rowCount());
     setItem(row, Column::Number, new QTableWidgetItem(QString::number(row + 1)));
     setItem(row, Column::Title, new QTableWidgetItem(path));
-    setItem(row, Column::Duration, new QTableWidgetItem("n/a"));
+    setItem(row, Column::Duration, new QTableWidgetItem(""));
     for (int col = 0; col < Column::COUNT; ++col) {
         auto curItem = item(row, col);
         curItem->setFlags(curItem->flags() ^ Qt::ItemIsEditable);
@@ -157,6 +158,19 @@ void QPlaylist::resizeEvent(QResizeEvent* event) {
     updateColumnWidths(event->size().width());
 }
 
+void QPlaylist::mousePressEvent(QMouseEvent* event) {
+    if (event->button() == Qt::MouseButton::RightButton) {
+        QTableWidgetItem* it = itemAt(event->position().toPoint());
+        int row = it->row();
+        selectRow(row);
+        itemRemoveAction->setData(row);
+        itemRightClickMenu->exec(event->globalPosition().toPoint());
+    }
+    else {
+        QTableWidget::mousePressEvent(event);
+    }
+}
+
 void QPlaylist::updateColumnWidths(int totalTableWidth) {
     QFontMetrics metrics(font());
     QSize numberSz = metrics.size(0, QString::number(rowCount() * 10));
@@ -164,5 +178,21 @@ void QPlaylist::updateColumnWidths(int totalTableWidth) {
     setColumnWidth(Column::Number, numberSz.width());
     setColumnWidth(Column::Title, totalTableWidth - numberSz.width() - durationSz.width());
     setColumnWidth(Column::Duration, durationSz.width());
+}
+
+void QPlaylist::initMenu() {
+    itemRemoveAction = new QAction("Remove from playlist", this);
+    connect(itemRemoveAction, &QAction::triggered, this, [this](){
+        int row = itemRemoveAction->data().toInt();
+        QTableWidgetItem* it = item(row, Column::Duration);
+        if (it->text().isEmpty()) {
+            // duration not filled - not initialized - skipping
+            return;
+        }
+        removeRow(row);
+    });
+    itemRightClickMenu = new QMenu();
+    itemRightClickMenu->addAction(itemRemoveAction);
+    //itemRightClickMenu->platformMenu()
 }
 
