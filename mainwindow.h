@@ -19,6 +19,7 @@
 #include "AudioPlayer.h"
 #include "QLabelElide.h"
 #include "QPlaylist.h"
+#include "QClickableSlider.h"
 
 #define ORGANIZATION_NAME "HaniwaSofuto"
 #define APP_NAME "HelloQt"
@@ -74,7 +75,7 @@ private:
     QLabelElide* lFileName;
     QVBoxLayout* layout;
     QSlider* sldVolume;
-    QSlider* sldProgress;
+    QClickableSlider* sldProgress;
     QLabel* lProgress;
     QPlaylist* playlist;
     std::shared_ptr<AudioPlayer> player;

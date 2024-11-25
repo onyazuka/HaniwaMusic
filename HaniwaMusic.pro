@@ -10,6 +10,7 @@ CONFIG += c++20 console
 
 SOURCES += \
     QAudioPlayer.cpp \
+    QClickableSlider.cpp \
     QLabelElide.cpp \
     QPlaylist.cpp \
     main.cpp \
@@ -18,6 +19,7 @@ SOURCES += \
 HEADERS += \
     AudioPlayer.h \
     QAudioPlayer.h \
+    QClickableSlider.h \
     QLabelElide.h \
     QPlaylist.h \
     mainwindow.h

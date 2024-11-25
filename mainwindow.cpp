@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
     lFileName = new QLabelElide("", this);
     //lFileName->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
     sldVolume = new QSlider(Qt::Orientation::Vertical, this);
-    sldProgress = new QSlider(Qt::Orientation::Horizontal, this);
+    sldProgress = new QClickableSlider(Qt::Orientation::Horizontal, this);
     sldProgress->setRange(1, 10000);
     sldProgress->setTickInterval(1);
     lProgress = new QLabel("0:00", this);
@@ -39,8 +39,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(btnOpen, &QPushButton::released, this, &MainWindow::onOpenPress);
     connect(btnOpenDir, &QPushButton::released, this, &MainWindow::onOpenDirPress);
     connect(sldVolume, &QAbstractSlider::valueChanged, this, &MainWindow::onVolumeSliderChanged);
-    connect(sldProgress, &QAbstractSlider::sliderReleased, this, [this]() {
-        player->setPosition((float)sldProgress->value() / (float)sldProgress->maximum());
+    connect(sldProgress, &QClickableSlider::sliderReleased, this, [this]() {
+        player->setPosition((float)sldProgress->value() / ((float)sldProgress->maximum() - (float)sldProgress->minimum()));
     });
     connect(playlist, &QPlaylist::fileChanged, this, &MainWindow::onFileChanged);    
 }

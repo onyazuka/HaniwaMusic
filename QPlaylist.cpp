@@ -30,6 +30,8 @@ void DurationGatherer::onTimer() {
 
 void DurationGatherer::onDuration(qint64 duration) {
     emit gotDuration(duration, curTask.row);
+    // setting empty source resets QMediaPlayer (I hope)
+    utilityPlayer->setSource(QUrl());
     onTimer();
 }
 
