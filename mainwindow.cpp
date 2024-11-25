@@ -16,6 +16,8 @@ MainWindow::MainWindow(QWidget *parent)
     btnStop = new QPushButton("Stop", this);
     btnNext = new QPushButton("Next", this);
     btnPrev = new QPushButton("Prev", this);
+    chRandom = new QCheckBox("Random", this);
+    chRepeat = new QCheckBox("Repeat", this);
     btnOpen = new QPushButton("Open", this);
     btnOpenDir = new QPushButton("Open directory", this);
     lFileName = new QLabelElide("", this);
@@ -34,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
     configureLayout();
     connect(btnPlay, &QPushButton::released, this, &MainWindow::onStartPress);
     connect(btnStop, &QPushButton::released, this, &MainWindow::onStopPress);
-    connect(btnNext, &QPushButton::released, playlist, &QPlaylist::next);
+    connect(btnNext, &QPushButton::released, this, &MainWindow::onNext);
     connect(btnPrev, &QPushButton::released, playlist, &QPlaylist::prev);
     connect(btnOpen, &QPushButton::released, this, &MainWindow::onOpenPress);
     connect(btnOpenDir, &QPushButton::released, this, &MainWindow::onOpenDirPress);
@@ -66,6 +68,8 @@ void MainWindow::configureLayout(){
     l2->addWidget(btnStop);
     l2->addWidget(btnNext);
     l2->addWidget(btnPrev);
+    l2->addWidget(chRandom);
+    l2->addWidget(chRepeat);
     l4->addWidget(sldProgress);
     l4->addWidget(lProgress);
     l3->addLayout(l4);
@@ -90,7 +94,7 @@ void MainWindow::configureAudio() {
         }
         lProgress->setText(QTime(0,0,0).addMSecs(pos * player->duration()).toString("m:ss") + "/" + QTime(0,0,0).addMSecs(player->duration()).toString("m:ss"));
     });
-    player->setOnAudioEndCb([this](){ playlist->next(); });
+    player->setOnAudioEndCb([this](){ onNext(); });
     player->setVolume(appSettings.volume);
     sldVolume->setValue(appSettings.volume * 100);
 }
@@ -181,6 +185,19 @@ void MainWindow::saveSettings() {
     settings.setValue("Playlist", playlist->toStringList());
     settings.setValue("Volume", (float)sldVolume->value() / 100.0f);
     settings.setValue("WindowRect", geometry());
+}
+
+void MainWindow::onNext() {
+    if (chRepeat->isChecked()) {
+        player->stop();
+        player->play();
+    }
+    else if (chRandom->isChecked()) {
+        playlist->nextRandom();
+    }
+    else {
+        playlist->next();
+    }
 }
 
 void MainWindow::onOpenPress() {

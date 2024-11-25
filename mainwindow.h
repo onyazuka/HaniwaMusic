@@ -15,6 +15,7 @@
 #include <QSettings>
 #include <QFileInfo>
 #include <QLineEdit>
+#include <QCheckBox>
 
 #include "AudioPlayer.h"
 #include "QLabelElide.h"
@@ -62,6 +63,7 @@ private:
     void changeFileNameLabel(const QString& text, Qt::GlobalColor color);
     void loadSettings();
     void saveSettings();
+    void onNext();
 
     Ui::MainWindow *ui;
 
@@ -70,6 +72,8 @@ private:
     QPushButton* btnStop;
     QPushButton* btnNext;
     QPushButton* btnPrev;
+    QCheckBox* chRandom;
+    QCheckBox* chRepeat;
     QPushButton* btnOpen;
     QPushButton* btnOpenDir;
     QLabelElide* lFileName;

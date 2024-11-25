@@ -130,6 +130,10 @@ void QPlaylist::next() {
     onCellDoubleClicked(row + 1, Column::Title);
 }
 
+void QPlaylist::nextRandom() {
+    onCellDoubleClicked(rand() % rowCount(), Column::Title);
+}
+
 void QPlaylist::prev() {
     if (!activeItem) {
         return;

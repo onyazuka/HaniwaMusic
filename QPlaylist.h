@@ -59,6 +59,7 @@ signals:
 public slots:
     void clear();
     void next();
+    void nextRandom();
     void prev();
 private slots:
     void onCellDoubleClicked(int row, int col);
