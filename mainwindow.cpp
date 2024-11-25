@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
     loadSettings();
     configureAudio();
     configureLayout();
+    playlist->select(appSettings.lastTrackNumber);
     connect(btnPlay, &QPushButton::released, this, &MainWindow::onStartPress);
     connect(btnStop, &QPushButton::released, this, &MainWindow::onStopPress);
     connect(btnNext, &QPushButton::released, this, &MainWindow::onNext);
@@ -66,8 +67,8 @@ void MainWindow::configureLayout(){
     l1->addWidget(lFileName);
     l2->addWidget(btnPlay);
     l2->addWidget(btnStop);
-    l2->addWidget(btnNext);
     l2->addWidget(btnPrev);
+    l2->addWidget(btnNext);
     l2->addWidget(chRandom);
     l2->addWidget(chRepeat);
     l4->addWidget(sldProgress);
@@ -95,6 +96,14 @@ void MainWindow::configureAudio() {
         lProgress->setText(QTime(0,0,0).addMSecs(pos * player->duration()).toString("m:ss") + "/" + QTime(0,0,0).addMSecs(player->duration()).toString("m:ss"));
     });
     player->setOnAudioEndCb([this](){ onNext(); });
+    player->setOnPlayStateChangeCb([this](AudioPlayer::PlayState state){
+        if (state == AudioPlayer::PlayState::Play) {
+            btnPlay->setText("Pause");
+        }
+        else if (state == AudioPlayer::PlayState::Pause) {
+            btnPlay->setText("Play");
+        }
+    });
     player->setVolume(appSettings.volume);
     sldVolume->setValue(appSettings.volume * 100);
 }
@@ -173,18 +182,24 @@ void MainWindow::loadSettings() {
     if (!dir.exists()) {
         appSettings.lastDir = QString(DEFAULT_PATH.data());
     }
-    QStringList lastPlaylist = settings.value("Playlist", QStringList()).toStringList();
-    playlist->addFiles(lastPlaylist);
+    QJsonArray lastPlaylist = settings.value("Playlist", QJsonArray()).toJsonArray();
+    playlist->addFilesFromJson(lastPlaylist);
     appSettings.volume = settings.value("Volume", DEFAULT_VOLUME).toFloat();
     appSettings.windowRect = settings.value("WindowRect", QRect()).toRect();
+    appSettings.lastTrackNumber = settings.value("LastTrackNumber", -1).toInt();
+    chRandom->setChecked(settings.value("Random", false).toBool());
+    chRepeat->setChecked(settings.value("Repeat", false).toBool());
 }
 
 void MainWindow::saveSettings() {
     QSettings settings(ORGANIZATION_NAME, APP_NAME);
     settings.setValue("LastDir", appSettings.lastDir);
-    settings.setValue("Playlist", playlist->toStringList());
+    settings.setValue("Playlist", playlist->toJson());
     settings.setValue("Volume", (float)sldVolume->value() / 100.0f);
     settings.setValue("WindowRect", geometry());
+    settings.setValue("LastTrackNumber", playlist->currentTrackNumber());
+    settings.setValue("Random", chRandom->isChecked());
+    settings.setValue("Repeat", chRepeat->isChecked());
 }
 
 void MainWindow::onNext() {

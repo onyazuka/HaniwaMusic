@@ -53,6 +53,7 @@ private:
         float volume = 0.0f;
         QPoint pos;
         QRect windowRect;
+        int lastTrackNumber = 0;
     } appSettings;
 
     bool checkFile(const QString& file);

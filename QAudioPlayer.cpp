@@ -13,6 +13,7 @@ QAudioPlayer::QAudioPlayer() {
         }
     });
     connect(player, &QMediaPlayer::durationChanged, this, &QAudioPlayer::onAudioDurationChanged);
+    connect(player, &QMediaPlayer::playbackStateChanged, this, &QAudioPlayer::onPlaybackStateChanged);
 }
 
 QAudioPlayer::~QAudioPlayer() {
@@ -36,8 +37,22 @@ void QAudioPlayer::onMediaError(QMediaPlayer::Error, const QString&) {
     if (onError) onError(Error::InvalidMedia);
 }
 
-void QAudioPlayer::onAudioDurationChanged(qint64 duration) {
-    qDebug() << QString("Duration changed: %1").arg(duration);
+void QAudioPlayer::onAudioDurationChanged(qint64) {
+    //qDebug() << QString("Duration changed: %1").arg(duration);
+}
+
+void QAudioPlayer::onPlaybackStateChanged(QMediaPlayer::PlaybackState newState) {
+    if (!onPlayStateChange) {
+        return;
+    }
+    switch (newState) {
+    case QMediaPlayer::PlaybackState::PlayingState:
+        return onPlayStateChange(AudioPlayer::PlayState::Play);
+    case QMediaPlayer::PlaybackState::PausedState:
+        return onPlayStateChange(AudioPlayer::PlayState::Pause);
+    case QMediaPlayer::PlaybackState::StoppedState:
+        return onPlayStateChange(AudioPlayer::PlayState::Stop);
+    }
 }
 
 int QAudioPlayer::init() {
@@ -104,4 +119,8 @@ void QAudioPlayer::setOnProgressCb(OnProgressCb cb) {
 
 void QAudioPlayer::setOnAudioEndCb(OnAudioEndCb cb) {
     onAudioEnd = cb;
+}
+
+void QAudioPlayer::setOnPlayStateChangeCb(OnPlayStateChangeCb cb) {
+    onPlayStateChange = cb;
 }

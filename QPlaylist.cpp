@@ -1,6 +1,7 @@
 #include "QPlaylist.h"
 #include <QResizeEvent>
 #include <QMenu>
+#include <QDirIterator>
 
 DurationGatherer::DurationGatherer() {
     utilityPlayer = new QMediaPlayer();
@@ -11,6 +12,7 @@ void DurationGatherer::init() {
     //timer->setInterval(100);
     QObject::connect(timer, &QTimer::timeout, this, &DurationGatherer::onTimer);
     connect(utilityPlayer, &QMediaPlayer::durationChanged, this, &DurationGatherer::onDuration);
+    connect(utilityPlayer, &QMediaPlayer::mediaStatusChanged, this, &DurationGatherer::onMediaStatusChanged);
     //timer->start();
 }
 
@@ -31,8 +33,14 @@ void DurationGatherer::onTimer() {
 void DurationGatherer::onDuration(qint64 duration) {
     emit gotDuration(duration, curTask.row);
     // setting empty source resets QMediaPlayer (I hope)
-    utilityPlayer->setSource(QUrl());
-    onTimer();
+    //utilityPlayer->setSource(QUrl());
+    //onTimer();
+}
+
+void DurationGatherer::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
+    if (status == QMediaPlayer::MediaStatus::LoadedMedia) {
+        onTimer();
+    }
 }
 
 void DurationGatherer::onAddFile(const QString& path, int row) {
@@ -74,22 +82,29 @@ QPlaylist::~QPlaylist() {
     durationGathererThread.wait();
 }
 
-void QPlaylist::addFile(const QString& path) {
+void QPlaylist::addFile(const QString& path, const QString& duration) {
     int row = rowCount();
     insertRow(rowCount());
     setItem(row, Column::Number, new QTableWidgetItem(QString::number(row + 1)));
     QTableWidgetItem* titleItem = new QTableWidgetItem(QFileInfo(path).completeBaseName());
     titleItem->setData(Qt::UserRole, path);
     setItem(row, Column::Title, titleItem);
-    setItem(row, Column::Duration, new QTableWidgetItem(""));
+    setItem(row, Column::Duration, new QTableWidgetItem(duration));
     for (int col = 0; col < Column::COUNT; ++col) {
         auto curItem = item(row, col);
         curItem->setFlags(curItem->flags() ^ Qt::ItemIsEditable);
     }
 
-    //getAndSetDuration(row, path);
-    emit fileAdded(path, row);
+    if (duration.isEmpty()) {
+        emit fileAdded(path, row);
+    }
     if (rowCount() % 10 == 0) updateColumnWidths(width());
+}
+
+void QPlaylist::addFileFromJson(const QJsonObject& obj) {
+    QString path = obj.value("path").toString();
+    QString duration = obj.value("duration").toString();
+    addFile(path, duration);
 }
 
 void QPlaylist::addFiles(const QStringList& files) {
@@ -99,9 +114,21 @@ void QPlaylist::addFiles(const QStringList& files) {
 }
 
 void QPlaylist::addFolder(const QString& path) {
-    QDir dir(path);
-    for (const auto& fileInfo : dir.entryInfoList(QStringList({"*.mp3", "*.wav", "*.flac"}))) {
-        addFile(fileInfo.absoluteFilePath());
+    QDirIterator it(path, QStringList({"*.mp3", "*.wav", "*.flac"}), QDir::Files, QDirIterator::Subdirectories);
+    while (it.hasNext()) {
+        addFile(it.nextFileInfo().absoluteFilePath());
+    }
+}
+
+/*
+    [
+        {"path": "...", "duration": "..."},
+        ...
+    ]
+*/
+void QPlaylist::addFilesFromJson(const QJsonArray& json) {
+    for (auto obj: json) {
+        addFileFromJson(obj.toObject());
     }
 }
 
@@ -111,6 +138,24 @@ QStringList QPlaylist::toStringList() const {
         res.append(item(i, Column::Title)->data(Qt::UserRole).toString());
     }
     return res;
+}
+
+QJsonArray QPlaylist::toJson() const {
+    QJsonArray jArr;
+    for(int i = 0; i < rowCount(); ++i) {
+        jArr.append(QJsonObject({
+            {"path", item(i, Column::Title)->data(Qt::UserRole).toString()},
+            {"duration", item(i, Column::Duration)->text()}
+        }));
+    }
+    return jArr;
+}
+
+int QPlaylist::currentTrackNumber() const {
+    if (!activeItem) {
+        return -1;
+    }
+    return activeItem->row();
 }
 
 void QPlaylist::clear() {
@@ -143,6 +188,13 @@ void QPlaylist::prev() {
         return;
     }
     onCellDoubleClicked(row - 1, Column::Title);
+}
+
+void QPlaylist::select(int row) {
+    if (row < 0 || row >= rowCount()) {
+        return;
+    }
+    setCurrentCell(row, Column::Title);
 }
 
 void QPlaylist::onCellDoubleClicked(int row, int) {
@@ -211,6 +263,7 @@ void QPlaylist::initMenu() {
     connect(itemRemoveAction, &QAction::triggered, this, [this](){
         int row = itemRemoveAction->data().toInt();
         QTableWidgetItem* it = item(row, Column::Duration);
+        if (!it) return;
         if (it->text().isEmpty()) {
             // duration not filled - not initialized - skipping
             return;

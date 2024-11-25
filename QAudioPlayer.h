@@ -26,17 +26,20 @@ public slots:
     void setOnErrorCb(OnErrorCb cb) override;
     void setOnProgressCb(OnProgressCb cb) override;
     void setOnAudioEndCb(OnAudioEndCb cb) override;
+    void setOnPlayStateChangeCb(OnPlayStateChangeCb cb) override;
     inline QMediaPlayer* __getPlayer() { return player; }
 private slots:
     void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
     void onMediaError(QMediaPlayer::Error error, const QString &errorString);
     void onAudioDurationChanged(qint64 duration);
+    void onPlaybackStateChanged(QMediaPlayer::PlaybackState newState);
 private:
     QMediaPlayer* player;
     QAudioOutput* audioOutput;
     OnErrorCb onError = nullptr;
     OnProgressCb onProgress = nullptr;
     OnAudioEndCb onAudioEnd = nullptr;
+    OnPlayStateChangeCb onPlayStateChange = nullptr;
 };
 
 #endif // QAUDIOPLAYER_H

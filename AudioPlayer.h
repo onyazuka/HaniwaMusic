@@ -9,9 +9,16 @@ public:
     enum class Error {
         InvalidMedia
     };
+    enum class PlayState {
+        Play,
+        Pause,
+        Stop
+    };
+
     using OnErrorCb = std::function<void(Error)>;
     using OnProgressCb = std::function<void(float)>;
     using OnAudioEndCb = std::function<void()>;
+    using OnPlayStateChangeCb = std::function<void(PlayState)>;
     virtual ~AudioPlayer() {};
     virtual int init() = 0;
     virtual int open(const std::string& path) = 0;
@@ -26,6 +33,7 @@ public:
     virtual void setOnErrorCb(OnErrorCb cb) = 0;
     virtual void setOnProgressCb(OnProgressCb cb) = 0;
     virtual void setOnAudioEndCb(OnAudioEndCb cb) = 0;
+    virtual void setOnPlayStateChangeCb(OnPlayStateChangeCb cb) = 0;
 };
 
 #endif // AUDIOPLAYER_H

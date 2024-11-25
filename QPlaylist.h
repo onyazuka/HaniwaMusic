@@ -11,6 +11,8 @@
 #include <QTimer>
 #include <QMenu>
 #include <QAction>
+#include <QJsonArray>
+#include <QJsonObject>
 
 class DurationGatherer : public QObject {
         Q_OBJECT
@@ -25,6 +27,7 @@ public:
 public slots:
     void onAddFile(const QString& path, int row);
     void onDuration(qint64 duration);
+    void onMediaStatusChanged(QMediaPlayer::MediaStatus status);
     void onTimer();
     void init();
 signals:
@@ -49,10 +52,14 @@ public:
 
     QPlaylist();
     ~QPlaylist();
-    void addFile(const QString& path);
+    void addFile(const QString& path, const QString& duration = "");
+    void addFileFromJson(const QJsonObject& obj);
     void addFiles(const QStringList& files);
     void addFolder(const QString& path);
+    void addFilesFromJson(const QJsonArray& json);
     QStringList toStringList() const;
+    QJsonArray toJson() const;
+    int currentTrackNumber() const;
 signals:
     void fileChanged(QString path);
     void fileAdded(QString path, int row);
@@ -61,6 +68,7 @@ public slots:
     void next();
     void nextRandom();
     void prev();
+    void select(int row);
 private slots:
     void onCellDoubleClicked(int row, int col);
     void onUpdateDuration(qint64 duration, int row);
