@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QAudioPlayer.h>
+#include <QKeyEvent>
 
 static constexpr std::string DEFAULT_PATH = "/home";
 static constexpr float DEFAULT_VOLUME = 0.5;
@@ -28,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
     sldProgress->setTickInterval(1);
     lProgress = new QLabel("0:00", this);
     sldVolume->setMaximumHeight(sldProgress->height() * 2);
-    playlist = new QPlaylist();
+    playlist = new QPlaylist(this);
     setWindowTitle("Haniwa Music");
     changeFileNameLabel("File not selected", Qt::red);
     loadSettings();

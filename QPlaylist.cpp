@@ -2,6 +2,9 @@
 #include <QResizeEvent>
 #include <QMenu>
 #include <QDirIterator>
+#include <QDrag>
+#include <QMimeData>
+#include <QApplication>
 
 DurationGatherer::DurationGatherer() {
     utilityPlayer = new QMediaPlayer();
@@ -55,19 +58,18 @@ void DurationGatherer::onAddFile(const QString& path, int row) {
     taskQueue.append({path,row,0});
 }
 
-QPlaylist::QPlaylist()
-    : QTableWidget()
+QPlaylist::QPlaylist(QWidget* parent)
+    : QTableWidget(parent)
 {
     setColumnCount(Column::COUNT);
     setSelectionBehavior(QAbstractItemView::SelectRows);
     //horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
     connect(this, &QTableWidget::cellDoubleClicked, this, &QPlaylist::onCellDoubleClicked);
     horizontalHeader()->hide();
     verticalHeader()->hide();
     initMenu();
     setSelectionMode(QAbstractItemView::SingleSelection);
-
+    setAcceptDrops(true);
     durationGatherer = new DurationGatherer();
     durationGatherer->moveToThread(&durationGathererThread);
     connect(&durationGathererThread, &QThread::finished, durationGatherer, &QObject::deleteLater);
@@ -90,6 +92,7 @@ void QPlaylist::addFile(const QString& path, const QString& duration) {
     titleItem->setData(Qt::UserRole, path);
     setItem(row, Column::Title, titleItem);
     setItem(row, Column::Duration, new QTableWidgetItem(duration));
+
     for (int col = 0; col < Column::COUNT; ++col) {
         auto curItem = item(row, col);
         curItem->setFlags(curItem->flags() ^ Qt::ItemIsEditable);
@@ -239,14 +242,110 @@ void QPlaylist::resizeEvent(QResizeEvent* event) {
 void QPlaylist::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::MouseButton::RightButton) {
         QTableWidgetItem* it = itemAt(event->position().toPoint());
-        int row = it->row();
-        selectRow(row);
-        itemRemoveAction->setData(row);
-        itemRightClickMenu->exec(event->globalPosition().toPoint());
+        if (it) {
+            int row = it->row();
+            selectRow(row);
+            itemRemoveAction->setData(row);
+            itemRightClickMenu->exec(event->globalPosition().toPoint());
+        }
+    }
+    else if (event->button() == Qt::MouseButton::LeftButton) {
+        dragStartPosition = event->pos();
+        dragRowSource = itemAt(event->position().toPoint())->row();
+    }
+    QTableWidget::mousePressEvent(event);
+}
+
+void QPlaylist::mouseMoveEvent(QMouseEvent* event)  {
+    if (event->buttons() & Qt::MouseButton::LeftButton) {
+        if ((event->pos() - dragStartPosition).manhattanLength() < QApplication::startDragDistance()) {
+            return;
+        }
+        QTableWidgetItem* it = itemAt(event->position().toPoint());
+        if (it) {
+            QDrag* drag = new QDrag(this);
+            QMimeData* mimeData = new QMimeData;
+            mimeData->setText(QString::number(it->row()));
+            drag->setMimeData(mimeData);
+            drag->exec();
+        }
     }
     else {
-        QTableWidget::mousePressEvent(event);
+        QTableWidget::mouseMoveEvent(event);
     }
+}
+
+void QPlaylist::dragEnterEvent(QDragEnterEvent* event) {
+    if (event->mimeData()->hasFormat("text/plain")) {
+        event->acceptProposedAction();
+    }
+}
+
+void QPlaylist::dragMoveEvent(QDragMoveEvent* event) {
+    QTableWidgetItem* it = itemAt(event->position().toPoint());
+    //int sourceRow = event->mimeData()->text().toInt();
+    int sourceRow = dragRowSource;
+    if (it && (it->row() != sourceRow)) {
+        if (sourceRow < 0 || sourceRow >= rowCount()) {
+            return;
+        }
+        int destRow = it->row();
+        QList<QTableWidgetItem*> sourceRowItems;
+        for (int col = (int)Column::Title; col < (int)Column::COUNT; ++col) {
+            QTableWidgetItem* sourceItem = takeItem(sourceRow, col);
+            sourceRowItems.append(sourceItem);
+        }
+        QTableWidgetItem* newDstItem = new QTableWidgetItem(QString::number(destRow));
+        if (activeItem && (activeItem->row() == sourceRow)) {
+            activeItem = newDstItem;
+        }
+        removeRow(sourceRow);
+        insertRow(destRow);
+        setItem(destRow, Column::Number, newDstItem);
+        for (int col = Column::Title; col < Column::COUNT; ++col) {
+            setItem(destRow, col, sourceRowItems.front());
+            sourceRowItems.pop_front();
+        }
+        for (int i = std::min(destRow, sourceRow); i <= std::max(destRow, sourceRow); ++i) {
+            auto curItem = item(i, Column::Number);
+            curItem->setText(QString::number(i + 1));
+        }
+        selectRow(destRow);
+        dragRowSource = destRow;
+    }
+    event->acceptProposedAction();
+}
+
+void QPlaylist::dropEvent(QDropEvent* event) {
+    /*QTableWidgetItem* it = itemAt(event->position().toPoint());
+    if (it) {
+        int sourceRow = event->mimeData()->text().toInt();
+        if (sourceRow < 0 || sourceRow >= rowCount()) {
+            return;
+        }
+        int destRow = it->row();
+        QList<QTableWidgetItem*> sourceRowItems;
+        for (int col = (int)Column::Title; col < (int)Column::COUNT; ++col) {
+            QTableWidgetItem* sourceItem = takeItem(sourceRow, col);
+            sourceRowItems.append(sourceItem);
+        }
+        QTableWidgetItem* newDstItem = new QTableWidgetItem(QString::number(destRow));
+        if (activeItem && (activeItem->row() == sourceRow)) {
+            activeItem = newDstItem;
+        }
+        removeRow(sourceRow);
+        insertRow(destRow);
+        setItem(destRow, Column::Number, newDstItem);
+        for (int col = Column::Title; col < Column::COUNT; ++col) {
+            setItem(destRow, col, sourceRowItems.front());
+            sourceRowItems.pop_front();
+        }
+        for (int i = std::min(destRow, sourceRow); i <= std::max(destRow, sourceRow); ++i) {
+            auto curItem = item(i, Column::Number);
+            curItem->setText(QString::number(curItem->text().toInt() + 1));
+        }
+    }*/
+    event->acceptProposedAction();
 }
 
 void QPlaylist::updateColumnWidths(int totalTableWidth) {

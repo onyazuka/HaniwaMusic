@@ -50,7 +50,7 @@ public:
         COUNT
     };
 
-    QPlaylist();
+    QPlaylist(QWidget* parent = nullptr);
     ~QPlaylist();
     void addFile(const QString& path, const QString& duration = "");
     void addFileFromJson(const QJsonObject& obj);
@@ -76,6 +76,10 @@ private slots:
 private:
     void resizeEvent(QResizeEvent *event) override;
     void mousePressEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dragMoveEvent(QDragMoveEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
     void updateColumnWidths(int totalTableWidth);
     void initMenu();
     QTableWidgetItem* activeItem = nullptr;
@@ -83,6 +87,8 @@ private:
     DurationGatherer* durationGatherer;
     QMenu* itemRightClickMenu = nullptr;;
     QAction* itemRemoveAction = nullptr;
+    QPoint dragStartPosition = QPoint(0,0);
+    int dragRowSource = 0;
 };
 
 #endif // QPLAYLIST_H
