@@ -154,7 +154,7 @@ void QPlaylist::addFiles(const QStringList& files) {
 }
 
 void QPlaylist::addFolder(const QString& path) {
-    QDirIterator it(path, QStringList({"*.mp3", "*.wav", "*.flac"}), QDir::Files, QDirIterator::Subdirectories);
+    QDirIterator it(path, QStringList({"*.mp3", "*.flac"}), QDir::Files, QDirIterator::Subdirectories);
     while (it.hasNext()) {
         addFile(it.nextFileInfo().absoluteFilePath());
     }
@@ -259,6 +259,10 @@ void QPlaylist::onUpdateDuration(qint64 duration, int row) {
     /*if (duration < 0) {
         duration = 0;
     }*/
+    if (duration <= 0) {
+        duration = 0;
+        it->setData(Qt::ForegroundRole, QVariant(QColor(Qt::red)));
+    }
     if (duration < 1000 * 60 * 60) {
         it->setText(QTime(0,0,0).addMSecs(duration).toString("m:ss"));
     }

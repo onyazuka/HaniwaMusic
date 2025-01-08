@@ -217,7 +217,7 @@ void MainWindow::onNext() {
 }
 
 void MainWindow::onOpenPress() {
-    QString songPath = QFileDialog::getOpenFileName(this, "Select audio file", appSettings.lastDir, "Audio (*.mp3 *.wav *.flac)");
+    QString songPath = QFileDialog::getOpenFileName(this, "Select audio file", appSettings.lastDir, "Audio (*.mp3 *.flac)");
     if (checkFile(songPath)) {
         appSettings.lastDir = QFileInfo(songPath).absolutePath();
         playlist->clear();
