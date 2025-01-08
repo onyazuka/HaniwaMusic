@@ -5,6 +5,8 @@
 #include <QDrag>
 #include <QMimeData>
 #include <QApplication>
+#include "MetaTagsParser/TagScout.hpp"
+
 
 DurationGatherer::DurationGatherer() {
     utilityPlayer = new QMediaPlayer();
@@ -58,6 +60,41 @@ void DurationGatherer::onAddFile(const QString& path, int row) {
     taskQueue.append({path,row,0});
 }
 
+DurationGatherer2::DurationGatherer2() {
+    ;
+}
+
+DurationGatherer2::~DurationGatherer2() {
+    terminated = true;
+    cnd.notify_one();
+}
+
+void DurationGatherer2::run() {
+    while (!terminated) {
+        mtx.lock();
+        cnd.wait(&mtx);
+
+        auto task = taskQueue.front();
+        taskQueue.pop_front();
+        auto metainfo = getMetainfo(task.path.toStdString());
+        emit gotDuration((qint64)(QString::fromStdString(metainfo["duration"]).toULongLong()), task.row);
+
+        mtx.unlock();
+    }
+}
+
+void DurationGatherer2::onAddFile(const QString& path, int row) {
+    //taskQueue.append({path,row,0});
+    //cnd.notify_one();
+    try {
+        auto metainfo = getMetainfo(path.toStdString());
+        emit gotDuration((qint64)(QString::fromStdString(metainfo["durationMs"]).toULongLong()), row);
+    }
+    catch (...) {
+        emit gotDuration(0, row);
+    }
+}
+
 QPlaylist::QPlaylist(QWidget* parent)
     : QTableWidget(parent)
 {
@@ -70,11 +107,11 @@ QPlaylist::QPlaylist(QWidget* parent)
     initMenu();
     setSelectionMode(QAbstractItemView::SingleSelection);
     setAcceptDrops(true);
-    durationGatherer = new DurationGatherer();
+    durationGatherer = new DurationGatherer2();
     durationGatherer->moveToThread(&durationGathererThread);
     connect(&durationGathererThread, &QThread::finished, durationGatherer, &QObject::deleteLater);
-    connect(this, &QPlaylist::fileAdded, durationGatherer, &DurationGatherer::onAddFile);
-    connect(durationGatherer, &DurationGatherer::gotDuration, this, &QPlaylist::onUpdateDuration);
+    connect(this, &QPlaylist::fileAdded, durationGatherer, &DurationGatherer2::onAddFile);
+    connect(durationGatherer, &DurationGatherer2::gotDuration, this, &QPlaylist::onUpdateDuration);
     connect(this, &QWidget::customContextMenuRequested, this, &QPlaylist::handleContextMenu);
     durationGathererThread.start();
 }
@@ -219,6 +256,9 @@ void QPlaylist::onCellDoubleClicked(int row, int) {
 void QPlaylist::onUpdateDuration(qint64 duration, int row) {
     QTableWidgetItem* it = item(row, Column::Duration);
     if (!it) return;
+    /*if (duration < 0) {
+        duration = 0;
+    }*/
     if (duration < 1000 * 60 * 60) {
         it->setText(QTime(0,0,0).addMSecs(duration).toString("m:ss"));
     }

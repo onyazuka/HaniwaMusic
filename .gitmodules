@@ -1,0 +1,3 @@
+[submodule "MetaTagsParser"]
+	path = MetaTagsParser
+	url = https://github.com/onyazuka/MetaTagsParser.git

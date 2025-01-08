@@ -13,6 +13,9 @@
 #include <QAction>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QMutex>
+#include <QWaitCondition>
+#include <atomic>
 
 class DurationGatherer : public QObject {
         Q_OBJECT
@@ -38,6 +41,28 @@ private:
     QTimer* timer = nullptr;
     TaskDescr curTask;
     bool inited = false;
+};
+
+class DurationGatherer2 : public QObject {
+    Q_OBJECT
+    struct TaskDescr {
+        QString path;
+        int row;
+        qint64 duration;
+    };
+public:
+    DurationGatherer2();
+    ~DurationGatherer2();
+public slots:
+    void onAddFile(const QString& path, int row);
+signals:
+    void gotDuration(qint64 duration, int row);
+private:
+    void run();
+    QQueue<TaskDescr> taskQueue;
+    QMutex mtx;
+    QWaitCondition cnd;
+    std::atomic_bool terminated = false;
 };
 
 class QPlaylist : public QTableWidget {
@@ -84,7 +109,7 @@ private:
     void initMenu();
     QTableWidgetItem* activeItem = nullptr;
     QThread durationGathererThread;
-    DurationGatherer* durationGatherer;
+    DurationGatherer2* durationGatherer;
     QMenu* itemRightClickMenu = nullptr;;
     QAction* itemRemoveAction = nullptr;
     QPoint dragStartPosition = QPoint(0,0);
