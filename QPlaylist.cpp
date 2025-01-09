@@ -189,6 +189,16 @@ void QPlaylist::clear() {
     activeItem = nullptr;
 }
 
+/*
+    selects current row as active item and plays it
+*/
+void QPlaylist::current() {
+    if (activeItem) {
+        return;
+    }
+    onCellDoubleClicked(currentRow(), Column::Title);
+}
+
 void QPlaylist::next() {
     if (!activeItem) {
         return;

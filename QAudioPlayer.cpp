@@ -91,6 +91,8 @@ int QAudioPlayer::playOrPause() {
 }
 
 int QAudioPlayer::stop() {
+    // needed to send 'pause' state
+    player->pause();
     player->stop();
     return 0;
 }

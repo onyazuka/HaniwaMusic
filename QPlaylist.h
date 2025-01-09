@@ -81,6 +81,7 @@ signals:
     void fileAdded(QString path, int row);
 public slots:
     void clear();
+    void current();
     void next();
     void nextRandom();
     void prev();

@@ -244,6 +244,7 @@ void MainWindow::onOpenDirPress() {
 }
 
 void MainWindow::onStartPress() {
+    playlist->current();
     player->playOrPause();
 }
 
