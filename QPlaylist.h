@@ -57,6 +57,7 @@ private:
 
 class QPlaylist : public QTableWidget {
     Q_OBJECT
+    static constexpr size_t MaxRandomHistorySize = 100;
 public:
     enum Column {
         Number,
@@ -83,6 +84,7 @@ public slots:
     void next();
     void nextRandom();
     void prev();
+    void prevRandom();
     void select(int row);
 private slots:
     void onCellDoubleClicked(int row, int col);
@@ -98,13 +100,16 @@ private:
     void dropEvent(QDropEvent* event) override;
     void updateColumnWidths(int totalTableWidth);
     void initMenu();
-    QTableWidgetItem* activeItem = nullptr;
+    void onRemoveTableWidgetItem(QTableWidgetItem* item);
     QThread durationGathererThread;
     DurationGatherer2* durationGatherer;
     QMenu* itemRightClickMenu = nullptr;;
     QAction* itemRemoveAction = nullptr;
     QPoint dragStartPosition = QPoint(0,0);
     int dragRowSource = 0;
+
+    QTableWidgetItem* activeItem = nullptr;
+    QList<QTableWidgetItem*> randomHistory;
 };
 
 #endif // QPLAYLIST_H

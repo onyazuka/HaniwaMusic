@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(btnPlay, &QPushButton::released, this, &MainWindow::onStartPress);
     connect(btnStop, &QPushButton::released, this, &MainWindow::onStopPress);
     connect(btnNext, &QPushButton::released, this, &MainWindow::onNext);
-    connect(btnPrev, &QPushButton::released, playlist, &QPlaylist::prev);
+    connect(btnPrev, &QPushButton::released, this, &MainWindow::onPrev);
     connect(btnOpen, &QPushButton::released, this, &MainWindow::onOpenPress);
     connect(btnOpenDir, &QPushButton::released, this, &MainWindow::onOpenDirPress);
     connect(sldVolume, &QAbstractSlider::valueChanged, this, &MainWindow::onVolumeSliderChanged);
@@ -213,6 +213,15 @@ void MainWindow::onNext() {
     }
     else {
         playlist->next();
+    }
+}
+
+void MainWindow::onPrev() {
+    if (chRandom->isChecked()) {
+        playlist->prevRandom();
+    }
+    else {
+        playlist->prev();
     }
 }
 

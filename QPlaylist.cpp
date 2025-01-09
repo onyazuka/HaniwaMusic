@@ -201,6 +201,10 @@ void QPlaylist::next() {
 }
 
 void QPlaylist::nextRandom() {
+    while ((size_t)randomHistory.size() >= MaxRandomHistorySize) {
+        randomHistory.pop_back();
+    }
+    randomHistory.push_back(activeItem);
     onCellDoubleClicked(rand() % rowCount(), Column::Title);
 }
 
@@ -213,6 +217,18 @@ void QPlaylist::prev() {
         return;
     }
     onCellDoubleClicked(row - 1, Column::Title);
+}
+
+void QPlaylist::prevRandom() {
+    while (!randomHistory.empty()) {
+        QTableWidgetItem* it = randomHistory.back();
+        randomHistory.pop_back();
+        if (it) {
+            onCellDoubleClicked(it->row(), Column::Title);
+            return;;
+        }
+    }
+    prev();
 }
 
 void QPlaylist::select(int row) {
@@ -229,7 +245,7 @@ void QPlaylist::onCellDoubleClicked(int row, int) {
         font.setBold(false);
         it->setFont(font);
     }
-    activeItem = item(row, Column::Number);
+    activeItem = item(row, Column::Title);
     QTableWidgetItem* it = item(row, Column::Title);
     QFont font = it->font();
     font.setBold(true);
@@ -329,11 +345,22 @@ void QPlaylist::dragMoveEvent(QDragMoveEvent* event) {
         }
         int destRow = it->row();
         QList<QTableWidgetItem*> sourceRowItems;
+        QList<QTableWidgetItem*> destRowItems;
         for (int col = (int)Column::Title; col < (int)Column::COUNT; ++col) {
             QTableWidgetItem* sourceItem = takeItem(sourceRow, col);
             sourceRowItems.append(sourceItem);
+            QTableWidgetItem* destItem = takeItem(destRow, col);
+            destRowItems.append(destItem);
         }
-        QTableWidgetItem* newDstItem = new QTableWidgetItem(QString::number(destRow));
+        for (int col = (int)Column::Title; col < (int)Column::COUNT; ++col) {
+            setItem(sourceRow, col, destRowItems.front());
+            destRowItems.pop_front();
+            setItem(destRow, col, sourceRowItems.front());
+            sourceRowItems.pop_front();
+        }
+        selectRow(destRow);
+        dragRowSource = destRow;
+        /*QTableWidgetItem* newDstItem = new QTableWidgetItem(QString::number(destRow));
         if (activeItem && (activeItem->row() == sourceRow)) {
             activeItem = newDstItem;
         }
@@ -349,7 +376,7 @@ void QPlaylist::dragMoveEvent(QDragMoveEvent* event) {
             curItem->setText(QString::number(i + 1));
         }
         selectRow(destRow);
-        dragRowSource = destRow;
+        dragRowSource = destRow;*/
     }
     event->acceptProposedAction();
 }
@@ -405,10 +432,27 @@ void QPlaylist::initMenu() {
             // duration not filled - not initialized - skipping
             return;
         }
+        onRemoveTableWidgetItem(it);
         removeRow(row);
     });
     itemRightClickMenu = new QMenu();
     itemRightClickMenu->addAction(itemRemoveAction);
     //itemRightClickMenu->platformMenu()
+}
+
+/*
+    Cleaning up on item remove
+    (activeItem, history, ...)
+*/
+void QPlaylist::onRemoveTableWidgetItem(QTableWidgetItem* item) {
+    for (int i = 0; i < randomHistory.size(); ++i) {
+        if (!randomHistory[i] || item->row() == randomHistory[i]->row()) {
+            randomHistory.erase(randomHistory.begin() + i);
+        }
+    }
+    // setting activeItem AFTER history, because else we could get nullptr dereference attempt
+    if (activeItem && (activeItem->row() == item->row())) {
+        activeItem = nullptr;
+    }
 }
 

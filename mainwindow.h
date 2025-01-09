@@ -65,6 +65,7 @@ private:
     void loadSettings();
     void saveSettings();
     void onNext();
+    void onPrev();
 
     Ui::MainWindow *ui;
 
