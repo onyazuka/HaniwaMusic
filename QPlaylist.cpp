@@ -8,7 +8,7 @@
 #include "MetaTagsParser/TagScout.hpp"
 
 
-DurationGatherer::DurationGatherer() {
+/*DurationGatherer::DurationGatherer() {
     utilityPlayer = new QMediaPlayer();
 }
 
@@ -58,29 +58,14 @@ void DurationGatherer::onAddFile(const QString& path, int row) {
         timer->start();
     }
     taskQueue.append({path,row,0});
-}
+}*/
 
 DurationGatherer2::DurationGatherer2() {
     ;
 }
 
 DurationGatherer2::~DurationGatherer2() {
-    terminated = true;
-    cnd.notify_one();
-}
-
-void DurationGatherer2::run() {
-    while (!terminated) {
-        mtx.lock();
-        cnd.wait(&mtx);
-
-        auto task = taskQueue.front();
-        taskQueue.pop_front();
-        auto metainfo = getMetainfo(task.path.toStdString());
-        emit gotDuration((qint64)(QString::fromStdString(metainfo["duration"]).toULongLong()), task.row);
-
-        mtx.unlock();
-    }
+    ;
 }
 
 void DurationGatherer2::onAddFile(const QString& path, int row) {
@@ -316,6 +301,15 @@ void QPlaylist::mouseMoveEvent(QMouseEvent* event)  {
     }
     else {
         QTableWidget::mouseMoveEvent(event);
+    }
+}
+
+void QPlaylist::keyPressEvent(QKeyEvent* event) {
+    if (event->key() == Qt::Key_Return) {
+        onCellDoubleClicked(currentRow(), Column::Title);
+    }
+    else {
+        QTableWidget::keyPressEvent(event);
     }
 }
 

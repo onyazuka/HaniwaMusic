@@ -17,7 +17,7 @@
 #include <QWaitCondition>
 #include <atomic>
 
-class DurationGatherer : public QObject {
+/*class DurationGatherer : public QObject {
         Q_OBJECT
     struct TaskDescr {
         QString path;
@@ -41,15 +41,10 @@ private:
     QTimer* timer = nullptr;
     TaskDescr curTask;
     bool inited = false;
-};
+};*/
 
 class DurationGatherer2 : public QObject {
     Q_OBJECT
-    struct TaskDescr {
-        QString path;
-        int row;
-        qint64 duration;
-    };
 public:
     DurationGatherer2();
     ~DurationGatherer2();
@@ -58,11 +53,6 @@ public slots:
 signals:
     void gotDuration(qint64 duration, int row);
 private:
-    void run();
-    QQueue<TaskDescr> taskQueue;
-    QMutex mtx;
-    QWaitCondition cnd;
-    std::atomic_bool terminated = false;
 };
 
 class QPlaylist : public QTableWidget {
@@ -102,6 +92,7 @@ private:
     void resizeEvent(QResizeEvent *event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
     void dragEnterEvent(QDragEnterEvent* event) override;
     void dragMoveEvent(QDragMoveEvent* event) override;
     void dropEvent(QDropEvent* event) override;
