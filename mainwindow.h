@@ -66,6 +66,7 @@ private:
     void saveSettings();
     void onNext();
     void onPrev();
+    void onSearchNext();
 
     Ui::MainWindow *ui;
 
@@ -84,8 +85,8 @@ private:
     QClickableSlider* sldProgress;
     QLabel* lProgress;
     QPlaylist* playlist;
-    //QLineEdit* lnSearch;
-    //QPushButton* btnSearch;
+    QLineEdit* lnSearch;
+    QPushButton* btnSearch;
     std::shared_ptr<AudioPlayer> player;
 
     QString songPath;

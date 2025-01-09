@@ -55,6 +55,12 @@ signals:
 private:
 };
 
+struct SearchCtx {
+    QString lastStr;
+    int lastRow = 0;
+    bool finish = false;
+};
+
 class QPlaylist : public QTableWidget {
     Q_OBJECT
     static constexpr size_t MaxRandomHistorySize = 100;
@@ -76,6 +82,7 @@ public:
     QStringList toStringList() const;
     QJsonArray toJson() const;
     int currentTrackNumber() const;
+    bool findNext(QString str);
 signals:
     void fileChanged(QString path);
     void fileAdded(QString path, int row);
@@ -108,6 +115,7 @@ private:
     QAction* itemRemoveAction = nullptr;
     QPoint dragStartPosition = QPoint(0,0);
     int dragRowSource = 0;
+    SearchCtx searchCtx;
 
     QTableWidgetItem* activeItem = nullptr;
     QList<QTableWidgetItem*> randomHistory;

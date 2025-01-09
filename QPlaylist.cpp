@@ -183,6 +183,30 @@ int QPlaylist::currentTrackNumber() const {
     return activeItem->row();
 }
 
+bool QPlaylist::findNext(QString str) {
+    str = str.toLower();
+    if (str.isEmpty()) {
+        return false;
+    }
+    if ((str != searchCtx.lastStr) || searchCtx.finish) {
+        searchCtx = SearchCtx();
+        searchCtx.lastStr = str;
+    }
+    if ((searchCtx.lastRow + 1) >= rowCount()) {
+        searchCtx.lastRow = 0;
+    }
+    for (int i = searchCtx.lastRow + 1; i < rowCount(); ++i) {
+        auto it = item(i, Column::Title);
+        if (it->text().toLower().contains(str)) {
+            searchCtx.lastRow = i;
+            selectRow(i);
+            return true;
+        }
+    }
+    searchCtx.finish = true;
+    return false;
+}
+
 void QPlaylist::clear() {
     QTableWidget::clear();
     setRowCount(0);

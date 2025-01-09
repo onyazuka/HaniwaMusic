@@ -30,8 +30,8 @@ MainWindow::MainWindow(QWidget *parent)
     lProgress = new QLabel("0:00", this);
     sldVolume->setMaximumHeight(sldProgress->height() * 2);
     playlist = new QPlaylist(this);
-    //lnSearch = new QLineEdit(this);
-    //btnSearch = new QPushButton(this);
+    lnSearch = new QLineEdit(this);
+    btnSearch = new QPushButton("Find",this);
     setWindowTitle("Haniwa Music");
     changeFileNameLabel("File not selected", Qt::red);
     loadSettings();
@@ -48,7 +48,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(sldProgress, &QClickableSlider::sliderReleased, this, [this]() {
         player->setPosition((float)sldProgress->value() / ((float)sldProgress->maximum() - (float)sldProgress->minimum()));
     });
-    connect(playlist, &QPlaylist::fileChanged, this, &MainWindow::onFileChanged);    
+    connect(playlist, &QPlaylist::fileChanged, this, &MainWindow::onFileChanged);
+    connect(btnSearch, &QPushButton::released, this, &MainWindow::onSearchNext);
 }
 
 
@@ -65,6 +66,7 @@ void MainWindow::configureLayout(){
     QHBoxLayout* l2 = new QHBoxLayout();
     QHBoxLayout* l3 = new QHBoxLayout();
     QVBoxLayout* l4 = new QVBoxLayout();
+    QHBoxLayout* l5 = new QHBoxLayout();
     l1->addWidget(btnOpen);
     l1->addWidget(btnOpenDir);
     l1->addWidget(lFileName);
@@ -78,10 +80,14 @@ void MainWindow::configureLayout(){
     l4->addWidget(lProgress);
     l3->addLayout(l4);
     l3->addWidget(sldVolume);
+    l5->addWidget(lnSearch, 1, Qt::AlignRight);
+    l5->addWidget(btnSearch);
+    l5->setAlignment(Qt::AlignRight);
     layout->addLayout(l1);
     layout->addLayout(l2);
     layout->addLayout(l3);
     layout->addWidget(playlist);
+    layout->addLayout(l5);
     centralWidget->setLayout(layout);
     if (!appSettings.windowRect.isEmpty()) {
         setGeometry(appSettings.windowRect);
@@ -225,6 +231,10 @@ void MainWindow::onPrev() {
     else {
         playlist->prev();
     }
+}
+
+void MainWindow::onSearchNext() {
+    playlist->findNext(lnSearch->text());
 }
 
 void MainWindow::onOpenPress() {
