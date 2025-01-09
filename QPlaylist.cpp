@@ -370,6 +370,16 @@ void QPlaylist::dragMoveEvent(QDragMoveEvent* event) {
         }
         selectRow(destRow);
         dragRowSource = destRow;
+
+        qDebug() << event->position().y();
+        qDebug() << rowHeight(0);
+        if (event->position().y() <= rowHeight(0)) {
+            scrollToItem(item(destRow - 1, Column::Title));
+        }
+        else if (event->position().y() >= (height() - rowHeight(0))) {
+            scrollToItem(item(destRow + 1, Column::Title));
+        }
+
         /*QTableWidgetItem* newDstItem = new QTableWidgetItem(QString::number(destRow));
         if (activeItem && (activeItem->row() == sourceRow)) {
             activeItem = newDstItem;

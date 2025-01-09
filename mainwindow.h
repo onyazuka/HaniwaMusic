@@ -84,6 +84,8 @@ private:
     QClickableSlider* sldProgress;
     QLabel* lProgress;
     QPlaylist* playlist;
+    //QLineEdit* lnSearch;
+    //QPushButton* btnSearch;
     std::shared_ptr<AudioPlayer> player;
 
     QString songPath;

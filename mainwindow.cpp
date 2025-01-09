@@ -30,6 +30,8 @@ MainWindow::MainWindow(QWidget *parent)
     lProgress = new QLabel("0:00", this);
     sldVolume->setMaximumHeight(sldProgress->height() * 2);
     playlist = new QPlaylist(this);
+    //lnSearch = new QLineEdit(this);
+    //btnSearch = new QPushButton(this);
     setWindowTitle("Haniwa Music");
     changeFileNameLabel("File not selected", Qt::red);
     loadSettings();
