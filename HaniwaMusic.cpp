@@ -1,12 +1,12 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "HaniwaMusic.h"
+#include "ui_HaniwaMusic.h"
 #include <QAudioPlayer.h>
 #include <QKeyEvent>
 
 static constexpr std::string DEFAULT_PATH = "/home";
 static constexpr float DEFAULT_VOLUME = 0.5;
 
-MainWindow::MainWindow(QWidget *parent)
+HaniwaMusic::HaniwaMusic(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
@@ -38,29 +38,29 @@ MainWindow::MainWindow(QWidget *parent)
     configureAudio();
     configureLayout();
     playlist->select(appSettings.lastTrackNumber);
-    connect(btnPlay, &QPushButton::released, this, &MainWindow::onStartPress);
-    connect(btnStop, &QPushButton::released, this, &MainWindow::onStopPress);
-    connect(btnNext, &QPushButton::released, this, &MainWindow::onNext);
-    connect(btnPrev, &QPushButton::released, this, &MainWindow::onPrev);
-    connect(btnOpen, &QPushButton::released, this, &MainWindow::onOpenPress);
-    connect(btnOpenDir, &QPushButton::released, this, &MainWindow::onOpenDirPress);
-    connect(sldVolume, &QAbstractSlider::valueChanged, this, &MainWindow::onVolumeSliderChanged);
+    connect(btnPlay, &QPushButton::released, this, &HaniwaMusic::onPlayPausePress);
+    connect(btnStop, &QPushButton::released, this, &HaniwaMusic::onStopPress);
+    connect(btnNext, &QPushButton::released, this, &HaniwaMusic::onNext);
+    connect(btnPrev, &QPushButton::released, this, &HaniwaMusic::onPrev);
+    connect(btnOpen, &QPushButton::released, this, &HaniwaMusic::onOpenPress);
+    connect(btnOpenDir, &QPushButton::released, this, &HaniwaMusic::onOpenDirPress);
+    connect(sldVolume, &QAbstractSlider::valueChanged, this, &HaniwaMusic::onVolumeSliderChanged);
     connect(sldProgress, &QClickableSlider::sliderReleased, this, [this]() {
         player->setPosition((float)sldProgress->value() / ((float)sldProgress->maximum() - (float)sldProgress->minimum()));
     });
-    connect(playlist, &QPlaylist::fileChanged, this, &MainWindow::onFileChanged);
-    connect(btnSearch, &QPushButton::released, this, &MainWindow::onSearchNext);
+    connect(playlist, &QPlaylist::fileChanged, this, &HaniwaMusic::onFileChanged);
+    connect(btnSearch, &QPushButton::released, this, &HaniwaMusic::onSearchNext);
 }
 
 
-MainWindow::~MainWindow()
+HaniwaMusic::~HaniwaMusic()
 {
     player->stop();
     saveSettings();
     delete ui;
 }
 
-void MainWindow::configureLayout(){
+void HaniwaMusic::configureLayout(){
     layout = new QVBoxLayout(centralWidget);
     QHBoxLayout* l1 = new QHBoxLayout();
     QHBoxLayout* l2 = new QHBoxLayout();
@@ -94,7 +94,7 @@ void MainWindow::configureLayout(){
     }
 }
 
-void MainWindow::configureAudio() {
+void HaniwaMusic::configureAudio() {
     player.reset(new QAudioPlayer());
     player->init();
     player->setOnErrorCb([this](AudioPlayer::Error error){ onAudioError(error); });
@@ -117,7 +117,7 @@ void MainWindow::configureAudio() {
     sldVolume->setValue(appSettings.volume * 100);
 }
 
-bool MainWindow::onFileChanged(QString newFile) {
+bool HaniwaMusic::onFileChanged(QString newFile) {
     bool ok = checkFile(newFile);
     if (!ok) {
         return false;
@@ -127,11 +127,11 @@ bool MainWindow::onFileChanged(QString newFile) {
     setAudio(newFile);
 
     changeFileNameLabel(songPath, Qt::black);
-    onStartPress();
+    onPlayPausePress();
     return ok;
 }
 
-void MainWindow::onAudioError(AudioPlayer::Error error) {
+void HaniwaMusic::onAudioError(AudioPlayer::Error error) {
     if (error == AudioPlayer::Error::InvalidMedia) {
         changeFileNameLabel("File not selected", Qt::red);
         QMessageBox::warning(this, "Error", "Invalid media file");
@@ -141,7 +141,7 @@ void MainWindow::onAudioError(AudioPlayer::Error error) {
     }
 }
 
-bool MainWindow::checkFile(const QString& path) {
+bool HaniwaMusic::checkFile(const QString& path) {
     if (path.isEmpty()) {
         QMessageBox msg;
         msg.warning(this, "Error", "Empty file path");
@@ -155,7 +155,7 @@ bool MainWindow::checkFile(const QString& path) {
     return true;
 }
 
-bool MainWindow::checkDir(const QString& path) {
+bool HaniwaMusic::checkDir(const QString& path) {
     if (path.isEmpty()) {
         QMessageBox msg;
         msg.warning(this, "Error", "Empty file path");
@@ -170,12 +170,12 @@ bool MainWindow::checkDir(const QString& path) {
 }
 
 
-void MainWindow::setAudio(const QString& file) {
+void HaniwaMusic::setAudio(const QString& file) {
     player->open(file.toStdString());
     // error handling in slot;
 }
 
-void MainWindow::changeFileNameLabel(const QString& text, Qt::GlobalColor color) {
+void HaniwaMusic::changeFileNameLabel(const QString& text, Qt::GlobalColor color) {
     //QFontMetrics metrics(lFileName->font());
     //QString elidedText = metrics.elidedText(text, Qt::ElideRight, lFileName->width());
     lFileName->elideText(QFileInfo(text).completeBaseName());
@@ -184,7 +184,7 @@ void MainWindow::changeFileNameLabel(const QString& text, Qt::GlobalColor color)
     lFileName->setPalette(palette);
 }
 
-void MainWindow::loadSettings() {
+void HaniwaMusic::loadSettings() {
     QSettings settings(ORGANIZATION_NAME, APP_NAME);
     appSettings.lastDir = settings.value("LastDir", "/home").toString();
     QDir dir(appSettings.lastDir);
@@ -200,7 +200,7 @@ void MainWindow::loadSettings() {
     chRepeat->setChecked(settings.value("Repeat", false).toBool());
 }
 
-void MainWindow::saveSettings() {
+void HaniwaMusic::saveSettings() {
     QSettings settings(ORGANIZATION_NAME, APP_NAME);
     settings.setValue("LastDir", appSettings.lastDir);
     settings.setValue("Playlist", playlist->toJson());
@@ -211,7 +211,7 @@ void MainWindow::saveSettings() {
     settings.setValue("Repeat", chRepeat->isChecked());
 }
 
-void MainWindow::onNext() {
+void HaniwaMusic::onNext() {
     if (chRepeat->isChecked()) {
         player->stop();
         player->play();
@@ -224,7 +224,7 @@ void MainWindow::onNext() {
     }
 }
 
-void MainWindow::onPrev() {
+void HaniwaMusic::onPrev() {
     if (chRandom->isChecked()) {
         playlist->prevRandom();
     }
@@ -233,11 +233,11 @@ void MainWindow::onPrev() {
     }
 }
 
-void MainWindow::onSearchNext() {
+void HaniwaMusic::onSearchNext() {
     playlist->findNext(lnSearch->text());
 }
 
-void MainWindow::onOpenPress() {
+void HaniwaMusic::onOpenPress() {
     QString songPath = QFileDialog::getOpenFileName(this, "Select audio file", appSettings.lastDir, "Audio (*.mp3 *.flac)");
     if (checkFile(songPath)) {
         appSettings.lastDir = QFileInfo(songPath).absolutePath();
@@ -246,7 +246,7 @@ void MainWindow::onOpenPress() {
     }
 }
 
-void MainWindow::onOpenDirPress() {
+void HaniwaMusic::onOpenDirPress() {
     auto dir = QFileDialog::getExistingDirectory(this, "Open directory", appSettings.lastDir);
     if (checkDir(dir)) {
         appSettings.lastDir = dir;
@@ -255,15 +255,24 @@ void MainWindow::onOpenDirPress() {
     }
 }
 
-void MainWindow::onStartPress() {
+void HaniwaMusic::onPlayPausePress() {
     playlist->current();
     player->playOrPause();
 }
 
-void MainWindow::onStopPress() {
+void HaniwaMusic::onPlayPress() {
+    playlist->current();
+    player->play();
+}
+
+void HaniwaMusic::onPausePress() {
+    player->pause();
+}
+
+void HaniwaMusic::onStopPress() {
     player->stop();
 }
 
-void MainWindow::onVolumeSliderChanged(int newValue) {
+void HaniwaMusic::onVolumeSliderChanged(int newValue) {
     player->setVolume((float)newValue / 100.0f);
 }

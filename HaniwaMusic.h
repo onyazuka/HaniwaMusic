@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef HANIWAMUSIC_H
+#define HANIWAMUSIC_H
 
 #include <QMainWindow>
 #include <QPushButton>
@@ -31,23 +31,28 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
+class HaniwaMusic : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
-
-private slots:
-    void onStartPress();
+    HaniwaMusic(QWidget *parent = nullptr);
+    ~HaniwaMusic();
+public slots:
+    void onNext();
+    void onPrev();
+    void onPlayPausePress();
+    void onPlayPress();
+    void onPausePress();
     void onStopPress();
+
+protected slots:
     void onOpenPress();
     void onOpenDirPress();
     void onVolumeSliderChanged(int newValue);
     bool onFileChanged(QString newFile);
     void onAudioError(AudioPlayer::Error error);
-private:
+protected:
     struct Settings {
         QString lastDir;
         float volume = 0.0f;
@@ -64,8 +69,6 @@ private:
     void changeFileNameLabel(const QString& text, Qt::GlobalColor color);
     void loadSettings();
     void saveSettings();
-    void onNext();
-    void onPrev();
     void onSearchNext();
 
     Ui::MainWindow *ui;
@@ -91,4 +94,4 @@ private:
 
     QString songPath;
 };
-#endif // MAINWINDOW_H
+#endif // HANIWAMUSIC_H

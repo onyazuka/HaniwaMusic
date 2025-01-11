@@ -1,4 +1,4 @@
-QT       += core gui multimedia testlib
+QT       += core gui multimedia testlib dbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -9,6 +9,7 @@ CONFIG += c++20 console
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    HaniwaMusic.cpp \
     MetaTagsParser/FlacTagParser.cpp \
     MetaTagsParser/ID3V2Parser.cpp \
     MetaTagsParser/Mp3FrameParser.cpp \
@@ -18,12 +19,13 @@ SOURCES += \
     QAudioPlayer.cpp \
     QClickableSlider.cpp \
     QLabelElide.cpp \
+    QMediaKeysDBusAdaptor.cpp \
     QPlaylist.cpp \
-    main.cpp \
-    mainwindow.cpp
+    main.cpp
 
 HEADERS += \
     AudioPlayer.h \
+    HaniwaMusic.h \
     MetaTagsParser/FlacTagParser.hpp \
     MetaTagsParser/ID3V2Parser.hpp \
     MetaTagsParser/Mp3FrameParser.hpp \
@@ -33,11 +35,11 @@ HEADERS += \
     QAudioPlayer.h \
     QClickableSlider.h \
     QLabelElide.h \
-    QPlaylist.h \
-    mainwindow.h
+    QMediaKeysDBusAdaptor.hpp \
+    QPlaylist.h
 
 FORMS += \
-    mainwindow.ui
+    HaniwaMusic.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
