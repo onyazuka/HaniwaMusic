@@ -6,6 +6,7 @@
 #include <QMimeData>
 #include <QApplication>
 #include "MetaTagsParser/TagScout.hpp"
+#include "QMetadataDlg.hpp"
 
 
 /*DurationGatherer::DurationGatherer() {
@@ -71,9 +72,13 @@ DurationGatherer2::~DurationGatherer2() {
 void DurationGatherer2::onAddFile(const QString& path, int row) {
     //taskQueue.append({path,row,0});
     //cnd.notify_one();
+    static GetMetaInfoConfig config;
+    config.textual = false;
+    config.duration = true;
+    config.images = false;
     try {
-        auto metainfo = getMetainfo(path.toStdString());
-        emit gotDuration((qint64)(QString::fromStdString(metainfo["durationMs"]).toULongLong()), row);
+        auto metainfo = getMetainfo(path.toStdString(), config);
+        emit gotDuration((qint64)(QString::fromStdString(std::get<std::string>(metainfo["durationMs"])).toULongLong()), row);
     }
     catch (...) {
         emit gotDuration(0, row);
@@ -468,6 +473,7 @@ void QPlaylist::updateColumnWidths(int totalTableWidth) {
 
 void QPlaylist::initMenu() {
     itemRemoveAction = new QAction("Remove from playlist", this);
+    itemShowMetadata = new QAction("Show metadata", this);
     connect(itemRemoveAction, &QAction::triggered, this, [this](){
         int row = itemRemoveAction->data().toInt();
         QTableWidgetItem* it = item(row, Column::Duration);
@@ -479,8 +485,14 @@ void QPlaylist::initMenu() {
         onRemoveTableWidgetItem(it);
         removeRow(row);
     });
+    connect(itemShowMetadata, &QAction::triggered, this, [this](){
+        QString path = item(currentRow(), Column::Title)->data(Qt::UserRole).toString();
+        QMetadataDlg dlg(path, this);
+        dlg.exec();
+    });
     itemRightClickMenu = new QMenu();
     itemRightClickMenu->addAction(itemRemoveAction);
+    itemRightClickMenu->addAction(itemShowMetadata);
     //itemRightClickMenu->platformMenu()
 }
 

@@ -113,6 +113,7 @@ private:
     DurationGatherer2* durationGatherer;
     QMenu* itemRightClickMenu = nullptr;;
     QAction* itemRemoveAction = nullptr;
+    QAction* itemShowMetadata = nullptr;
     QPoint dragStartPosition = QPoint(0,0);
     int dragRowSource = 0;
     SearchCtx searchCtx;

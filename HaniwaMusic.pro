@@ -20,6 +20,7 @@ SOURCES += \
     QClickableSlider.cpp \
     QLabelElide.cpp \
     QMediaKeysDBusAdaptor.cpp \
+    QMetadataDlg.cpp \
     QPlaylist.cpp \
     main.cpp
 
@@ -36,6 +37,7 @@ HEADERS += \
     QClickableSlider.h \
     QLabelElide.h \
     QMediaKeysDBusAdaptor.hpp \
+    QMetadataDlg.hpp \
     QPlaylist.h
 
 FORMS += \

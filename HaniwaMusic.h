@@ -23,7 +23,7 @@
 #include "QClickableSlider.h"
 
 #define ORGANIZATION_NAME "HaniwaSofuto"
-#define APP_NAME "HelloQt"
+#define APP_NAME "HaniwaMusic"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
