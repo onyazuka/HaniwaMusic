@@ -10,6 +10,9 @@
 
 int main(int argc, char *argv[])
 {
+    //std::ifstream ifs("/home/onyazuka/playlist.m3u");
+    //m3u::M3UPlaylist playlist = m3u::M3UPlaylist::fromStream(ifs);
+
     srand(time(0));
     QApplication a(argc, argv);
     HaniwaMusic w;

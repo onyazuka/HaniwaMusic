@@ -26,7 +26,8 @@ SOURCES += \
     QMediaKeysWinapiAdaptor.cpp \
     QMetadataDlg.cpp \
     QPlaylist.cpp \
-    main.cpp
+    main.cpp \
+    utils/UtilsString.cpp
 
 HEADERS += \
     AudioPlayer.h \
@@ -44,7 +45,8 @@ HEADERS += \
     QMediaKeysDBusAdaptor.hpp \
     QMediaKeysWinapiAdaptor.hpp \
     QMetadataDlg.hpp \
-    QPlaylist.h
+    QPlaylist.h \
+    utils/UtilsString.hpp
 
 FORMS += \
     HaniwaMusic.ui
