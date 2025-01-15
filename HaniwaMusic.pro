@@ -22,6 +22,7 @@ SOURCES += \
     QClickableSlider.cpp \
     QLabelElide.cpp \
     QMediaKeysDBusAdaptor.cpp \
+    QMediaKeysWinapiAdaptor.cpp \
     QMetadataDlg.cpp \
     QPlaylist.cpp \
     main.cpp
@@ -39,11 +40,14 @@ HEADERS += \
     QClickableSlider.h \
     QLabelElide.h \
     QMediaKeysDBusAdaptor.hpp \
+    QMediaKeysWinapiAdaptor.hpp \
     QMetadataDlg.hpp \
     QPlaylist.h
 
 FORMS += \
     HaniwaMusic.ui
+
+LIBS += -luser32
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
