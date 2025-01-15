@@ -3,7 +3,7 @@
 #include <QAudioPlayer.h>
 #include <QKeyEvent>
 
-static constexpr std::string DEFAULT_PATH = "/home";
+static const std::string DEFAULT_PATH = "/home";
 static constexpr float DEFAULT_VOLUME = 0.5;
 
 HaniwaMusic::HaniwaMusic(QWidget *parent)
