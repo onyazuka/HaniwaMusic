@@ -16,6 +16,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <atomic>
+#include "M3UPlaylist.hpp"
 
 /*class DurationGatherer : public QObject {
         Q_OBJECT
@@ -74,13 +75,14 @@ public:
 
     QPlaylist(QWidget* parent = nullptr);
     ~QPlaylist();
-    void addFile(const QString& path, const QString& duration = "");
+    void addFile(const QString& path, qint64 durationMs = -1);
     void addFileFromJson(const QJsonObject& obj);
     void addFiles(const QStringList& files);
     void addFolder(const QString& path);
     void addFilesFromJson(const QJsonArray& json);
     QStringList toStringList() const;
     QJsonArray toJson() const;
+    std::string toM3UPlaylist() const;
     int currentTrackNumber() const;
     bool findNext(QString str);
 signals:
@@ -109,6 +111,7 @@ private:
     void updateColumnWidths(int totalTableWidth);
     void initMenu();
     void onRemoveTableWidgetItem(QTableWidgetItem* item);
+    QString durationMsToStrDuration(qint64 durationMs);
     QThread durationGathererThread;
     DurationGatherer2* durationGatherer;
     QMenu* itemRightClickMenu = nullptr;;

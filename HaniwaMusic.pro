@@ -12,6 +12,7 @@ CONFIG += c++20 console
 
 SOURCES += \
     HaniwaMusic.cpp \
+    M3UPlaylist.cpp \
     MetaTagsParser/FlacTagParser.cpp \
     MetaTagsParser/ID3V2Parser.cpp \
     MetaTagsParser/Mp3FrameParser.cpp \
@@ -30,6 +31,7 @@ SOURCES += \
 HEADERS += \
     AudioPlayer.h \
     HaniwaMusic.h \
+    M3UPlaylist.hpp \
     MetaTagsParser/FlacTagParser.hpp \
     MetaTagsParser/ID3V2Parser.hpp \
     MetaTagsParser/Mp3FrameParser.hpp \
@@ -47,7 +49,9 @@ HEADERS += \
 FORMS += \
     HaniwaMusic.ui
 
-LIBS += -luser32
+win32 {
+    LIBS += -luser32
+}
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

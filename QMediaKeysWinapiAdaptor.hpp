@@ -1,3 +1,5 @@
+#ifdef _MSC_VER
+
 #include <QWidget>
 #include "HaniwaMusic.h"
 
@@ -23,3 +25,5 @@ signals:
 private:
     bool nativeEvent(const QByteArray &eventType, void *message, qintptr *result) override;
 };
+
+#endif

@@ -111,15 +111,19 @@ QPlaylist::~QPlaylist() {
     durationGathererThread.wait();
 }
 
-void QPlaylist::addFile(const QString& path, const QString& duration) {
+// 'duration' = 0 means unknown duration AFTER reading, -1 - default arg
+void QPlaylist::addFile(const QString& path, qint64 durationMs) {
     int row = rowCount();
+    QString duration = durationMs < 0 ? "" : durationMsToStrDuration(durationMs);
     insertRow(rowCount());
     setItem(row, Column::Number, new QTableWidgetItem(QString::number(row + 1)));
     QTableWidgetItem* titleItem = new QTableWidgetItem(QFileInfo(path).completeBaseName());
     titleItem->setData(Qt::UserRole, path);
     setItem(row, Column::Title, titleItem);
     setItem(row, Column::Duration, new QTableWidgetItem(duration));
-
+    if (durationMs <= 0) {
+        item(row, Column::Duration)->setData(Qt::ForegroundRole, QVariant(QColor(Qt::red)));
+    }
     for (int col = 0; col < Column::COUNT; ++col) {
         auto curItem = item(row, col);
         curItem->setFlags(curItem->flags() ^ Qt::ItemIsEditable);
@@ -128,12 +132,15 @@ void QPlaylist::addFile(const QString& path, const QString& duration) {
     if (duration.isEmpty()) {
         emit fileAdded(path, row);
     }
+    else {
+        item(row, Column::Duration)->setData(Qt::UserRole, (int)durationMs);
+    }
     if (rowCount() % 10 == 0) updateColumnWidths(width());
 }
 
 void QPlaylist::addFileFromJson(const QJsonObject& obj) {
     QString path = obj.value("path").toString();
-    QString duration = obj.value("duration").toString();
+    int duration = obj.value("duration").toInt();
     addFile(path, duration);
 }
 
@@ -175,10 +182,21 @@ QJsonArray QPlaylist::toJson() const {
     for(int i = 0; i < rowCount(); ++i) {
         jArr.append(QJsonObject({
             {"path", item(i, Column::Title)->data(Qt::UserRole).toString()},
-            {"duration", item(i, Column::Duration)->text()}
+            {"duration", item(i, Column::Duration)->data(Qt::UserRole).toInt()}
         }));
     }
     return jArr;
+}
+
+std::string QPlaylist::toM3UPlaylist() const {
+    m3u::M3UWriter writer;
+    for(int i = 0; i < rowCount(); ++i) {
+        writer << m3u::EXTINF(item(i, Column::Duration)->data(Qt::UserRole).toInt() / 1000);
+        writer << item(i, Column::Title)->data(Qt::UserRole).toString().toStdString();
+    }
+    //writer.dumpToFile("/home/onyazuka/playlist.txt");
+    //return "";
+    return writer.dumpToString();
 }
 
 int QPlaylist::currentTrackNumber() const {
@@ -293,22 +311,19 @@ void QPlaylist::onCellDoubleClicked(int row, int) {
     emit fileChanged(item(row, Column::Title)->data(Qt::UserRole).toString());
 }
 
-void QPlaylist::onUpdateDuration(qint64 duration, int row) {
+// got 'duration' in ms
+void QPlaylist::onUpdateDuration(qint64 durationMs, int row) {
     QTableWidgetItem* it = item(row, Column::Duration);
     if (!it) return;
     /*if (duration < 0) {
         duration = 0;
     }*/
-    if (duration <= 0) {
-        duration = 0;
+    if (durationMs <= 0) {
+        durationMs = 0;
         it->setData(Qt::ForegroundRole, QVariant(QColor(Qt::red)));
     }
-    if (duration < 1000 * 60 * 60) {
-        it->setText(QTime(0,0,0).addMSecs(duration).toString("m:ss"));
-    }
-    else {
-        it->setText(QTime(0,0,0).addMSecs(duration).toString("hh:mm:ss"));
-    }
+    it->setText(durationMsToStrDuration(durationMs));
+    item(row, Column::Duration)->setData(Qt::UserRole, (int)durationMs);
 }
 
 void QPlaylist::handleContextMenu(const QPoint& pos) {
@@ -509,6 +524,15 @@ void QPlaylist::onRemoveTableWidgetItem(QTableWidgetItem* item) {
     // setting activeItem AFTER history, because else we could get nullptr dereference attempt
     if (activeItem && (activeItem->row() == item->row())) {
         activeItem = nullptr;
+    }
+}
+
+QString QPlaylist::durationMsToStrDuration(qint64 durationMs) {
+    if (durationMs < 1000 * 60 * 60) {
+        return QTime(0,0,0).addMSecs(durationMs).toString("m:ss");
+    }
+    else {
+        return QTime(0,0,0).addMSecs(durationMs).toString("hh:mm:ss");
     }
 }
 
