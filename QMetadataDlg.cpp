@@ -38,14 +38,36 @@ QMetadataDlg::QMetadataDlg(const QString& path, QWidget *parent, Qt::WindowFlags
     config.duration = false;
     config.images = true;
     auto metainfo = getMetainfo(path.toStdString(), config);
-    lArtistHeader = new QLabel("Artist: ");
+    lArtistHeader = new QLabel("Artist ");
     lArtist = new QLabel(QString::fromStdString(std::get<std::string>(metainfo["artist"])));
-    lTitleHeader = new QLabel("Title: ");
+    if (lArtist->text().isEmpty()) {
+        lArtist->setText("-");
+    }
+    lTitleHeader = new QLabel("Title ");
     lTitle = new QLabel(QString::fromStdString(std::get<std::string>(metainfo["title"])));
-    lAlbumHeader = new QLabel("Album: ");
+    if (lTitle->text().isEmpty()) {
+        lTitle->setText("-");
+    }
+    lAlbumHeader = new QLabel("Album ");
     lAlbum = new QLabel(QString::fromStdString(std::get<std::string>(metainfo["album"])));
-    lYearHeader = new QLabel("Year: ");
+    if (lAlbum->text().isEmpty()) {
+        lAlbum->setText("-");
+    }
+    lYearHeader = new QLabel("Year ");
     lYear = new QLabel(QString::fromStdString(std::get<std::string>(metainfo["year"])));
+    if (lYear->text().isEmpty()) {
+        lYear->setText("-");
+    }
+    lTrackNumberHeader = new QLabel("Track number ");
+    lTrackNumber = new QLabel(QString::fromStdString(std::get<std::string>(metainfo["trackNumber"])));
+    if (lTrackNumber->text().isEmpty()) {
+        lTrackNumber->setText("-");
+    }
+    lCommentHeader = new QLabel("Comment ");
+    lComment = new QLabel(QString::fromStdString(std::get<std::string>(metainfo["comment"])));
+    if (lComment->text().isEmpty()) {
+        lComment->setText("-");
+    }
     lImage = new QLabel();
     auto images = std::get<std::vector<tag::user::APICUserData>>(metainfo["images"]);
     int iImageToShow = -1;
@@ -61,12 +83,12 @@ QMetadataDlg::QMetadataDlg(const QString& path, QWidget *parent, Qt::WindowFlags
         QImage qimage = QImage::fromData(QByteArray((const char*)img.data.first.get(), img.data.second), img.mimeType.data());
         static const float scaleFactor = 400.0f / 2560.0f;
         float width = QApplication::primaryScreen()->geometry().width();
-        qimage = qimage.scaled(QSize(std::min(width * scaleFactor, (float)qimage.width()), std::min(width * scaleFactor, (float)qimage.height())), Qt::AspectRatioMode::KeepAspectRatio);
+        qimage = qimage.scaled(QSize(std::min(width * scaleFactor, (float)qimage.width()), std::min(width * scaleFactor, (float)qimage.height())), Qt::AspectRatioMode::KeepAspectRatio, Qt::TransformationMode::SmoothTransformation);
         lImage->setPixmap(QPixmap::fromImage(qimage));
     }
     initLayout();
     setWindowTitle("Metadata");
-    setMinimumSize(QSize(200,100));
+    setMinimumSize(200, 100);
 }
 
 void QMetadataDlg::initLayout() {
@@ -80,8 +102,15 @@ void QMetadataDlg::initLayout() {
     layout->addWidget(lAlbum, i++, 1);
     layout->addWidget(lYearHeader, i, 0);
     layout->addWidget(lYear, i++, 1);
+    layout->addWidget(lTrackNumberHeader, i, 0);
+    layout->addWidget(lTrackNumber, i++, 1);
+    layout->addWidget(lCommentHeader, i, 0);
+    layout->addWidget(lComment, i++, 1);
     if (!lImage->pixmap().isNull()) {
         layout->addWidget(lImage, i++, 0, 2, 2, Qt::AlignHCenter | Qt::AlignTop);
     }
     setLayout(layout);
+    layout->setColumnMinimumWidth(0, 100);
+    layout->setColumnMinimumWidth(1, 100);
+    layout->setSizeConstraint(QLayout::SetFixedSize);
 }

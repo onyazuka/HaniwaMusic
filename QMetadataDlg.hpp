@@ -17,6 +17,10 @@ private:
     QLabel* lAlbum;
     QLabel* lYearHeader;
     QLabel* lYear;
+    QLabel* lTrackNumberHeader;
+    QLabel* lTrackNumber;
+    QLabel* lCommentHeader;
+    QLabel* lComment;
     QLabel* lImage;
     QGridLayout* layout;
 };
