@@ -243,6 +243,9 @@ void QPlaylist::clear() {
     selects current row as active item and plays it
 */
 void QPlaylist::current() {
+    if (rowCount() == 0) {
+        return;
+    }
     if (activeItem) {
         return;
     }
@@ -250,6 +253,9 @@ void QPlaylist::current() {
 }
 
 void QPlaylist::next() {
+    if (rowCount() == 0) {
+        return;
+    }
     if (!activeItem) {
         return;
     }
@@ -261,6 +267,9 @@ void QPlaylist::next() {
 }
 
 void QPlaylist::nextRandom() {
+    if (rowCount() == 0) {
+        return;
+    }
     while ((size_t)randomHistory.size() >= MaxRandomHistorySize) {
         randomHistory.pop_back();
     }
@@ -269,6 +278,9 @@ void QPlaylist::nextRandom() {
 }
 
 void QPlaylist::prev() {
+    if (rowCount() == 0) {
+        return;
+    }
     if (!activeItem) {
         return;
     }
@@ -280,6 +292,9 @@ void QPlaylist::prev() {
 }
 
 void QPlaylist::prevRandom() {
+    if (rowCount() == 0) {
+        return;
+    }
     while (!randomHistory.empty()) {
         QTableWidgetItem* it = randomHistory.back();
         randomHistory.pop_back();
@@ -291,11 +306,12 @@ void QPlaylist::prevRandom() {
     prev();
 }
 
-void QPlaylist::select(int row) {
+bool QPlaylist::select(int row) {
     if (row < 0 || row >= rowCount()) {
-        return;
+        return false;
     }
     setCurrentCell(row, Column::Title);
+    return true;
 }
 
 void QPlaylist::onCellDoubleClicked(int row, int) {

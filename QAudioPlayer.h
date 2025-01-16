@@ -16,6 +16,7 @@ public slots:
     int init() override;
     int open(const std::string& path) override;
     int open(const QString& path);
+    int close() override;
     int play() override;
     int pause() override;
     int playOrPause() override;

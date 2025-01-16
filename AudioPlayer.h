@@ -22,6 +22,7 @@ public:
     virtual ~AudioPlayer() {};
     virtual int init() = 0;
     virtual int open(const std::string& path) = 0;
+    virtual int close() = 0;
     virtual int play() = 0;
     virtual int pause() = 0;
     virtual int playOrPause() = 0;

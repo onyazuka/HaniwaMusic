@@ -55,6 +55,7 @@ protected slots:
     void onVolumeSliderChanged(int newValue);
     bool onFileChanged(QString newFile);
     void onAudioError(AudioPlayer::Error error);
+    void onPlaylistsMenuClicked();
 protected:
     struct Settings {
         QString lastDir;
@@ -73,6 +74,7 @@ protected:
     void loadSettings();
     void saveSettings();
     void onSearchNext();
+    void initPlaylistsMenu();
 
     Ui::MainWindow *ui;
 
@@ -96,6 +98,10 @@ protected:
     QPushButton* btnPlaylistsMenu;
     QLineEdit* lnSearch;
     QPushButton* btnSearch;
+
+    QMenu* playlistsMenu = nullptr;
+    QList<QAction*> playlistsMenuActions;
+
     std::shared_ptr<AudioPlayer> player;
 };
 #endif // HANIWAMUSIC_H

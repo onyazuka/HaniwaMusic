@@ -95,7 +95,7 @@ public slots:
     void nextRandom();
     void prev();
     void prevRandom();
-    void select(int row);
+    bool select(int row);
 private slots:
     void onCellDoubleClicked(int row, int col);
     void onUpdateDuration(qint64 duration, int row);
@@ -114,7 +114,7 @@ private:
     QString durationMsToStrDuration(qint64 durationMs);
     QThread durationGathererThread;
     DurationGatherer2* durationGatherer;
-    QMenu* itemRightClickMenu = nullptr;;
+    QMenu* itemRightClickMenu = nullptr;
     QAction* itemRemoveAction = nullptr;
     QAction* itemShowMetadata = nullptr;
     QPoint dragStartPosition = QPoint(0,0);

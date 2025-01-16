@@ -70,6 +70,11 @@ int QAudioPlayer::open(const QString& path) {
     return 0;
 }
 
+int QAudioPlayer::close() {
+    player->setSource(QUrl());
+    return 0;
+}
+
 int QAudioPlayer::play() {
     player->play();
     return 0;

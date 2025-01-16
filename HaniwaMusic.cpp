@@ -2,6 +2,7 @@
 #include "ui_HaniwaMusic.h"
 #include <QAudioPlayer.h>
 #include <QKeyEvent>
+#include <QInputDialog>
 
 static const std::string DEFAULT_PATH = "/home";
 static constexpr float DEFAULT_VOLUME = 0.5;
@@ -46,7 +47,12 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     }
     configureAudio();
     configureLayout();
-    currentPlaylist()->select(appSettings.lastTrackNumber);
+    if (!currentPlaylist()->select(appSettings.lastTrackNumber)) {
+        currentPlaylist()->select(0);
+    }
+
+    initPlaylistsMenu();
+
     connect(btnPlay, &QPushButton::released, this, &HaniwaMusic::onPlayPausePress);
     connect(btnStop, &QPushButton::released, this, &HaniwaMusic::onStopPress);
     connect(btnNext, &QPushButton::released, this, &HaniwaMusic::onNext);
@@ -59,6 +65,7 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     });
     connect(currentPlaylist(), &QPlaylist::fileChanged, this, &HaniwaMusic::onFileChanged);
     connect(tabPlaylists, &QTabWidget::currentChanged, this, &HaniwaMusic::onPlaylistChange);
+    connect(btnPlaylistsMenu, &QPushButton::released, this, &HaniwaMusic::onPlaylistsMenuClicked);
     connect(btnSearch, &QPushButton::released, this, &HaniwaMusic::onSearchNext);
 }
 
@@ -237,7 +244,8 @@ void HaniwaMusic::saveSettings() {
     for (int i = 0; i < tabPlaylists->count(); ++i) {
         QJsonObject jPlaylist;
         jPlaylist.insert("Title", tabPlaylists->tabText(i));
-        jPlaylist.insert("Playlist", playlist->toJson());
+        QPlaylist* curPlaylist = (QPlaylist*)tabPlaylists->widget(i);
+        jPlaylist.insert("Playlist", curPlaylist->toJson());
         jPlaylists.push_back(jPlaylist);
     }
     settings.setValue("Playlists", jPlaylists);
@@ -311,8 +319,12 @@ void HaniwaMusic::onOpenDirPress() {
 }
 
 void HaniwaMusic::onPlaylistChange(int n) {
+    if (playlist) {
+        disconnect(playlist, &QPlaylist::fileChanged, this, &HaniwaMusic::onFileChanged);
+    }
     if (n >= 0) {
         playlist = (QPlaylist*)tabPlaylists->widget(n);
+        connect(playlist, &QPlaylist::fileChanged, this, &HaniwaMusic::onFileChanged);
     }
     else {
         playlist = nullptr;
@@ -345,4 +357,34 @@ void HaniwaMusic::onStopPress() {
 
 void HaniwaMusic::onVolumeSliderChanged(int newValue) {
     player->setVolume((float)newValue / 100.0f);
+}
+
+void HaniwaMusic::onPlaylistsMenuClicked() {
+    playlistsMenu->exec(cursor().pos());
+}
+
+void HaniwaMusic::initPlaylistsMenu() {
+    playlistsMenu = new QMenu();
+    QAction* playlistsAddPlaylistAction = new QAction("Add playlist", this);
+    QAction* playlistsRemovePlaylistAction = new QAction("Remove playlist", this);
+    QAction* playlistsClearPlaylistAction = new QAction("Clear playlist", this);
+    playlistsMenuActions.push_back(playlistsAddPlaylistAction);
+    playlistsMenuActions.push_back(playlistsRemovePlaylistAction);
+    playlistsMenuActions.push_back(playlistsClearPlaylistAction);
+    connect(playlistsAddPlaylistAction, &QAction::triggered, this, [this](){
+        QString title = QInputDialog::getText(this, "Add new playlist", "Title: ", QLineEdit::Normal);
+        tabPlaylists->setCurrentIndex(tabPlaylists->addTab(new QPlaylist(tabPlaylists), title));
+    });
+    connect(playlistsRemovePlaylistAction, &QAction::triggered, this, [this](){
+        tabPlaylists->removeTab(tabPlaylists->currentIndex());
+        player->close();
+    });
+    connect(playlistsClearPlaylistAction, &QAction::triggered, this, [this](){
+        onStopPress();
+        playlist->clear();
+        player->close();
+    });
+    playlistsMenu->addAction(playlistsAddPlaylistAction);
+    playlistsMenu->addAction(playlistsRemovePlaylistAction);
+    playlistsMenu->addAction(playlistsClearPlaylistAction);
 }
