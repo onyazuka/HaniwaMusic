@@ -82,7 +82,7 @@ public:
     void addFilesFromJson(const QJsonArray& json);
     QStringList toStringList() const;
     QJsonArray toJson() const;
-    const m3u::M3UPlaylist& toM3UPlaylist(const QString& title) const;
+    m3u::M3UPlaylist toM3UPlaylist(const QString& title) const;
     int currentTrackNumber() const;
     bool findNext(QString str);
 signals:

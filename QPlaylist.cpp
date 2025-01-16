@@ -97,6 +97,7 @@ QPlaylist::QPlaylist(QWidget* parent)
     initMenu();
     setSelectionMode(QAbstractItemView::SingleSelection);
     setAcceptDrops(true);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
     durationGatherer = new DurationGatherer2();
     durationGatherer->moveToThread(&durationGathererThread);
     connect(&durationGathererThread, &QThread::finished, durationGatherer, &QObject::deleteLater);
@@ -188,7 +189,7 @@ QJsonArray QPlaylist::toJson() const {
     return jArr;
 }
 
-const m3u::M3UPlaylist& QPlaylist::toM3UPlaylist(const QString& title) const {
+m3u::M3UPlaylist QPlaylist::toM3UPlaylist(const QString& title) const {
     m3u::M3UWriter writer;
     writer.writeParam({"PLAYLIST", title.toStdString()});
     for(int i = 0; i < rowCount(); ++i) {
@@ -323,6 +324,9 @@ void QPlaylist::onUpdateDuration(qint64 durationMs, int row) {
         durationMs = 0;
         it->setData(Qt::ForegroundRole, QVariant(QColor(Qt::red)));
     }
+    else {
+        it->setData(Qt::ForegroundRole, QVariant(QColor(Qt::black)));
+    }
     it->setText(durationMsToStrDuration(durationMs));
     item(row, Column::Duration)->setData(Qt::UserRole, (int)durationMs);
 }
@@ -350,8 +354,11 @@ void QPlaylist::mousePressEvent(QMouseEvent* event) {
         }
     }
     else if (event->button() == Qt::MouseButton::LeftButton) {
-        dragStartPosition = event->pos();
-        dragRowSource = itemAt(event->position().toPoint())->row();
+        QTableWidgetItem* item = itemAt(event->position().toPoint());
+        if (item) {
+            dragStartPosition = event->pos();
+            dragRowSource = item->row();
+        }
     }
     QTableWidget::mousePressEvent(event);
 }
@@ -424,57 +431,11 @@ void QPlaylist::dragMoveEvent(QDragMoveEvent* event) {
         else if (event->position().y() >= (height() - rowHeight(0))) {
             scrollToItem(item(destRow + 1, Column::Title));
         }
-
-        /*QTableWidgetItem* newDstItem = new QTableWidgetItem(QString::number(destRow));
-        if (activeItem && (activeItem->row() == sourceRow)) {
-            activeItem = newDstItem;
-        }
-        removeRow(sourceRow);
-        insertRow(destRow);
-        setItem(destRow, Column::Number, newDstItem);
-        for (int col = Column::Title; col < Column::COUNT; ++col) {
-            setItem(destRow, col, sourceRowItems.front());
-            sourceRowItems.pop_front();
-        }
-        for (int i = std::min(destRow, sourceRow); i <= std::max(destRow, sourceRow); ++i) {
-            auto curItem = item(i, Column::Number);
-            curItem->setText(QString::number(i + 1));
-        }
-        selectRow(destRow);
-        dragRowSource = destRow;*/
     }
     event->acceptProposedAction();
 }
 
 void QPlaylist::dropEvent(QDropEvent* event) {
-    /*QTableWidgetItem* it = itemAt(event->position().toPoint());
-    if (it) {
-        int sourceRow = event->mimeData()->text().toInt();
-        if (sourceRow < 0 || sourceRow >= rowCount()) {
-            return;
-        }
-        int destRow = it->row();
-        QList<QTableWidgetItem*> sourceRowItems;
-        for (int col = (int)Column::Title; col < (int)Column::COUNT; ++col) {
-            QTableWidgetItem* sourceItem = takeItem(sourceRow, col);
-            sourceRowItems.append(sourceItem);
-        }
-        QTableWidgetItem* newDstItem = new QTableWidgetItem(QString::number(destRow));
-        if (activeItem && (activeItem->row() == sourceRow)) {
-            activeItem = newDstItem;
-        }
-        removeRow(sourceRow);
-        insertRow(destRow);
-        setItem(destRow, Column::Number, newDstItem);
-        for (int col = Column::Title; col < Column::COUNT; ++col) {
-            setItem(destRow, col, sourceRowItems.front());
-            sourceRowItems.pop_front();
-        }
-        for (int i = std::min(destRow, sourceRow); i <= std::max(destRow, sourceRow); ++i) {
-            auto curItem = item(i, Column::Number);
-            curItem->setText(QString::number(curItem->text().toInt() + 1));
-        }
-    }*/
     event->acceptProposedAction();
 }
 

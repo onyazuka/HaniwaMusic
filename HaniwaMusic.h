@@ -91,7 +91,5 @@ protected:
     QLineEdit* lnSearch;
     QPushButton* btnSearch;
     std::shared_ptr<AudioPlayer> player;
-
-    QString songPath;
 };
 #endif // HANIWAMUSIC_H

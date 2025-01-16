@@ -123,10 +123,9 @@ bool HaniwaMusic::onFileChanged(QString newFile) {
         return false;
     }
     onStopPress();
-    songPath = newFile;
     setAudio(newFile);
 
-    changeFileNameLabel(songPath, Qt::black);
+    changeFileNameLabel(newFile, Qt::black);
     onPlayPausePress();
     return ok;
 }
