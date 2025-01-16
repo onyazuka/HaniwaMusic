@@ -29,9 +29,7 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     sldProgress->setTickInterval(1);
     lProgress = new QLabel("0:00", this);
     sldVolume->setMaximumHeight(sldProgress->height() * 2);
-    playlist = new QPlaylist(this);
     tabPlaylists = new QTabWidget(this);
-    tabPlaylists->addTab(playlist, "Playlist");
     // hide tab bar if less than 2 tabs
     tabPlaylists->setTabBarAutoHide(true);
     // setting document mode true to get rid of double border
@@ -42,9 +40,13 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     setWindowTitle("Haniwa Music");
     changeFileNameLabel("File not selected", Qt::red);
     loadSettings();
+    if (tabPlaylists->count() == 0) {
+        tabPlaylists->addTab(new QPlaylist(tabPlaylists), "Playlist");
+        playlist = (QPlaylist*)tabPlaylists->widget(0);
+    }
     configureAudio();
     configureLayout();
-    playlist->select(appSettings.lastTrackNumber);
+    currentPlaylist()->select(appSettings.lastTrackNumber);
     connect(btnPlay, &QPushButton::released, this, &HaniwaMusic::onPlayPausePress);
     connect(btnStop, &QPushButton::released, this, &HaniwaMusic::onStopPress);
     connect(btnNext, &QPushButton::released, this, &HaniwaMusic::onNext);
@@ -55,10 +57,17 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     connect(sldProgress, &QClickableSlider::sliderReleased, this, [this]() {
         player->setPosition((float)sldProgress->value() / ((float)sldProgress->maximum() - (float)sldProgress->minimum()));
     });
-    connect(playlist, &QPlaylist::fileChanged, this, &HaniwaMusic::onFileChanged);
+    connect(currentPlaylist(), &QPlaylist::fileChanged, this, &HaniwaMusic::onFileChanged);
+    connect(tabPlaylists, &QTabWidget::currentChanged, this, &HaniwaMusic::onPlaylistChange);
     connect(btnSearch, &QPushButton::released, this, &HaniwaMusic::onSearchNext);
 }
 
+QPlaylist* HaniwaMusic::currentPlaylist() {
+    if (tabPlaylists->count() == 0) {
+        return nullptr;
+    }
+    return (QPlaylist*)tabPlaylists->currentWidget();
+}
 
 HaniwaMusic::~HaniwaMusic()
 {
@@ -198,8 +207,22 @@ void HaniwaMusic::loadSettings() {
     if (!dir.exists()) {
         appSettings.lastDir = QString(DEFAULT_PATH.data());
     }
-    QJsonArray lastPlaylist = settings.value("Playlist", QJsonArray()).toJsonArray();
-    playlist->addFilesFromJson(lastPlaylist);
+    QJsonArray playlists = settings.value("Playlists", QJsonArray()).toJsonArray();
+    for (const auto& item : playlists) {
+        QJsonObject oItem = item.toObject();
+        QString playlistTitle = oItem.value("Title").toString("");
+        QJsonArray playlist = oItem.value("Playlist").toArray({});
+        QPlaylist* newPlaylist = new QPlaylist(tabPlaylists);
+        tabPlaylists->addTab(newPlaylist, playlistTitle);
+        newPlaylist->addFilesFromJson(playlist);
+    }
+    //QJsonArray lastPlaylist = settings.value("Playlist", QJsonArray()).toJsonArray();
+    //playlist->addFilesFromJson(lastPlaylist);
+    if (tabPlaylists->count()) {
+        int idx = settings.value("LastPlaylist", 0).toInt();
+        tabPlaylists->setCurrentIndex(idx);
+        playlist = (QPlaylist*)tabPlaylists->widget(idx);
+    }
     appSettings.volume = settings.value("Volume", DEFAULT_VOLUME).toFloat();
     appSettings.windowRect = settings.value("WindowRect", QRect()).toRect();
     appSettings.lastTrackNumber = settings.value("LastTrackNumber", -1).toInt();
@@ -210,15 +233,28 @@ void HaniwaMusic::loadSettings() {
 void HaniwaMusic::saveSettings() {
     QSettings settings(ORGANIZATION_NAME, APP_NAME);
     settings.setValue("LastDir", appSettings.lastDir);
-    settings.setValue("Playlist", playlist->toJson());
+    QJsonArray jPlaylists;
+    for (int i = 0; i < tabPlaylists->count(); ++i) {
+        QJsonObject jPlaylist;
+        jPlaylist.insert("Title", tabPlaylists->tabText(i));
+        jPlaylist.insert("Playlist", playlist->toJson());
+        jPlaylists.push_back(jPlaylist);
+    }
+    settings.setValue("Playlists", jPlaylists);
+    if (playlist) {
+        settings.setValue("LastTrackNumber", playlist->currentTrackNumber());
+        settings.setValue("LastPlaylist", tabPlaylists->currentIndex());
+    }
     settings.setValue("Volume", (float)sldVolume->value() / 100.0f);
     settings.setValue("WindowRect", geometry());
-    settings.setValue("LastTrackNumber", playlist->currentTrackNumber());
     settings.setValue("Random", chRandom->isChecked());
     settings.setValue("Repeat", chRepeat->isChecked());
 }
 
 void HaniwaMusic::onNext() {
+    if (!playlist) {
+        return;
+    }
     if (chRepeat->isChecked()) {
         player->stop();
         player->play();
@@ -232,6 +268,9 @@ void HaniwaMusic::onNext() {
 }
 
 void HaniwaMusic::onPrev() {
+    if (!playlist) {
+        return;
+    }
     if (chRandom->isChecked()) {
         playlist->prevRandom();
     }
@@ -241,10 +280,16 @@ void HaniwaMusic::onPrev() {
 }
 
 void HaniwaMusic::onSearchNext() {
+    if (!playlist) {
+        return;
+    }
     playlist->findNext(lnSearch->text());
 }
 
 void HaniwaMusic::onOpenPress() {
+    if (!playlist) {
+        return;
+    }
     QString songPath = QFileDialog::getOpenFileName(this, "Select audio file", appSettings.lastDir, "Audio (*.mp3 *.flac)");
     if (checkFile(songPath)) {
         appSettings.lastDir = QFileInfo(songPath).absolutePath();
@@ -254,6 +299,9 @@ void HaniwaMusic::onOpenPress() {
 }
 
 void HaniwaMusic::onOpenDirPress() {
+    if (!playlist) {
+        return;
+    }
     auto dir = QFileDialog::getExistingDirectory(this, "Open directory", appSettings.lastDir);
     if (checkDir(dir)) {
         appSettings.lastDir = dir;
@@ -262,12 +310,27 @@ void HaniwaMusic::onOpenDirPress() {
     }
 }
 
+void HaniwaMusic::onPlaylistChange(int n) {
+    if (n >= 0) {
+        playlist = (QPlaylist*)tabPlaylists->widget(n);
+    }
+    else {
+        playlist = nullptr;
+    }
+}
+
 void HaniwaMusic::onPlayPausePress() {
+    if (!playlist) {
+        return;
+    }
     playlist->current();
     player->playOrPause();
 }
 
 void HaniwaMusic::onPlayPress() {
+    if (!playlist) {
+        return;
+    }
     playlist->current();
     player->play();
 }

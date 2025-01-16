@@ -131,6 +131,7 @@ void QPlaylist::addFile(const QString& path, qint64 durationMs) {
     }
 
     if (duration.isEmpty()) {
+        item(row, Column::Duration)->setData(Qt::UserRole, -1);
         emit fileAdded(path, row);
     }
     else {

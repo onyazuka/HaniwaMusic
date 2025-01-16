@@ -39,6 +39,7 @@ class HaniwaMusic : public QMainWindow
 public:
     HaniwaMusic(QWidget *parent = nullptr);
     ~HaniwaMusic();
+    QPlaylist* currentPlaylist();
 public slots:
     void onNext();
     void onPrev();
@@ -50,6 +51,7 @@ public slots:
 protected slots:
     void onOpenPress();
     void onOpenDirPress();
+    void onPlaylistChange(int n);
     void onVolumeSliderChanged(int newValue);
     bool onFileChanged(QString newFile);
     void onAudioError(AudioPlayer::Error error);
@@ -88,6 +90,7 @@ protected:
     QSlider* sldVolume;
     QClickableSlider* sldProgress;
     QLabel* lProgress;
+    // REQUIREMENT: should have at least 1 playlist, so don't allow to close last playlist
     QTabWidget* tabPlaylists;
     QPlaylist* playlist;
     QPushButton* btnPlaylistsMenu;
