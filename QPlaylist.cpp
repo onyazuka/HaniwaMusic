@@ -188,15 +188,16 @@ QJsonArray QPlaylist::toJson() const {
     return jArr;
 }
 
-std::string QPlaylist::toM3UPlaylist() const {
+const m3u::M3UPlaylist& QPlaylist::toM3UPlaylist(const QString& title) const {
     m3u::M3UWriter writer;
+    writer.writeParam({"PLAYLIST", title.toStdString()});
     for(int i = 0; i < rowCount(); ++i) {
-        writer << m3u::EXTINF(item(i, Column::Duration)->data(Qt::UserRole).toInt() / 1000);
-        writer << item(i, Column::Title)->data(Qt::UserRole).toString().toStdString();
+        writer.writeExtinf(std::pair<size_t, std::string>{(size_t)item(i, Column::Duration)->data(Qt::UserRole).toInt() / 1000, ""});
+        writer.writePath(item(i, Column::Title)->data(Qt::UserRole).toString().toStdString());
     }
-    //writer.dumpToFile("/home/onyazuka/playlist.txt");
+    //writer.dumpToFile("/home/onyazuka/playlist.m3u");
     //return "";
-    return writer.dumpToString();
+    return writer.playlist();
 }
 
 int QPlaylist::currentTrackNumber() const {

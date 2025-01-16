@@ -4,65 +4,69 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <map>
 #include <optional>
 #include <memory>
 
 namespace m3u {
 
-    class IM3UEntry {
-    public:
-        virtual ~IM3UEntry();
-        virtual void dump (std::ostream& os) const = 0;
+    struct EXTINF {
+        size_t duration;
+        std::string title;
+        static EXTINF fromStr(const std::string& s);
     };
 
-    class EXTINF : public IM3UEntry {
+    class M3UEntry {
     public:
-        EXTINF(size_t durationS, const std::string& title = "");
-        inline size_t durationS() const { return _durationS; }
-        inline const std::string& title() const { return _title; }
-        void dump(std::ostream& os) const override;
-    private:
-        const size_t _durationS;
-        const std::string _title;
-    };
-
-    class PLAYLIST : public IM3UEntry {
-    public:
-        PLAYLIST(const std::string& title);
-        inline const std::string& title() const { return _title; }
-        void dump(std::ostream& os) const override;
-    private:
-        std::string _title;
-    };
-
-    struct M3UEntry {
-        std::optional<EXTINF> oExtinf;
-        std::optional<PLAYLIST> oPlaylist;
-        std::string path;
+        M3UEntry() = default;
         void dump(std::ostream& os) const;
+        inline const std::string& path() const { return _path; }
+        inline void setPath(const std::string& p) { _path = p; }
+        inline std::map<std::string, std::string>& params() { return lParams; }
+    private:
+        std::map<std::string, std::string> lParams;
+        std::string _path;
     };
 
     class M3UPlaylist {
     public:
+        M3UPlaylist() = default;
         void add(const M3UEntry& entry);
         inline const std::vector<M3UEntry>& entries() const { return _entries; }
         void dump(std::ostream& os) const;
         static M3UPlaylist fromStream(std::istream& is);
+        inline std::map<std::string, std::string>& params() { return gParams; }
     private:
         std::vector<M3UEntry> _entries;
+        std::map<std::string, std::string> gParams;
     };
 
     class M3UWriter {
     public:
-        M3UWriter();
-        M3UWriter& operator<<(const EXTINF& extinf);
-        M3UWriter& operator<<(const PLAYLIST& playlist);
+        M3UWriter() = default;
+        M3UWriter(M3UPlaylist&& playlist);
         M3UWriter& operator<<(const std::string& path);
+        M3UWriter& operator<<(std::pair<std::string, const std::string&> param);
+        M3UWriter& operator<<(std::pair<size_t, const std::string&> param);
+        void writePath(const std::string& path);
+        void writeParam(std::pair<std::string, const std::string&> param);
+        void writeExtinf(std::pair<size_t, const std::string&> param);
         const M3UPlaylist& playlist() const { return _playlist; }
         bool dumpToFile(const std::string& path) const;
         std::string dumpToString() const;
     private:
-        std::shared_ptr<M3UEntry> entry;
+        M3UEntry entry;
+        M3UPlaylist _playlist;
+    };
+
+    class M3UReader {
+    public:
+        M3UReader() = default;
+        friend std::istream& operator>>(std::istream& is, M3UReader& reader);
+        const M3UPlaylist& playlist() const { return _playlist; }
+    private:
+        M3UEntry entry;
         M3UPlaylist _playlist;
     };
 
