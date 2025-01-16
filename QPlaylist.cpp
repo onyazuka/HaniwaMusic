@@ -403,6 +403,10 @@ void QPlaylist::keyPressEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Return) {
         onCellDoubleClicked(currentRow(), Column::Title);
     }
+    if (event->key() == Qt::Key_Delete) {
+        itemRemoveAction->setData(currentRow());
+        itemRemoveAction->trigger();
+    }
     else {
         QTableWidget::keyPressEvent(event);
     }
@@ -485,8 +489,9 @@ void QPlaylist::initMenu() {
         dlg.exec();
     });
     itemRightClickMenu = new QMenu();
-    itemRightClickMenu->addAction(itemRemoveAction);
     itemRightClickMenu->addAction(itemShowMetadata);
+    itemRightClickMenu->addSeparator();
+    itemRightClickMenu->addAction(itemRemoveAction);
     //itemRightClickMenu->platformMenu()
 }
 
@@ -494,14 +499,17 @@ void QPlaylist::initMenu() {
     Cleaning up on item remove
     (activeItem, history, ...)
 */
-void QPlaylist::onRemoveTableWidgetItem(QTableWidgetItem* item) {
+void QPlaylist::onRemoveTableWidgetItem(QTableWidgetItem* it) {
     for (int i = 0; i < randomHistory.size(); ++i) {
-        if (!randomHistory[i] || item->row() == randomHistory[i]->row()) {
+        if (!randomHistory[i] || it->row() == randomHistory[i]->row()) {
             randomHistory.erase(randomHistory.begin() + i);
         }
     }
+    for (int i = it->row() + 1; i < rowCount(); ++i) {
+        item(i, Column::Number)->setText(QString::number(i));
+    }
     // setting activeItem AFTER history, because else we could get nullptr dereference attempt
-    if (activeItem && (activeItem->row() == item->row())) {
+    if (activeItem && (activeItem->row() == it->row())) {
         activeItem = nullptr;
     }
 }

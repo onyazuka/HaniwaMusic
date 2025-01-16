@@ -355,6 +355,11 @@ void HaniwaMusic::onStopPress() {
     player->stop();
 }
 
+void HaniwaMusic::onClose() {
+    player->stop();
+    changeFileNameLabel("File not selected", Qt::red);
+}
+
 void HaniwaMusic::onVolumeSliderChanged(int newValue) {
     player->setVolume((float)newValue / 100.0f);
 }
@@ -377,12 +382,12 @@ void HaniwaMusic::initPlaylistsMenu() {
     });
     connect(playlistsRemovePlaylistAction, &QAction::triggered, this, [this](){
         tabPlaylists->removeTab(tabPlaylists->currentIndex());
-        player->close();
+        onClose();
     });
     connect(playlistsClearPlaylistAction, &QAction::triggered, this, [this](){
         onStopPress();
         playlist->clear();
-        player->close();
+        onClose();
     });
     playlistsMenu->addAction(playlistsAddPlaylistAction);
     playlistsMenu->addAction(playlistsRemovePlaylistAction);

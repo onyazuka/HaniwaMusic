@@ -47,7 +47,7 @@ public slots:
     void onPlayPress();
     void onPausePress();
     void onStopPress();
-
+    void onClose();
 protected slots:
     void onOpenPress();
     void onOpenDirPress();
