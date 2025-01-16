@@ -16,6 +16,7 @@
 #include <QFileInfo>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <QTabWidget>
 
 #include "AudioPlayer.h"
 #include "QLabelElide.h"
@@ -87,7 +88,9 @@ protected:
     QSlider* sldVolume;
     QClickableSlider* sldProgress;
     QLabel* lProgress;
+    QTabWidget* tabPlaylists;
     QPlaylist* playlist;
+    QPushButton* btnPlaylistsMenu;
     QLineEdit* lnSearch;
     QPushButton* btnSearch;
     std::shared_ptr<AudioPlayer> player;

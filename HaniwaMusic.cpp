@@ -30,6 +30,13 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     lProgress = new QLabel("0:00", this);
     sldVolume->setMaximumHeight(sldProgress->height() * 2);
     playlist = new QPlaylist(this);
+    tabPlaylists = new QTabWidget(this);
+    tabPlaylists->addTab(playlist, "Playlist");
+    // hide tab bar if less than 2 tabs
+    tabPlaylists->setTabBarAutoHide(true);
+    // setting document mode true to get rid of double border
+    tabPlaylists->setDocumentMode(true);
+    btnPlaylistsMenu = new QPushButton("Playlists", this);
     lnSearch = new QLineEdit(this);
     btnSearch = new QPushButton("Find",this);
     setWindowTitle("Haniwa Music");
@@ -80,13 +87,14 @@ void HaniwaMusic::configureLayout(){
     l4->addWidget(lProgress);
     l3->addLayout(l4);
     l3->addWidget(sldVolume);
-    l5->addWidget(lnSearch, 1, Qt::AlignRight);
-    l5->addWidget(btnSearch);
+    l5->addWidget(btnPlaylistsMenu, 1, Qt::AlignLeft);
+    l5->addWidget(lnSearch, 10, Qt::AlignRight);
+    l5->addWidget(btnSearch, 1, Qt::AlignRight);
     l5->setAlignment(Qt::AlignRight);
     layout->addLayout(l1);
     layout->addLayout(l2);
     layout->addLayout(l3);
-    layout->addWidget(playlist);
+    layout->addWidget(tabPlaylists);
     layout->addLayout(l5);
     centralWidget->setLayout(layout);
     if (!appSettings.windowRect.isEmpty()) {
