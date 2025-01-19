@@ -4,6 +4,14 @@
 #include <QMouseEvent>
 #include <QDrag>
 #include <QApplication>
+#include <QTime>
+#include <QFileInfo>
+
+Track::Track(const QString& path, int durationMs)
+    : path{path}, durationMs{durationMs}
+{
+    ;
+}
 
 QPlaylistView::QPlaylistView(QWidget* parent)
     : QTableWidget(parent)
@@ -15,6 +23,47 @@ QPlaylistView::QPlaylistView(QWidget* parent)
     setSelectionMode(QAbstractItemView::SingleSelection);
     setAcceptDrops(true);
     setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
+    connect(this, &QTableWidget::cellDoubleClicked, this, &QPlaylistView::onCellDoubleClicked);
+}
+
+QString QPlaylistView::durationMsToStrDuration(qint64 durationMs) {
+    if (durationMs < 1000 * 60 * 60) {
+        return QTime(0,0,0).addMSecs(durationMs).toString("m:ss");
+    }
+    else {
+        return QTime(0,0,0).addMSecs(durationMs).toString("hh:mm:ss");
+    }
+}
+
+int QPlaylistView::activeRowNumber() const {
+    if (!_activeItem) {
+        return -1;
+    }
+    return _activeItem->row();
+}
+
+void QPlaylistView::resetActiveItem() {
+    _activeItem = nullptr;
+}
+
+int QPlaylistView::nextRow(int row) const {
+    if (row < 0 || row >= rowCount()) {
+        return -1;
+    }
+    return row + 1;
+}
+
+int QPlaylistView::prevRow(int row) const {
+    if (row <= 0 || row > rowCount()) {
+        return -1;
+    }
+    return row - 1;
+}
+
+void QPlaylistView::clear() {
+    QTableWidget::clear();
+    setRowCount(0);
+    _activeItem = nullptr;
 }
 
 void QPlaylistView::swapRows(int sourceRow, int destRow) {
@@ -35,6 +84,40 @@ void QPlaylistView::swapRows(int sourceRow, int destRow) {
         setItem(destRow, col, sourceRowItems.front());
         sourceRowItems.pop_front();
     }
+}
+
+int QPlaylistView::appendTrack(const Track& track) {
+    int row = rowCount();
+    QString duration = track.durationMs < 0 ? "" : durationMsToStrDuration(track.durationMs);
+    insertRow(rowCount());
+    setItem(row, Column::Number, new QTableWidgetItem(QString::number(row + 1)));
+    QTableWidgetItem* titleItem = new QTableWidgetItem(QFileInfo(track.path).completeBaseName());
+    titleItem->setData(Qt::UserRole, track.path);
+    setItem(row, Column::Title, titleItem);
+    setItem(row, Column::Duration, new QTableWidgetItem(duration));
+    if (track.durationMs <= 0) {
+        item(row, Column::Duration)->setData(Qt::ForegroundRole, QVariant(QColor(Qt::red)));
+    }
+    for (int col = 0; col < Column::COUNT; ++col) {
+        auto curItem = item(row, col);
+        curItem->setFlags(curItem->flags() ^ Qt::ItemIsEditable);
+    }
+
+    if (duration.isEmpty()) {
+        item(row, Column::Duration)->setData(Qt::UserRole, -1);
+    }
+    else {
+        item(row, Column::Duration)->setData(Qt::UserRole, (int)track.durationMs);
+    }
+    if (rowCount() % 10 == 0) updateColumnWidths(width());
+    return row;
+}
+
+Track QPlaylistView::track(int row) const {
+    Track track;
+    track.path = item(row, Column::Title)->data(Qt::UserRole).toString();
+    track.durationMs = item(row, Column::Duration)->data(Qt::UserRole).toInt();
+    return track;
 }
 
 void QPlaylistView::mousePressEvent(QMouseEvent* event) {
@@ -98,4 +181,36 @@ void QPlaylistView::dragMoveEvent(QDragMoveEvent* event) {
 
 void QPlaylistView::dropEvent(QDropEvent* event) {
     event->acceptProposedAction();
+}
+
+void QPlaylistView::resizeEvent(QResizeEvent* event) {
+    updateColumnWidths(event->size().width());
+    QTableWidget::resizeEvent(event);
+}
+
+void QPlaylistView::onCellDoubleClicked(int row, int) {
+    if (row < 0 || row >= rowCount()) {
+        return;
+    }
+    if (_activeItem) {
+        QTableWidgetItem* it = item(_activeItem->row(), Column::Title);
+        QFont font = it->font();
+        font.setBold(false);
+        it->setFont(font);
+    }
+    _activeItem = item(row, Column::Title);
+    QTableWidgetItem* it = item(row, Column::Title);
+    QFont font = it->font();
+    font.setBold(true);
+    it->setFont(font);
+    selectRow(row);
+}
+
+void QPlaylistView::updateColumnWidths(int totalTableWidth) {
+    QFontMetrics metrics(font());
+    QSize numberSz = metrics.size(0, QString::number(rowCount() * 10));
+    QSize durationSz = metrics.size(0, " 99:99:99 ");
+    setColumnWidth(Column::Number, numberSz.width());
+    setColumnWidth(Column::Title, totalTableWidth - numberSz.width() - durationSz.width());
+    setColumnWidth(Column::Duration, durationSz.width());
 }

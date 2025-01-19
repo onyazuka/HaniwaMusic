@@ -9,58 +9,6 @@
 #include "QMetadataDlg.hpp"
 
 
-/*DurationGatherer::DurationGatherer() {
-    utilityPlayer = new QMediaPlayer();
-}
-
-void DurationGatherer::init() {
-    timer = new QTimer();
-    //timer->setInterval(100);
-    QObject::connect(timer, &QTimer::timeout, this, &DurationGatherer::onTimer);
-    connect(utilityPlayer, &QMediaPlayer::durationChanged, this, &DurationGatherer::onDuration);
-    connect(utilityPlayer, &QMediaPlayer::mediaStatusChanged, this, &DurationGatherer::onMediaStatusChanged);
-    //timer->start();
-}
-
-void DurationGatherer::onTimer() {
-    if (!taskQueue.empty()) {
-        timer->stop();
-        curTask = taskQueue.front();
-        taskQueue.pop_front();
-        utilityPlayer->setSource(QUrl::fromLocalFile(curTask.path));
-    }
-    else {
-        //timer->setInterval(100);
-        //timer->start();
-        timer->stop();
-    }
-}
-
-void DurationGatherer::onDuration(qint64 duration) {
-    emit gotDuration(duration, curTask.row);
-    // setting empty source resets QMediaPlayer (I hope)
-    //utilityPlayer->setSource(QUrl());
-    //onTimer();
-}
-
-void DurationGatherer::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
-    if (status == QMediaPlayer::MediaStatus::LoadedMedia) {
-        onTimer();
-    }
-}
-
-void DurationGatherer::onAddFile(const QString& path, int row) {
-    if (!inited) {
-        init();
-        inited = true;
-    }
-    if (!timer->isActive()) {
-        timer->setInterval(100);
-        timer->start();
-    }
-    taskQueue.append({path,row,0});
-}*/
-
 DurationGatherer2::DurationGatherer2() {
     ;
 }
@@ -93,7 +41,7 @@ QPlaylist::QPlaylist(QWidget* parent)
     durationGatherer->moveToThread(&durationGathererThread);
     connect(this, &QTableWidget::cellDoubleClicked, this, &QPlaylist::onCellDoubleClicked);
     connect(&durationGathererThread, &QThread::finished, durationGatherer, &QObject::deleteLater);
-    connect(this, &QPlaylist::fileAdded, durationGatherer, &DurationGatherer2::onAddFile);
+    connect(this, &QPlaylist::fileAddedWithUnknownDuration, durationGatherer, &DurationGatherer2::onAddFile);
     connect(durationGatherer, &DurationGatherer2::gotDuration, this, &QPlaylist::onUpdateDuration);
     connect(this, &QWidget::customContextMenuRequested, this, &QPlaylist::handleContextMenu);
     durationGathererThread.start();
@@ -106,30 +54,11 @@ QPlaylist::~QPlaylist() {
 
 // 'duration' = 0 means unknown duration AFTER reading, -1 - default arg
 void QPlaylist::addFile(const QString& path, qint64 durationMs) {
-    int row = rowCount();
-    QString duration = durationMs < 0 ? "" : durationMsToStrDuration(durationMs);
-    insertRow(rowCount());
-    setItem(row, Column::Number, new QTableWidgetItem(QString::number(row + 1)));
-    QTableWidgetItem* titleItem = new QTableWidgetItem(QFileInfo(path).completeBaseName());
-    titleItem->setData(Qt::UserRole, path);
-    setItem(row, Column::Title, titleItem);
-    setItem(row, Column::Duration, new QTableWidgetItem(duration));
-    if (durationMs <= 0) {
-        item(row, Column::Duration)->setData(Qt::ForegroundRole, QVariant(QColor(Qt::red)));
+    int row = appendTrack(Track(path, durationMs));
+    // unknown duration - sending to duration gatherer
+    if (durationMs < 0) {
+        emit fileAddedWithUnknownDuration(path, row);
     }
-    for (int col = 0; col < Column::COUNT; ++col) {
-        auto curItem = item(row, col);
-        curItem->setFlags(curItem->flags() ^ Qt::ItemIsEditable);
-    }
-
-    if (duration.isEmpty()) {
-        item(row, Column::Duration)->setData(Qt::UserRole, -1);
-        emit fileAdded(path, row);
-    }
-    else {
-        item(row, Column::Duration)->setData(Qt::UserRole, (int)durationMs);
-    }
-    if (rowCount() % 10 == 0) updateColumnWidths(width());
 }
 
 void QPlaylist::addFileFromJson(const QJsonObject& obj) {
@@ -166,7 +95,8 @@ void QPlaylist::addFilesFromJson(const QJsonArray& json) {
 QStringList QPlaylist::toStringList() const {
     QStringList res;
     for(int i = 0; i < rowCount(); ++i) {
-        res.append(item(i, Column::Title)->data(Qt::UserRole).toString());
+        Track tr = track(i);
+        res.append(tr.path);
     }
     return res;
 }
@@ -174,9 +104,10 @@ QStringList QPlaylist::toStringList() const {
 QJsonArray QPlaylist::toJson() const {
     QJsonArray jArr;
     for(int i = 0; i < rowCount(); ++i) {
+        Track tr = track(i);
         jArr.append(QJsonObject({
-            {"path", item(i, Column::Title)->data(Qt::UserRole).toString()},
-            {"duration", item(i, Column::Duration)->data(Qt::UserRole).toInt()}
+            {"path", tr.path},
+            {"duration", tr.durationMs}
         }));
     }
     return jArr;
@@ -186,19 +117,13 @@ m3u::M3UPlaylist QPlaylist::toM3UPlaylist(const QString& title) const {
     m3u::M3UWriter writer;
     writer.writeParam({"PLAYLIST", title.toStdString()});
     for(int i = 0; i < rowCount(); ++i) {
-        writer.writeExtinf(std::pair<size_t, std::string>{(size_t)item(i, Column::Duration)->data(Qt::UserRole).toInt() / 1000, ""});
-        writer.writePath(item(i, Column::Title)->data(Qt::UserRole).toString().toStdString());
+        Track tr = track(i);
+        writer.writeExtinf(std::pair<size_t, std::string>{(size_t)tr.durationMs / 1000, ""});
+        writer.writePath(tr.path.toStdString());
     }
     //writer.dumpToFile("/home/onyazuka/playlist.m3u");
     //return "";
     return writer.playlist();
-}
-
-int QPlaylist::currentTrackNumber() const {
-    if (!activeItem) {
-        return -1;
-    }
-    return activeItem->row();
 }
 
 bool QPlaylist::findNext(QString str) {
@@ -225,71 +150,59 @@ bool QPlaylist::findNext(QString str) {
     return false;
 }
 
-void QPlaylist::clear() {
-    QTableWidget::clear();
-    setRowCount(0);
-    activeItem = nullptr;
-}
-
 /*
     selects current row as active item and plays it
 */
 void QPlaylist::current() {
-    if (rowCount() == 0) {
+    if (empty()) {
         return;
     }
-    if (activeItem) {
+    if (activeItem()) {
         return;
     }
     onCellDoubleClicked(currentRow(), Column::Title);
 }
 
 void QPlaylist::next() {
-    if (rowCount() == 0) {
+    if (empty()) {
         return;
     }
-    if (!activeItem) {
-        return;
-    }
-    int row = activeItem->row();
-    if (row == (rowCount() - 1)) {
-        return;
-    }
-    onCellDoubleClicked(row + 1, Column::Title);
+    onNext();
+    onCellDoubleClicked(nextRow(activeRowNumber()), Column::Title);
 }
 
 void QPlaylist::nextRandom() {
-    if (rowCount() == 0) {
+    if (empty()) {
         return;
     }
-    while ((size_t)randomHistory.size() >= MaxRandomHistorySize) {
-        randomHistory.pop_back();
-    }
-    randomHistory.push_back(activeItem);
+    onNext();
     onCellDoubleClicked(rand() % rowCount(), Column::Title);
 }
 
+void QPlaylist::onNext() {
+    while ((size_t)playHistory.size() >= MaxRandomHistorySize) {
+        playHistory.pop_back();
+    }
+    int activeRow = activeRowNumber();
+    if (activeRow >= 0) {
+        playHistory.push_back(activeItem());
+    }
+}
+
 void QPlaylist::prev() {
-    if (rowCount() == 0) {
+    if (empty()) {
         return;
     }
-    if (!activeItem) {
-        return;
-    }
-    int row = activeItem->row();
-    if (row == 0) {
-        return;
-    }
-    onCellDoubleClicked(row - 1, Column::Title);
+    onCellDoubleClicked(prevRow(activeRowNumber()), Column::Title);
 }
 
 void QPlaylist::prevRandom() {
-    if (rowCount() == 0) {
+    if (empty()) {
         return;
     }
-    while (!randomHistory.empty()) {
-        QTableWidgetItem* it = randomHistory.back();
-        randomHistory.pop_back();
+    while (!playHistory.empty()) {
+        QTableWidgetItem* it = playHistory.back();
+        playHistory.pop_back();
         if (it) {
             onCellDoubleClicked(it->row(), Column::Title);
             return;;
@@ -306,20 +219,13 @@ bool QPlaylist::select(int row) {
     return true;
 }
 
-void QPlaylist::onCellDoubleClicked(int row, int) {
-    if (activeItem) {
-        QTableWidgetItem* it = item(activeItem->row(), Column::Title);
-        QFont font = it->font();
-        font.setBold(false);
-        it->setFont(font);
+void QPlaylist::onCellDoubleClicked(int row, int col) {
+    if (row < 0 || row >= rowCount()) {
+        return;
     }
-    activeItem = item(row, Column::Title);
-    QTableWidgetItem* it = item(row, Column::Title);
-    QFont font = it->font();
-    font.setBold(true);
-    it->setFont(font);
-    selectRow(row);
-    emit fileChanged(item(row, Column::Title)->data(Qt::UserRole).toString());
+    QPlaylistView::onCellDoubleClicked(row, col);
+    Track tr = track(row);
+    emit fileChanged(tr.path);
 }
 
 // got 'duration' in ms
@@ -347,11 +253,6 @@ void QPlaylist::handleContextMenu(const QPoint& pos) {
     }
 }
 
-void QPlaylist::resizeEvent(QResizeEvent* event) {
-    updateColumnWidths(event->size().width());
-    QTableWidget::resizeEvent(event);
-}
-
 void QPlaylist::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::MouseButton::RightButton) {
         QTableWidgetItem* it = itemAt(event->position().toPoint());
@@ -376,15 +277,6 @@ void QPlaylist::keyPressEvent(QKeyEvent* event) {
     else {
         QTableWidget::keyPressEvent(event);
     }
-}
-
-void QPlaylist::updateColumnWidths(int totalTableWidth) {
-    QFontMetrics metrics(font());
-    QSize numberSz = metrics.size(0, QString::number(rowCount() * 10));
-    QSize durationSz = metrics.size(0, " 99:99:99 ");
-    setColumnWidth(Column::Number, numberSz.width());
-    setColumnWidth(Column::Title, totalTableWidth - numberSz.width() - durationSz.width());
-    setColumnWidth(Column::Duration, durationSz.width());
 }
 
 void QPlaylist::initMenu() {
@@ -418,26 +310,18 @@ void QPlaylist::initMenu() {
     (activeItem, history, ...)
 */
 void QPlaylist::onRemoveTableWidgetItem(QTableWidgetItem* it) {
-    for (int i = 0; i < randomHistory.size(); ++i) {
-        if (!randomHistory[i] || it->row() == randomHistory[i]->row()) {
-            randomHistory.erase(randomHistory.begin() + i);
+    for (int i = 0; i < playHistory.size(); ++i) {
+        if (!playHistory[i] || it->row() == playHistory[i]->row()) {
+            playHistory.erase(playHistory.begin() + i);
         }
     }
     for (int i = it->row() + 1; i < rowCount(); ++i) {
         item(i, Column::Number)->setText(QString::number(i));
     }
     // setting activeItem AFTER history, because else we could get nullptr dereference attempt
-    if (activeItem && (activeItem->row() == it->row())) {
-        activeItem = nullptr;
+    if (activeRowNumber() == it->row()) {
+        resetActiveItem();
     }
 }
 
-QString QPlaylist::durationMsToStrDuration(qint64 durationMs) {
-    if (durationMs < 1000 * 60 * 60) {
-        return QTime(0,0,0).addMSecs(durationMs).toString("m:ss");
-    }
-    else {
-        return QTime(0,0,0).addMSecs(durationMs).toString("hh:mm:ss");
-    }
-}
 

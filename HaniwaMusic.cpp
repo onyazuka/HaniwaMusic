@@ -250,7 +250,7 @@ void HaniwaMusic::saveSettings() {
     }
     settings.setValue("Playlists", jPlaylists);
     if (playlist) {
-        settings.setValue("LastTrackNumber", playlist->currentTrackNumber());
+        settings.setValue("LastTrackNumber", playlist->activeRowNumber());
         settings.setValue("LastPlaylist", tabPlaylists->currentIndex());
     }
     settings.setValue("Volume", (float)sldVolume->value() / 100.0f);
