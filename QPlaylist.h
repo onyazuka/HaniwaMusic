@@ -16,6 +16,7 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <atomic>
+#include "QPlaylistView.hpp"
 #include "M3UPlaylist.hpp"
 
 /*class DurationGatherer : public QObject {
@@ -62,17 +63,10 @@ struct SearchCtx {
     bool finish = false;
 };
 
-class QPlaylist : public QTableWidget {
+class QPlaylist : public QPlaylistView {
     Q_OBJECT
     static constexpr size_t MaxRandomHistorySize = 100;
 public:
-    enum Column {
-        Number,
-        Title,
-        Duration,
-        COUNT
-    };
-
     QPlaylist(QWidget* parent = nullptr);
     ~QPlaylist();
     void addFile(const QString& path, qint64 durationMs = -1);
@@ -103,11 +97,7 @@ private slots:
 private:
     void resizeEvent(QResizeEvent *event) override;
     void mousePressEvent(QMouseEvent* event) override;
-    void mouseMoveEvent(QMouseEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
-    void dragEnterEvent(QDragEnterEvent* event) override;
-    void dragMoveEvent(QDragMoveEvent* event) override;
-    void dropEvent(QDropEvent* event) override;
     void updateColumnWidths(int totalTableWidth);
     void initMenu();
     void onRemoveTableWidgetItem(QTableWidgetItem* item);
@@ -117,10 +107,7 @@ private:
     QMenu* itemRightClickMenu = nullptr;
     QAction* itemRemoveAction = nullptr;
     QAction* itemShowMetadata = nullptr;
-    QPoint dragStartPosition = QPoint(0,0);
-    int dragRowSource = 0;
     SearchCtx searchCtx;
-
     QTableWidgetItem* activeItem = nullptr;
     QList<QTableWidgetItem*> randomHistory;
 };

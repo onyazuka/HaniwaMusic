@@ -26,6 +26,7 @@ SOURCES += \
     QMediaKeysWinapiAdaptor.cpp \
     QMetadataDlg.cpp \
     QPlaylist.cpp \
+    QPlaylistView.cpp \
     main.cpp \
     utils/UtilsString.cpp
 
@@ -46,6 +47,7 @@ HEADERS += \
     QMediaKeysWinapiAdaptor.hpp \
     QMetadataDlg.hpp \
     QPlaylist.h \
+    QPlaylistView.hpp \
     utils/UtilsString.hpp
 
 FORMS += \

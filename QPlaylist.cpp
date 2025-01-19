@@ -86,20 +86,12 @@ void DurationGatherer2::onAddFile(const QString& path, int row) {
 }
 
 QPlaylist::QPlaylist(QWidget* parent)
-    : QTableWidget(parent)
+    : QPlaylistView(parent)
 {
-    setColumnCount(Column::COUNT);
-    setSelectionBehavior(QAbstractItemView::SelectRows);
-    //horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    connect(this, &QTableWidget::cellDoubleClicked, this, &QPlaylist::onCellDoubleClicked);
-    horizontalHeader()->hide();
-    verticalHeader()->hide();
     initMenu();
-    setSelectionMode(QAbstractItemView::SingleSelection);
-    setAcceptDrops(true);
-    setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
     durationGatherer = new DurationGatherer2();
     durationGatherer->moveToThread(&durationGathererThread);
+    connect(this, &QTableWidget::cellDoubleClicked, this, &QPlaylist::onCellDoubleClicked);
     connect(&durationGathererThread, &QThread::finished, durationGatherer, &QObject::deleteLater);
     connect(this, &QPlaylist::fileAdded, durationGatherer, &DurationGatherer2::onAddFile);
     connect(durationGatherer, &DurationGatherer2::gotDuration, this, &QPlaylist::onUpdateDuration);
@@ -370,33 +362,7 @@ void QPlaylist::mousePressEvent(QMouseEvent* event) {
             itemRightClickMenu->exec(event->globalPosition().toPoint());
         }
     }
-    else if (event->button() == Qt::MouseButton::LeftButton) {
-        QTableWidgetItem* item = itemAt(event->position().toPoint());
-        if (item) {
-            dragStartPosition = event->pos();
-            dragRowSource = item->row();
-        }
-    }
-    QTableWidget::mousePressEvent(event);
-}
-
-void QPlaylist::mouseMoveEvent(QMouseEvent* event)  {
-    if (event->buttons() & Qt::MouseButton::LeftButton) {
-        if ((event->pos() - dragStartPosition).manhattanLength() < QApplication::startDragDistance()) {
-            return;
-        }
-        QTableWidgetItem* it = itemAt(event->position().toPoint());
-        if (it) {
-            QDrag* drag = new QDrag(this);
-            QMimeData* mimeData = new QMimeData;
-            mimeData->setText(QString::number(it->row()));
-            drag->setMimeData(mimeData);
-            drag->exec();
-        }
-    }
-    else {
-        QTableWidget::mouseMoveEvent(event);
-    }
+    QPlaylistView::mousePressEvent(event);
 }
 
 void QPlaylist::keyPressEvent(QKeyEvent* event) {
@@ -410,54 +376,6 @@ void QPlaylist::keyPressEvent(QKeyEvent* event) {
     else {
         QTableWidget::keyPressEvent(event);
     }
-}
-
-void QPlaylist::dragEnterEvent(QDragEnterEvent* event) {
-    if (event->mimeData()->hasFormat("text/plain")) {
-        event->acceptProposedAction();
-    }
-}
-
-void QPlaylist::dragMoveEvent(QDragMoveEvent* event) {
-    QTableWidgetItem* it = itemAt(event->position().toPoint());
-    //int sourceRow = event->mimeData()->text().toInt();
-    int sourceRow = dragRowSource;
-    if (it && (it->row() != sourceRow)) {
-        if (sourceRow < 0 || sourceRow >= rowCount()) {
-            return;
-        }
-        int destRow = it->row();
-        QList<QTableWidgetItem*> sourceRowItems;
-        QList<QTableWidgetItem*> destRowItems;
-        for (int col = (int)Column::Title; col < (int)Column::COUNT; ++col) {
-            QTableWidgetItem* sourceItem = takeItem(sourceRow, col);
-            sourceRowItems.append(sourceItem);
-            QTableWidgetItem* destItem = takeItem(destRow, col);
-            destRowItems.append(destItem);
-        }
-        for (int col = (int)Column::Title; col < (int)Column::COUNT; ++col) {
-            setItem(sourceRow, col, destRowItems.front());
-            destRowItems.pop_front();
-            setItem(destRow, col, sourceRowItems.front());
-            sourceRowItems.pop_front();
-        }
-        selectRow(destRow);
-        dragRowSource = destRow;
-
-        qDebug() << event->position().y();
-        qDebug() << rowHeight(0);
-        if (event->position().y() <= rowHeight(0)) {
-            scrollToItem(item(destRow - 1, Column::Title));
-        }
-        else if (event->position().y() >= (height() - rowHeight(0))) {
-            scrollToItem(item(destRow + 1, Column::Title));
-        }
-    }
-    event->acceptProposedAction();
-}
-
-void QPlaylist::dropEvent(QDropEvent* event) {
-    event->acceptProposedAction();
 }
 
 void QPlaylist::updateColumnWidths(int totalTableWidth) {
