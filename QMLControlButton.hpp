@@ -1,10 +1,8 @@
 #ifndef QMLCONTROLBUTTON_HPP
 #define QMLCONTROLBUTTON_HPP
-#include <QtQuickWidgets/QQuickWidget>
-#include <QQuickItem>
-#include <QWidget>
+#include "QMLWidgetBase.hpp"
 
-class QMLControlButton  : public QQuickWidget {
+class QMLControlButton  : public QMLWidgetBase  {
     Q_OBJECT
 public:
     QMLControlButton(const QString& text, QWidget* parent = nullptr);

@@ -53,6 +53,20 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
 
     initPlaylistsMenu();
 
+    {
+        QFont font = lProgress->font();
+        font.setFamily("Seven Segment");
+        font.setPointSize(font.pointSize() * 1.8);
+        lProgress->setFont(font);
+    }
+
+    {
+        QFont font = lFileName->font();
+        font.setFamily("Monospace");
+        font.setPointSize(font.pointSize() * 1.35);
+        lFileName->setFont(font);
+    }
+
     connect((QObject*)btnPlay->rootObject(), SIGNAL(released()), this, SLOT(onPlayPausePress()));
     connect((QObject*)btnStop->rootObject(), SIGNAL(released()), this, SLOT(onStopPress()));
     connect((QObject*)btnNext->rootObject(), SIGNAL(released()), this, SLOT(onNext()));

@@ -7,6 +7,7 @@
 #endif
 
 #include <QApplication>
+#include <QFontDatabase>
 
 int main(int argc, char *argv[])
 {
@@ -15,6 +16,11 @@ int main(int argc, char *argv[])
 
     srand(time(0));
     QApplication a(argc, argv);
+
+    if (QFontDatabase::addApplicationFont(":/fonts/Seven Segment.ttf") < 0) {
+        qDebug() << "Couldn't register fonts";
+    }
+
     HaniwaMusic w;
     QCoreApplication::setOrganizationName(ORGANIZATION_NAME);
     QCoreApplication::setApplicationName(APP_NAME);

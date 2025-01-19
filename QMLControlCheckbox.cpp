@@ -1,10 +1,8 @@
 #include "QMLControlCheckbox.hpp"
 
 QMLControlCheckbox::QMLControlCheckbox(const QString& path, bool chState, QWidget* parent)
-    : QQuickWidget(parent)
+    : QMLWidgetBase(":/QML/ControlCheckBox.qml", parent)
 {
-    setSource(QUrl::fromLocalFile(":/QML/ControlCheckBox.qml"));
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     setIconPath(path);
     setChecked(chState);
 }
@@ -22,5 +20,5 @@ bool QMLControlCheckbox::isChecked() const {
 }
 
 QQuickItem* QMLControlCheckbox::checkBox() const {
-    return rootObject()->findChild<QQuickItem*>("chBox");
+    return findItem("chBox");
 }

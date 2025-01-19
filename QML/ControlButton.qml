@@ -3,13 +3,12 @@ import QtQuick.Controls
 
 RoundButton {
     SystemPalette { id: pal; colorGroup: SystemPalette.Active }
-    property string txt;
     id: button
     width: height
     Text {
-        id: text
+        objectName: "text"
         anchors.centerIn: parent
         color: palette.highlight
-        text: button.txt
+        // text is set by qt
     }
 }

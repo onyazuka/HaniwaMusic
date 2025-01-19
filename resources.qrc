@@ -4,5 +4,6 @@
         <file>QML/ControlCheckBox.qml</file>
         <file>icons/random.svg</file>
         <file>icons/repeat.svg</file>
+        <file>fonts/Seven Segment.ttf</file>
     </qresource>
 </RCC>

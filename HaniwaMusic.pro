@@ -24,6 +24,7 @@ SOURCES += \
     QLabelElide.cpp \
     QMLControlButton.cpp \
     QMLControlCheckbox.cpp \
+    QMLWidgetBase.cpp \
     QMediaKeysDBusAdaptor.cpp \
     QMediaKeysWinapiAdaptor.cpp \
     QMetadataDlg.cpp \
@@ -47,6 +48,7 @@ HEADERS += \
     QLabelElide.h \
     QMLControlButton.hpp \
     QMLControlCheckbox.hpp \
+    QMLWidgetBase.hpp \
     QMediaKeysDBusAdaptor.hpp \
     QMediaKeysWinapiAdaptor.hpp \
     QMetadataDlg.hpp \

@@ -10,9 +10,7 @@ RowLayout {
         objectName: "chBox"
         padding: 0
         property string iconPath
-        property bool checkState
-        //text: txt
-        position: checkState ? 1.0 : 0.0
+        // property checked set by cpp
     }
     Button {
         implicitHeight: chBox.height
