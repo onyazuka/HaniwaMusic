@@ -20,6 +20,7 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     btnPrev = new QMLControlButton("⏮", this);
     chRandom = new QMLControlCheckbox("qrc:/icons/random.svg", false, this);
     chRepeat = new QMLControlCheckbox("qrc:/icons/repeat.svg", false, this);
+    qmlSlider = new QMLSlider(Qt::Orientation::Vertical, this);
     btnOpen = new QPushButton("Open", this);
     btnOpenDir = new QPushButton("Open directory", this);
     lFileName = new QLabelElide("", this);
@@ -110,6 +111,7 @@ void HaniwaMusic::configureLayout(){
     l2->addWidget(btnNext);
     l2->addWidget(chRandom);
     l2->addWidget(chRepeat);
+    l2->addWidget(qmlSlider);
     l2->addStretch();
     l1->addWidget(lFileName);
     l4->addWidget(sldProgress);

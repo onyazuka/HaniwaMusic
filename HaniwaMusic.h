@@ -24,6 +24,7 @@
 #include "QClickableSlider.h"
 #include "QMLControlButton.hpp"
 #include "QMLControlCheckbox.hpp"
+#include "QMLSlider.hpp"
 
 #define ORGANIZATION_NAME "HaniwaSofuto"
 #define APP_NAME "HaniwaMusic"
@@ -87,6 +88,7 @@ protected:
     QMLControlButton* btnPrev;
     QMLControlCheckbox* chRandom;
     QMLControlCheckbox* chRepeat;
+    QMLSlider* qmlSlider;
     QPushButton* btnOpen;
     QPushButton* btnOpenDir;
     QLabelElide* lFileName;

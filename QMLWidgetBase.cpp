@@ -7,6 +7,7 @@ QMLWidgetBase::QMLWidgetBase(const QString& resourcePath, QWidget* parent)
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 
-QQuickItem* QMLWidgetBase::findItem(const QString& objectName) const {
-    return rootObject()->findChild<QQuickItem*>(objectName);
+QQuickItem* QMLWidgetBase::findItem(const QString& objectName) {
+    QQuickItem* it = rootObject()->findChild<QQuickItem*>(objectName);
+    return it;
 }

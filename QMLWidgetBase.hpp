@@ -8,7 +8,7 @@ class QMLWidgetBase  : public QQuickWidget {
     Q_OBJECT
 public:
     QMLWidgetBase(const QString& resourcePath, QWidget* parent = nullptr);
-    QQuickItem* findItem(const QString& objectName) const;
+    QQuickItem* findItem(const QString& objectName);
 };
 
 

@@ -24,6 +24,7 @@ SOURCES += \
     QLabelElide.cpp \
     QMLControlButton.cpp \
     QMLControlCheckbox.cpp \
+    QMLSlider.cpp \
     QMLWidgetBase.cpp \
     QMediaKeysDBusAdaptor.cpp \
     QMediaKeysWinapiAdaptor.cpp \
@@ -48,6 +49,7 @@ HEADERS += \
     QLabelElide.h \
     QMLControlButton.hpp \
     QMLControlCheckbox.hpp \
+    QMLSlider.hpp \
     QMLWidgetBase.hpp \
     QMediaKeysDBusAdaptor.hpp \
     QMediaKeysWinapiAdaptor.hpp \
@@ -73,7 +75,8 @@ SUBDIRS += \
 
 DISTFILES += \
     QML/ControlButton.qml \
-    QML/ControlCheckBox.qml
+    QML/ControlCheckBox.qml \
+    QML/Slider.qml
 
 RESOURCES += \
     resources.qrc

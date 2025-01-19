@@ -15,10 +15,10 @@ void QMLControlCheckbox::setChecked(bool chState) {
     checkBox()->setProperty("checked", chState);
 }
 
-bool QMLControlCheckbox::isChecked() const {
+bool QMLControlCheckbox::isChecked() {
     return checkBox()->property("checked").toBool();
 }
 
-QQuickItem* QMLControlCheckbox::checkBox() const {
+QQuickItem* QMLControlCheckbox::checkBox() {
     return findItem("chBox");
 }

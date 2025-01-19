@@ -8,8 +8,8 @@ public:
     QMLControlCheckbox(const QString& text, bool checked, QWidget* parent = nullptr);
     void setIconPath(const QString& text);
     void setChecked(bool chState);
-    bool isChecked() const;
-    QQuickItem* checkBox() const;
+    bool isChecked();
+    QQuickItem* checkBox();
 };
 
 #endif // QMLCONTROLCHECKBOX_HPP
