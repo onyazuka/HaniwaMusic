@@ -1,4 +1,4 @@
-QT       += core gui multimedia testlib dbus
+QT       += core gui multimedia testlib dbus qml quick quickwidgets
 
 QMAKE_PROJECT_DEPTH = 0
 
@@ -22,6 +22,8 @@ SOURCES += \
     QAudioPlayer.cpp \
     QClickableSlider.cpp \
     QLabelElide.cpp \
+    QMLControlButton.cpp \
+    QMLControlCheckbox.cpp \
     QMediaKeysDBusAdaptor.cpp \
     QMediaKeysWinapiAdaptor.cpp \
     QMetadataDlg.cpp \
@@ -43,6 +45,8 @@ HEADERS += \
     QAudioPlayer.h \
     QClickableSlider.h \
     QLabelElide.h \
+    QMLControlButton.hpp \
+    QMLControlCheckbox.hpp \
     QMediaKeysDBusAdaptor.hpp \
     QMediaKeysWinapiAdaptor.hpp \
     QMetadataDlg.hpp \
@@ -64,3 +68,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 SUBDIRS += \
     MetaTagsParser/ID3V2Parser.pro
+
+DISTFILES += \
+    QML/ControlButton.qml \
+    QML/ControlCheckBox.qml
+
+RESOURCES += \
+    resources.qrc

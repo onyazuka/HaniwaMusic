@@ -14,12 +14,12 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     ui->setupUi(this);
     centralWidget = new QWidget();
     setCentralWidget(centralWidget);
-    btnPlay = new QPushButton("Play", this);
-    btnStop = new QPushButton("Stop", this);
-    btnNext = new QPushButton("Next", this);
-    btnPrev = new QPushButton("Prev", this);
-    chRandom = new QCheckBox("Random", this);
-    chRepeat = new QCheckBox("Repeat", this);
+    btnPlay = new QMLControlButton("⏵", this);
+    btnStop = new QMLControlButton("⏹", this);
+    btnNext = new QMLControlButton("⏭", this);
+    btnPrev = new QMLControlButton("⏮", this);
+    chRandom = new QMLControlCheckbox("qrc:/icons/random.svg", false, this);
+    chRepeat = new QMLControlCheckbox("qrc:/icons/repeat.svg", false, this);
     btnOpen = new QPushButton("Open", this);
     btnOpenDir = new QPushButton("Open directory", this);
     lFileName = new QLabelElide("", this);
@@ -53,10 +53,10 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
 
     initPlaylistsMenu();
 
-    connect(btnPlay, &QPushButton::released, this, &HaniwaMusic::onPlayPausePress);
-    connect(btnStop, &QPushButton::released, this, &HaniwaMusic::onStopPress);
-    connect(btnNext, &QPushButton::released, this, &HaniwaMusic::onNext);
-    connect(btnPrev, &QPushButton::released, this, &HaniwaMusic::onPrev);
+    connect((QObject*)btnPlay->rootObject(), SIGNAL(released()), this, SLOT(onPlayPausePress()));
+    connect((QObject*)btnStop->rootObject(), SIGNAL(released()), this, SLOT(onStopPress()));
+    connect((QObject*)btnNext->rootObject(), SIGNAL(released()), this, SLOT(onNext()));
+    connect((QObject*)btnPrev->rootObject(), SIGNAL(released()), this, SLOT(onPrev()));
     connect(btnOpen, &QPushButton::released, this, &HaniwaMusic::onOpenPress);
     connect(btnOpenDir, &QPushButton::released, this, &HaniwaMusic::onOpenDirPress);
     connect(sldVolume, &QAbstractSlider::valueChanged, this, &HaniwaMusic::onVolumeSliderChanged);
@@ -90,26 +90,28 @@ void HaniwaMusic::configureLayout(){
     QHBoxLayout* l3 = new QHBoxLayout();
     QVBoxLayout* l4 = new QVBoxLayout();
     QHBoxLayout* l5 = new QHBoxLayout();
-    l1->addWidget(btnOpen);
-    l1->addWidget(btnOpenDir);
-    l1->addWidget(lFileName);
     l2->addWidget(btnPlay);
     l2->addWidget(btnStop);
     l2->addWidget(btnPrev);
     l2->addWidget(btnNext);
     l2->addWidget(chRandom);
     l2->addWidget(chRepeat);
+    l2->addStretch();
+    l1->addWidget(lFileName);
     l4->addWidget(sldProgress);
     l4->addWidget(lProgress);
     l3->addLayout(l4);
     l3->addWidget(sldVolume);
+    l5->addWidget(btnOpen, 1, Qt::AlignLeft);
+    l5->addWidget(btnOpenDir, 1, Qt::AlignLeft);
     l5->addWidget(btnPlaylistsMenu, 1, Qt::AlignLeft);
     l5->addWidget(lnSearch, 10, Qt::AlignRight);
     l5->addWidget(btnSearch, 1, Qt::AlignRight);
     l5->setAlignment(Qt::AlignRight);
     layout->addLayout(l1);
-    layout->addLayout(l2);
     layout->addLayout(l3);
+    layout->addLayout(l2);
+    layout->addSpacing(5);
     layout->addWidget(tabPlaylists);
     layout->addLayout(l5);
     centralWidget->setLayout(layout);
@@ -131,10 +133,10 @@ void HaniwaMusic::configureAudio() {
     player->setOnAudioEndCb([this](){ onNext(); });
     player->setOnPlayStateChangeCb([this](AudioPlayer::PlayState state){
         if (state == AudioPlayer::PlayState::Play) {
-            btnPlay->setText("Pause");
+            btnPlay->setText("⏸");
         }
         else if (state == AudioPlayer::PlayState::Pause) {
-            btnPlay->setText("Play");
+            btnPlay->setText("⏵");
         }
     });
     player->setVolume(appSettings.volume);

@@ -22,6 +22,8 @@
 #include "QLabelElide.h"
 #include "QPlaylist.h"
 #include "QClickableSlider.h"
+#include "QMLControlButton.hpp"
+#include "QMLControlCheckbox.hpp"
 
 #define ORGANIZATION_NAME "HaniwaSofuto"
 #define APP_NAME "HaniwaMusic"
@@ -79,12 +81,12 @@ protected:
     Ui::MainWindow *ui;
 
     QWidget* centralWidget;
-    QPushButton* btnPlay;
-    QPushButton* btnStop;
-    QPushButton* btnNext;
-    QPushButton* btnPrev;
-    QCheckBox* chRandom;
-    QCheckBox* chRepeat;
+    QMLControlButton* btnPlay;
+    QMLControlButton* btnStop;
+    QMLControlButton* btnNext;
+    QMLControlButton* btnPrev;
+    QMLControlCheckbox* chRandom;
+    QMLControlCheckbox* chRepeat;
     QPushButton* btnOpen;
     QPushButton* btnOpenDir;
     QLabelElide* lFileName;
