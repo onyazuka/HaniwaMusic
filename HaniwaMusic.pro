@@ -25,6 +25,7 @@ SOURCES += \
     QMLControlButton.cpp \
     QMLControlCheckbox.cpp \
     QMLIcon.cpp \
+    QMLMenuButton.cpp \
     QMLSlider.cpp \
     QMLWidgetBase.cpp \
     QMediaKeysDBusAdaptor.cpp \
@@ -51,6 +52,7 @@ HEADERS += \
     QMLControlButton.hpp \
     QMLControlCheckbox.hpp \
     QMLIcon.hpp \
+    QMLMenuButton.hpp \
     QMLSlider.hpp \
     QMLWidgetBase.hpp \
     QMLWidgets.hpp \
@@ -80,6 +82,7 @@ DISTFILES += \
     QML/ControlButton.qml \
     QML/ControlCheckBox.qml \
     QML/Icon.qml \
+    QML/MenuButton.qml \
     QML/Slider.qml
 
 RESOURCES += \

@@ -58,6 +58,7 @@ protected slots:
     bool onFileChanged(QString newFile);
     void onAudioError(AudioPlayer::Error error);
     void onPlaylistsMenuClicked();
+    void onSearchNext();
 protected:
     struct Settings {
         QString lastDir;
@@ -75,7 +76,6 @@ protected:
     void changeFileNameLabel(const QString& text, Qt::GlobalColor color);
     void loadSettings();
     void saveSettings();
-    void onSearchNext();
     void initPlaylistsMenu();
 
     Ui::MainWindow *ui;
@@ -87,8 +87,6 @@ protected:
     QMLControlButton* btnPrev;
     QMLControlCheckbox* chRandom;
     QMLControlCheckbox* chRepeat;
-    QPushButton* btnOpen;
-    QPushButton* btnOpenDir;
     QLabelElide* lFileName;
     QVBoxLayout* layout;
     QMLIcon* iVolume;
@@ -98,9 +96,11 @@ protected:
     // REQUIREMENT: should have at least 1 playlist, so don't allow to close last playlist
     QTabWidget* tabPlaylists;
     QPlaylist* playlist;
-    QPushButton* btnPlaylistsMenu;
+    QMLMenuButton* btnOpen;
+    QMLMenuButton* btnOpenDir;
+    QMLMenuButton* btnPlaylistsMenu;
     QLineEdit* lnSearch;
-    QPushButton* btnSearch;
+    QMLMenuButton* btnSearch;
 
     QMenu* playlistsMenu = nullptr;
     QList<QAction*> playlistsMenuActions;

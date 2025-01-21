@@ -9,5 +9,10 @@
         <file>QML/Icon.qml</file>
         <file>icons/mute.svg</file>
         <file>icons/volume.svg</file>
+        <file>QML/MenuButton.qml</file>
+        <file>icons/openFile.svg</file>
+        <file>icons/openFolder.svg</file>
+        <file>icons/playlist.svg</file>
+        <file>icons/search.svg</file>
     </qresource>
 </RCC>

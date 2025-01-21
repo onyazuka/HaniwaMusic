@@ -21,8 +21,6 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     chRandom = new QMLControlCheckbox("qrc:/icons/random.svg", false, this);
     chRepeat = new QMLControlCheckbox("qrc:/icons/repeat.svg", false, this);
     //qmlSlider = new QMLSlider(Qt::Orientation::Vertical, this);
-    btnOpen = new QPushButton("Open", this);
-    btnOpenDir = new QPushButton("Open directory", this);
     lFileName = new QLabelElide("", this);
     //lFileName->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
     iVolume = new QMLIcon("qrc:/icons/volume.svg", this);
@@ -31,15 +29,18 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     //sldProgress->setRange(1, 10000);
     //sldProgress->setTickInterval(1);
     lProgress = new QLabel("0:00", this);
-    sldVolume->setMaximumHeight(sldProgress->height() * 3);
+    sldVolume->setMaximumHeight(sldProgress->height() * 2);
     tabPlaylists = new QTabWidget(this);
     // hide tab bar if less than 2 tabs
     tabPlaylists->setTabBarAutoHide(true);
     // setting document mode true to get rid of double border
     tabPlaylists->setDocumentMode(true);
-    btnPlaylistsMenu = new QPushButton("Playlists", this);
+    btnOpen = new QMLMenuButton("qrc:/icons/openFile.svg", this);
+    btnOpenDir = new QMLMenuButton("qrc:/icons/openFolder.svg", this);
+    btnPlaylistsMenu = new QMLMenuButton("qrc:/icons/playlist.svg", this);
     lnSearch = new QLineEdit(this);
-    btnSearch = new QPushButton("Find",this);
+    //lnSearch->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    btnSearch = new QMLMenuButton("qrc:/icons/search.svg",this);
     setWindowTitle("Haniwa Music");
     changeFileNameLabel("File not selected", Qt::red);
     loadSettings();
@@ -73,15 +74,15 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     connect((QObject*)btnStop->base(), SIGNAL(released()), this, SLOT(onStopPress()));
     connect((QObject*)btnNext->base(), SIGNAL(released()), this, SLOT(onNext()));
     connect((QObject*)btnPrev->base(), SIGNAL(released()), this, SLOT(onPrev()));
-    connect(btnOpen, &QPushButton::released, this, &HaniwaMusic::onOpenPress);
-    connect(btnOpenDir, &QPushButton::released, this, &HaniwaMusic::onOpenDirPress);
+    connect((QObject*)btnOpen->base(), SIGNAL(released()), this, SLOT(onOpenPress()));
+    connect((QObject*)btnOpenDir->base(), SIGNAL(released()), this, SLOT(onOpenDirPress()));
     sldVolume->value.connectNotifySignal(this, SLOT(onVolumeSliderChanged()));
     sldProgress->pressed.connectNotifySignal(this, SLOT(updatePlayerPosition()));
     connect((QObject*)iVolume->base(), SIGNAL(released()), this, SLOT(onMute()));
     connect(currentPlaylist(), &QPlaylist::fileChanged, this, &HaniwaMusic::onFileChanged);
     connect(tabPlaylists, &QTabWidget::currentChanged, this, &HaniwaMusic::onPlaylistChange);
-    connect(btnPlaylistsMenu, &QPushButton::released, this, &HaniwaMusic::onPlaylistsMenuClicked);
-    connect(btnSearch, &QPushButton::released, this, &HaniwaMusic::onSearchNext);
+    connect((QObject*)btnPlaylistsMenu->base(), SIGNAL(released()), this, SLOT(onPlaylistsMenuClicked()));
+    connect((QObject*)btnSearch->base(), SIGNAL(released()), this, SLOT(onSearchNext()));
 }
 
 QPlaylist* HaniwaMusic::currentPlaylist() {
@@ -117,15 +118,15 @@ void HaniwaMusic::configureLayout(){
     l4->addWidget(sldProgress);
     l4->addWidget(lProgress);
     l3->addLayout(l4);
-    l6->addWidget(iVolume, 0, Qt::AlignHCenter);
     l6->addWidget(sldVolume);
+    l6->addWidget(iVolume, 0, Qt::AlignHCenter);
     l3->addLayout(l6);
-    l5->addWidget(btnOpen, 1, Qt::AlignLeft);
-    l5->addWidget(btnOpenDir, 1, Qt::AlignLeft);
-    l5->addWidget(btnPlaylistsMenu, 1, Qt::AlignLeft);
-    l5->addWidget(lnSearch, 10, Qt::AlignRight);
-    l5->addWidget(btnSearch, 1, Qt::AlignRight);
-    l5->setAlignment(Qt::AlignRight);
+    l5->addWidget(btnOpen);
+    l5->addWidget(btnOpenDir);
+    l5->addWidget(btnPlaylistsMenu);
+    l5->addWidget(lnSearch);
+    l5->addWidget(btnSearch);
+    //l5->setAlignment(Qt::AlignRight);
     layout->addLayout(l1);
     layout->addLayout(l3);
     layout->addLayout(l2);

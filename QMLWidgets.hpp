@@ -4,5 +4,6 @@
 #include "QMLControlCheckbox.hpp"
 #include "QMLIcon.hpp"
 #include "QMLSlider.hpp"
+#include "QMLMenuButton.hpp"
 
 #endif // QMLWIDGETS_HPP
