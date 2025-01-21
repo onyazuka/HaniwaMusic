@@ -55,7 +55,9 @@ protected slots:
     void onOpenPress();
     void onOpenDirPress();
     void onPlaylistChange(int n);
+    void onVolumeSliderChanged();
     void onVolumeSliderChanged(int newValue);
+    void updatePlayerPosition();
     bool onFileChanged(QString newFile);
     void onAudioError(AudioPlayer::Error error);
     void onPlaylistsMenuClicked();
@@ -88,13 +90,12 @@ protected:
     QMLControlButton* btnPrev;
     QMLControlCheckbox* chRandom;
     QMLControlCheckbox* chRepeat;
-    QMLSlider* qmlSlider;
     QPushButton* btnOpen;
     QPushButton* btnOpenDir;
     QLabelElide* lFileName;
     QVBoxLayout* layout;
-    QSlider* sldVolume;
-    QClickableSlider* sldProgress;
+    QMLSlider* sldVolume;
+    QMLSlider* sldProgress;
     QLabel* lProgress;
     // REQUIREMENT: should have at least 1 playlist, so don't allow to close last playlist
     QTabWidget* tabPlaylists;

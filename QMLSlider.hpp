@@ -7,8 +7,10 @@ class QMLSlider  : public QMLWidgetBase  {
     Q_OBJECT
 public:
     QMLSlider(Qt::Orientation orientation, QWidget* parent = nullptr);
-    void setOrientation(Qt::Orientation orientation);
-    QQuickItem* slider();
+    QQuickItem* base();
+    QQmlProperty value;
+    QQmlProperty pressed;
+    QQmlProperty orientation;
 };
 
 #endif // QMLSLIDER_HPP

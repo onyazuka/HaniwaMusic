@@ -6,10 +6,9 @@ class QMLControlCheckbox  : public QMLWidgetBase {
     Q_OBJECT
 public:
     QMLControlCheckbox(const QString& text, bool checked, QWidget* parent = nullptr);
-    void setIconPath(const QString& text);
-    void setChecked(bool chState);
-    bool isChecked();
-    QQuickItem* checkBox();
+    QQuickItem* base() override;
+    QQmlProperty checked;
+    QQmlProperty iconPath;
 };
 
 #endif // QMLCONTROLCHECKBOX_HPP

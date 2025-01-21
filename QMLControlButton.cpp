@@ -1,11 +1,8 @@
 #include "QMLControlButton.hpp"
 
-QMLControlButton::QMLControlButton(const QString& text, QWidget* parent)
+QMLControlButton::QMLControlButton(const QString& txt, QWidget* parent)
     : QMLWidgetBase(":/QML/ControlButton.qml", parent)
 {
-    setText(text);
-}
-
-void QMLControlButton::setText(const QString& text) {
-    findItem("text")->setProperty("text", text);
+    text = QQmlProperty(findItem("text"), "text");
+    text.write(txt);
 }

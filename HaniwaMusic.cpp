@@ -20,17 +20,17 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     btnPrev = new QMLControlButton("⏮", this);
     chRandom = new QMLControlCheckbox("qrc:/icons/random.svg", false, this);
     chRepeat = new QMLControlCheckbox("qrc:/icons/repeat.svg", false, this);
-    qmlSlider = new QMLSlider(Qt::Orientation::Vertical, this);
+    //qmlSlider = new QMLSlider(Qt::Orientation::Vertical, this);
     btnOpen = new QPushButton("Open", this);
     btnOpenDir = new QPushButton("Open directory", this);
     lFileName = new QLabelElide("", this);
     //lFileName->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
-    sldVolume = new QSlider(Qt::Orientation::Vertical, this);
-    sldProgress = new QClickableSlider(Qt::Orientation::Horizontal, this);
-    sldProgress->setRange(1, 10000);
-    sldProgress->setTickInterval(1);
+    sldVolume = new QMLSlider(Qt::Orientation::Vertical, this);
+    sldProgress = new QMLSlider(Qt::Orientation::Horizontal, this);
+    //sldProgress->setRange(1, 10000);
+    //sldProgress->setTickInterval(1);
     lProgress = new QLabel("0:00", this);
-    sldVolume->setMaximumHeight(sldProgress->height() * 2);
+    sldVolume->setMaximumHeight(sldProgress->height() * 3);
     tabPlaylists = new QTabWidget(this);
     // hide tab bar if less than 2 tabs
     tabPlaylists->setTabBarAutoHide(true);
@@ -68,16 +68,14 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
         lFileName->setFont(font);
     }
 
-    connect((QObject*)btnPlay->rootObject(), SIGNAL(released()), this, SLOT(onPlayPausePress()));
-    connect((QObject*)btnStop->rootObject(), SIGNAL(released()), this, SLOT(onStopPress()));
-    connect((QObject*)btnNext->rootObject(), SIGNAL(released()), this, SLOT(onNext()));
-    connect((QObject*)btnPrev->rootObject(), SIGNAL(released()), this, SLOT(onPrev()));
+    connect((QObject*)btnPlay->base(), SIGNAL(released()), this, SLOT(onPlayPausePress()));
+    connect((QObject*)btnStop->base(), SIGNAL(released()), this, SLOT(onStopPress()));
+    connect((QObject*)btnNext->base(), SIGNAL(released()), this, SLOT(onNext()));
+    connect((QObject*)btnPrev->base(), SIGNAL(released()), this, SLOT(onPrev()));
     connect(btnOpen, &QPushButton::released, this, &HaniwaMusic::onOpenPress);
     connect(btnOpenDir, &QPushButton::released, this, &HaniwaMusic::onOpenDirPress);
-    connect(sldVolume, &QAbstractSlider::valueChanged, this, &HaniwaMusic::onVolumeSliderChanged);
-    connect(sldProgress, &QClickableSlider::sliderReleased, this, [this]() {
-        player->setPosition((float)sldProgress->value() / ((float)sldProgress->maximum() - (float)sldProgress->minimum()));
-    });
+    sldVolume->value.connectNotifySignal(this, SLOT(onVolumeSliderChanged()));
+    sldProgress->pressed.connectNotifySignal(this, SLOT(updatePlayerPosition()));
     connect(currentPlaylist(), &QPlaylist::fileChanged, this, &HaniwaMusic::onFileChanged);
     connect(tabPlaylists, &QTabWidget::currentChanged, this, &HaniwaMusic::onPlaylistChange);
     connect(btnPlaylistsMenu, &QPushButton::released, this, &HaniwaMusic::onPlaylistsMenuClicked);
@@ -111,7 +109,6 @@ void HaniwaMusic::configureLayout(){
     l2->addWidget(btnNext);
     l2->addWidget(chRandom);
     l2->addWidget(chRepeat);
-    l2->addWidget(qmlSlider);
     l2->addStretch();
     l1->addWidget(lFileName);
     l4->addWidget(sldProgress);
@@ -141,22 +138,23 @@ void HaniwaMusic::configureAudio() {
     player->init();
     player->setOnErrorCb([this](AudioPlayer::Error error){ onAudioError(error); });
     player->setOnProgressCb([this](float pos){
-        if (!sldProgress->isSliderDown()) {
-            sldProgress->setValue(1 + pos * 10000);
+        if (!sldProgress->pressed.read().toBool()) {
+            //sldProgress->setValue(1 + pos * 10000);
+            sldProgress->value.write(pos);
         }
         lProgress->setText(QTime(0,0,0).addMSecs(pos * player->duration()).toString("m:ss") + "/" + QTime(0,0,0).addMSecs(player->duration()).toString("m:ss"));
     });
     player->setOnAudioEndCb([this](){ onNext(); });
     player->setOnPlayStateChangeCb([this](AudioPlayer::PlayState state){
         if (state == AudioPlayer::PlayState::Play) {
-            btnPlay->setText("⏸");
+            btnPlay->text.write("⏸");
         }
         else if (state == AudioPlayer::PlayState::Pause) {
-            btnPlay->setText("⏵");
+            btnPlay->text.write("⏵");
         }
     });
     player->setVolume(appSettings.volume);
-    sldVolume->setValue(appSettings.volume * 100);
+    sldVolume->value.write(appSettings.volume);
 }
 
 bool HaniwaMusic::onFileChanged(QString newFile) {
@@ -251,8 +249,8 @@ void HaniwaMusic::loadSettings() {
     appSettings.volume = settings.value("Volume", DEFAULT_VOLUME).toFloat();
     appSettings.windowRect = settings.value("WindowRect", QRect()).toRect();
     appSettings.lastTrackNumber = settings.value("LastTrackNumber", -1).toInt();
-    chRandom->setChecked(settings.value("Random", false).toBool());
-    chRepeat->setChecked(settings.value("Repeat", false).toBool());
+    chRandom->checked.write(settings.value("Random", false).toBool());
+    chRepeat->checked.write(settings.value("Repeat", false).toBool());
 }
 
 void HaniwaMusic::saveSettings() {
@@ -271,21 +269,21 @@ void HaniwaMusic::saveSettings() {
         settings.setValue("LastTrackNumber", playlist->activeRowNumber());
         settings.setValue("LastPlaylist", tabPlaylists->currentIndex());
     }
-    settings.setValue("Volume", (float)sldVolume->value() / 100.0f);
+    settings.setValue("Volume", sldVolume->value.read() );
     settings.setValue("WindowRect", geometry());
-    settings.setValue("Random", chRandom->isChecked());
-    settings.setValue("Repeat", chRepeat->isChecked());
+    settings.setValue("Random", chRandom->checked.read());
+    settings.setValue("Repeat", chRepeat->checked.read());
 }
 
 void HaniwaMusic::onNext() {
     if (!playlist) {
         return;
     }
-    if (chRepeat->isChecked()) {
+    if (chRepeat->checked.read().toBool()) {
         player->stop();
         player->play();
     }
-    else if (chRandom->isChecked()) {
+    else if (chRandom->checked.read().toBool()) {
         playlist->nextRandom();
     }
     else {
@@ -297,7 +295,7 @@ void HaniwaMusic::onPrev() {
     if (!playlist) {
         return;
     }
-    if (chRandom->isChecked()) {
+    if (chRandom->checked.read().toBool()) {
         playlist->prevRandom();
     }
     else {
@@ -378,8 +376,19 @@ void HaniwaMusic::onClose() {
     changeFileNameLabel("File not selected", Qt::red);
 }
 
+void HaniwaMusic::onVolumeSliderChanged() {
+    player->setVolume(sldVolume->value.read().toFloat());
+}
+
 void HaniwaMusic::onVolumeSliderChanged(int newValue) {
     player->setVolume((float)newValue / 100.0f);
+}
+
+void HaniwaMusic::updatePlayerPosition() {
+    // on released
+    if (!sldProgress->pressed.read().toBool()) {
+        player->setPosition(sldProgress->value.read().toFloat());
+    }
 }
 
 void HaniwaMusic::onPlaylistsMenuClicked() {

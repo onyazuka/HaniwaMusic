@@ -1,20 +1,20 @@
 #include "QMLSlider.hpp"
 
-QMLSlider::QMLSlider(Qt::Orientation orientation, QWidget* parent)
+QMLSlider::QMLSlider(Qt::Orientation orientat, QWidget* parent)
     : QMLWidgetBase(":/QML/Slider.qml", parent)
 {
-    setOrientation(orientation);
-}
-
-void QMLSlider::setOrientation(Qt::Orientation orientation) {
-    if (orientation == Qt::Orientation::Horizontal) {
-        slider()->setProperty("orientation", 1);
+    value = QQmlProperty(base(), "value");
+    pressed = QQmlProperty(base(), "pressed");
+    orientation = QQmlProperty(base(), "orientation");
+    orientation.write(orientat);
+    if (orientat == Qt::Horizontal) {
+        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     }
     else {
-        slider()->setProperty("orientation", 2);
+        setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
     }
 }
 
-QQuickItem* QMLSlider::slider() {
-    return findItem("slidan");
+QQuickItem* QMLSlider::base() {
+    return findItem("slider");
 }

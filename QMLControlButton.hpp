@@ -6,7 +6,7 @@ class QMLControlButton  : public QMLWidgetBase  {
     Q_OBJECT
 public:
     QMLControlButton(const QString& text, QWidget* parent = nullptr);
-    void setText(const QString& text);
+    QQmlProperty text;
 };
 
 #endif // QMLCONTROLBUTTON_HPP

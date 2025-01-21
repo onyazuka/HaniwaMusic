@@ -3,22 +3,12 @@
 QMLControlCheckbox::QMLControlCheckbox(const QString& path, bool chState, QWidget* parent)
     : QMLWidgetBase(":/QML/ControlCheckBox.qml", parent)
 {
-    setIconPath(path);
-    setChecked(chState);
+    checked = QQmlProperty(base(), "checked");
+    iconPath = QQmlProperty(base(), "iconPath");
+    checked.write(chState);
+    iconPath.write(path);
 }
 
-void QMLControlCheckbox::setIconPath(const QString& path) {
-    checkBox()->setProperty("iconPath", path);
-}
-
-void QMLControlCheckbox::setChecked(bool chState) {
-    checkBox()->setProperty("checked", chState);
-}
-
-bool QMLControlCheckbox::isChecked() {
-    return checkBox()->property("checked").toBool();
-}
-
-QQuickItem* QMLControlCheckbox::checkBox() {
+QQuickItem* QMLControlCheckbox::base() {
     return findItem("chBox");
 }

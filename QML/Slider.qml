@@ -1,34 +1,65 @@
-import QtQuick 2.15
+import QtQuick 6.8
 import QtQuick.Controls
 import QtQuick.Layouts
 
-ColumnLayout {
+
+Control {
+    id: root
+    SystemPalette { id: pal; colorGroup: SystemPalette.Active }
+    background: Rectangle {
+        anchors.fill: parent
+        color: pal.window
+    }
+    implicitHeight: control.implicitHeight
+    implicitWidth: control.implicitWidth
     Slider {
-        SystemPalette { id: pal; colorGroup: SystemPalette.Active }
         id: control
-        objectName: "slidan"
-        value: 0.5
-        leftPadding: 10
-
-        Rectangle {
-            anchors.fill: parent
-            color: pal.window
-            z: 1
-        }
-
+        objectName: "slider"
+        value: 0.0
         background: Rectangle {
             x: control.horizontal ? control.leftPadding : control.leftPadding + control.availableWidth / 2 - width / 2
             y: control.horizontal ? control.topPadding + control.availableHeight / 2 - height / 2 : control.topPadding
-            implicitWidth: control.horizontal ? 200 : 10
-            implicitHeight: control.horizontal ? 10 : 200
-            width: control.horizontal ? control.availableWidth : implicitWidth
-            height: control.horizontal ? implicitHeight : control.availableHeight
+            implicitWidth: control.horizontal ? root.width - control.leftPadding : 10
+            implicitHeight: control.horizontal ? 10 : root.height - control.topPadding
+            width: implicitWidth
+            height: implicitHeight
             radius: 10
             color: pal.window
-            border.color: grad.color2
+            border.color: drawingCanvas.color2
             z: 2
 
-            gradient: Gradient {
+            Canvas
+            {
+                property color color2: "#ccc"
+                id: drawingCanvas
+                anchors.fill: parent
+                onPaint:
+                {
+                    var ctx = getContext("2d")
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = drawingCanvas.color2
+                    if (control.horizontal) {
+                        for (let i = 50; i < drawingCanvas.width; i += 50) {
+                            ctx.beginPath()
+                            ctx.moveTo(i, 0)
+                            ctx.lineTo(i, drawingCanvas.height)
+                            ctx.closePath()
+                            ctx.stroke()
+                        }
+                    }
+                    else {
+                        for (let i = 50; i < drawingCanvas.height; i += 50) {
+                            ctx.beginPath()
+                            ctx.moveTo(0, i)
+                            ctx.lineTo(drawingCanvas.width, i)
+                            ctx.closePath()
+                            ctx.stroke()
+                        }
+                    }
+                }
+            }
+
+            /*gradient: Gradient {
                 id: grad
                 property color color2: "#ccc"
                 orientation: control.horizontal ? Gradient.Horizontal : Gradient.Vertical
@@ -61,22 +92,24 @@ ColumnLayout {
                 GradientStop { position: 0.9; color: grad.color2 }
                 GradientStop { position: 0.905; color: pal.window }
                 GradientStop { position: 1.0; color: pal.window }
-            }
+            }*/
 
             Rectangle {
                 width: control.horizontal ? control.visualPosition * parent.width : parent.width
-                height: control.horizontal ? parent.height : control.visualPosition * parent.height
+                height: control.horizontal ? parent.height : parent.height - y
+                y: control.horizontal ? 0 :  control.visualPosition * parent.height
                 color: pal.highlight
                 radius: 10
             }
         }
 
         handle: Rectangle {
+            id: handle
             implicitWidth: 26
             implicitHeight: 26
             z: 3
-            x: control.horizontal ? control.leftPadding + control.visualPosition * (control.availableWidth - width) :  control.leftPadding + control.availableWidth / 2 - width / 2
-            y: control.horizontal ? control.topPadding + control.availableHeight / 2 - height / 2 : control.topPadding + control.visualPosition * (control.availableHeight - height)
+            x: control.horizontal ? control.leftPadding + control.visualPosition * (control.width - width) :  control.leftPadding + control.availableWidth / 2 - width / 2
+            y: control.horizontal ? control.topPadding + control.availableHeight / 2 - height / 2 : control.topPadding + control.visualPosition * (control.height - height)
             radius: 13
             color: control.pressed ? "#f0f0f0" : "#f6f6f6"
             border.color: "#bdbebf"
