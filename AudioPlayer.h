@@ -27,6 +27,7 @@ public:
     virtual int pause() = 0;
     virtual int playOrPause() = 0;
     virtual int stop() = 0;
+    virtual float volume() = 0;
     virtual int setVolume(float volume) = 0;
     virtual int duration() = 0;
     // pos: in percents

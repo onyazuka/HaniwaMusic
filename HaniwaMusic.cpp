@@ -25,6 +25,7 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     btnOpenDir = new QPushButton("Open directory", this);
     lFileName = new QLabelElide("", this);
     //lFileName->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
+    iVolume = new QMLIcon("qrc:/icons/volume.svg", this);
     sldVolume = new QMLSlider(Qt::Orientation::Vertical, this);
     sldProgress = new QMLSlider(Qt::Orientation::Horizontal, this);
     //sldProgress->setRange(1, 10000);
@@ -76,6 +77,7 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     connect(btnOpenDir, &QPushButton::released, this, &HaniwaMusic::onOpenDirPress);
     sldVolume->value.connectNotifySignal(this, SLOT(onVolumeSliderChanged()));
     sldProgress->pressed.connectNotifySignal(this, SLOT(updatePlayerPosition()));
+    connect((QObject*)iVolume->base(), SIGNAL(released()), this, SLOT(onMute()));
     connect(currentPlaylist(), &QPlaylist::fileChanged, this, &HaniwaMusic::onFileChanged);
     connect(tabPlaylists, &QTabWidget::currentChanged, this, &HaniwaMusic::onPlaylistChange);
     connect(btnPlaylistsMenu, &QPushButton::released, this, &HaniwaMusic::onPlaylistsMenuClicked);
@@ -103,6 +105,7 @@ void HaniwaMusic::configureLayout(){
     QHBoxLayout* l3 = new QHBoxLayout();
     QVBoxLayout* l4 = new QVBoxLayout();
     QHBoxLayout* l5 = new QHBoxLayout();
+    QVBoxLayout* l6 = new QVBoxLayout();
     l2->addWidget(btnPlay);
     l2->addWidget(btnStop);
     l2->addWidget(btnPrev);
@@ -114,7 +117,9 @@ void HaniwaMusic::configureLayout(){
     l4->addWidget(sldProgress);
     l4->addWidget(lProgress);
     l3->addLayout(l4);
-    l3->addWidget(sldVolume);
+    l6->addWidget(iVolume, 0, Qt::AlignHCenter);
+    l6->addWidget(sldVolume);
+    l3->addLayout(l6);
     l5->addWidget(btnOpen, 1, Qt::AlignLeft);
     l5->addWidget(btnOpenDir, 1, Qt::AlignLeft);
     l5->addWidget(btnPlaylistsMenu, 1, Qt::AlignLeft);
@@ -376,12 +381,32 @@ void HaniwaMusic::onClose() {
     changeFileNameLabel("File not selected", Qt::red);
 }
 
-void HaniwaMusic::onVolumeSliderChanged() {
-    player->setVolume(sldVolume->value.read().toFloat());
+void HaniwaMusic::onMute() {
+    auto oldVal = player->volume();
+    if (oldVal) {
+        memoVolume = oldVal;
+        player->setVolume(0);
+        sldVolume->value.write(0.0f);
+        iVolume->icon_source.write("qrc:/icons/mute.svg");
+    }
+    else {
+        memoVolume = memoVolume ? memoVolume : 0.5f;
+        player->setVolume(memoVolume);
+        sldVolume->value.write(memoVolume);
+        iVolume->icon_source.write("qrc:/icons/volume.svg");
+    }
 }
 
-void HaniwaMusic::onVolumeSliderChanged(int newValue) {
-    player->setVolume((float)newValue / 100.0f);
+void HaniwaMusic::onVolumeSliderChanged() {
+    auto newVal = sldVolume->value.read().toFloat();
+    auto oldVal = player->volume();
+    player->setVolume(newVal);
+    if (newVal && !oldVal) {
+        iVolume->icon_source.write("qrc:/icons/volume.svg");
+    }
+    else if (!newVal && oldVal) {
+        iVolume->icon_source.write("qrc:/icons/mute.svg");
+    }
 }
 
 void HaniwaMusic::updatePlayerPosition() {

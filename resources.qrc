@@ -6,5 +6,8 @@
         <file>icons/repeat.svg</file>
         <file>fonts/Seven Segment.ttf</file>
         <file>QML/Slider.qml</file>
+        <file>QML/Icon.qml</file>
+        <file>icons/mute.svg</file>
+        <file>icons/volume.svg</file>
     </qresource>
 </RCC>

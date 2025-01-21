@@ -106,6 +106,10 @@ int QAudioPlayer::duration() {
     return player->duration();
 }
 
+float QAudioPlayer::volume() {
+    return audioOutput->volume();
+}
+
 int QAudioPlayer::setVolume(float volume) {
     audioOutput->setVolume(volume);
     return 0;

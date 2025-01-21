@@ -21,10 +21,7 @@
 #include "AudioPlayer.h"
 #include "QLabelElide.h"
 #include "QPlaylist.h"
-#include "QClickableSlider.h"
-#include "QMLControlButton.hpp"
-#include "QMLControlCheckbox.hpp"
-#include "QMLSlider.hpp"
+#include "QMLWidgets.hpp"
 
 #define ORGANIZATION_NAME "HaniwaSofuto"
 #define APP_NAME "HaniwaMusic"
@@ -55,8 +52,8 @@ protected slots:
     void onOpenPress();
     void onOpenDirPress();
     void onPlaylistChange(int n);
+    void onMute();
     void onVolumeSliderChanged();
-    void onVolumeSliderChanged(int newValue);
     void updatePlayerPosition();
     bool onFileChanged(QString newFile);
     void onAudioError(AudioPlayer::Error error);
@@ -94,6 +91,7 @@ protected:
     QPushButton* btnOpenDir;
     QLabelElide* lFileName;
     QVBoxLayout* layout;
+    QMLIcon* iVolume;
     QMLSlider* sldVolume;
     QMLSlider* sldProgress;
     QLabel* lProgress;
@@ -106,6 +104,7 @@ protected:
 
     QMenu* playlistsMenu = nullptr;
     QList<QAction*> playlistsMenuActions;
+    float memoVolume = 0.0f;
 
     std::shared_ptr<AudioPlayer> player;
 };

@@ -12,19 +12,10 @@ RowLayout {
         property string iconPath
         // property checked set by cpp
     }
-    Button {
+    Icon {
         implicitHeight: chBox.height
         implicitWidth: chBox.height
         icon.source: chBox.iconPath
-        icon.width: implicitWidth * 0.8
-        icon.height: implicitHeight * 0.8
-        icon.color: pal.text
-        display: AbstractButton.IconOnly
-        flat: true
-        padding: 0
-        background: Rectangle {
-            color: "white"
-        }
     }
 }
 
