@@ -83,7 +83,8 @@ DISTFILES += \
     QML/ControlCheckBox.qml \
     QML/Icon.qml \
     QML/MenuButton.qml \
-    QML/Slider.qml
+    QML/Slider.qml \
+    qtquickcontrols2.conf
 
 RESOURCES += \
     resources.qrc

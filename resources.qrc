@@ -14,5 +14,6 @@
         <file>icons/openFolder.svg</file>
         <file>icons/playlist.svg</file>
         <file>icons/search.svg</file>
+        <file>qtquickcontrols2.conf</file>
     </qresource>
 </RCC>

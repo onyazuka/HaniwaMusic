@@ -128,12 +128,13 @@ std::istream& m3u::operator>>(std::istream& is, M3UReader& reader) {
             if (parts.size() != 2 && parts.size() != 1) {
                 return is;
             }
-            std::transform(parts[0].begin(), parts[0].end(), (char*)parts[0].begin(), [](char ch) { return std::toupper(ch); } );
+            std::string s = std::string(parts[0].data(), parts[0].size());
+            std::transform(s.begin(), s.end(), s.begin(), [](char ch) { return std::toupper(ch); } );
             if (reader._playlist.entries().empty() && reader.entry.params().empty() && parts[0] != "#EXTINF") {
-                reader._playlist.params()[std::string(parts[0].data(), parts[0].size())] = parts.size() == 2 ? std::string(parts[1].data(), parts[1].size()) : "";
+                reader._playlist.params()[std::string(s.data(), s.size())] = parts.size() == 2 ? std::string(parts[1].data(), parts[1].size()) : "";
             }
             else {
-                reader.entry.params()[std::string(parts[0].data(), parts[0].size())] = parts.size() == 2 ? std::string(parts[1].data(), parts[1].size()) : "";
+                reader.entry.params()[std::string(s.data(), s.size())] = parts.size() == 2 ? std::string(parts[1].data(), parts[1].size()) : "";
             }
         }
         else {

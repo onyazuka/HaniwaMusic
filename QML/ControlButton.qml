@@ -1,14 +1,25 @@
-import QtQuick 2.15
+import QtQuick 6.8
 import QtQuick.Controls
+import QtQuick.Layouts
 
-RoundButton {
-    SystemPalette { id: pal; colorGroup: SystemPalette.Active }
-    id: button
-    width: height
-    Text {
-        objectName: "text"
-        anchors.centerIn: parent
-        color: palette.highlight
-        // text is set by qt
+Control {
+    background: Rectangle {
+        implicitWidth: button.implicitWidth
+        implicitHeight: button.implicitHeight
+        color: pal.window
+    }
+
+    RoundButton {
+        SystemPalette { id: pal; colorGroup: SystemPalette.Active }
+        id: button
+        objectName: "button"
+        width: height
+        Text {
+            id: text
+            objectName: "text"
+            anchors.centerIn: parent
+            color: palette.highlight
+            // text is set by qt
+        }
     }
 }

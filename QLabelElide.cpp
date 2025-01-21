@@ -1,10 +1,15 @@
 #include "QLabelElide.h"
+#include <QApplication>
 
 QLabelElide::QLabelElide(const QString& txt, QWidget* parent)
     : QLineEdit(txt, parent), originalText(txt)
 {
     setReadOnly(true);
-    setStyleSheet("border: none");
+    //setStyleSheet("border: none");
+    QPalette pal;
+    pal.setBrush(backgroundRole(), QApplication::palette().window());
+    setFrame(false);
+    setPalette(pal);
 }
 
 void QLabelElide::resizeEvent(QResizeEvent*) {

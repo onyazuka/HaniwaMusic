@@ -2,9 +2,15 @@ import QtQuick 2.15
 import QtQuick.Controls
 import QtQuick.Layouts
 
-RowLayout {
+Control {
     SystemPalette { id: pal; colorGroup: SystemPalette.Active }
     spacing: 0
+    background: Rectangle {
+        implicitWidth: chBox.implicitWidth + icon.implicitWidth
+        implicitHeight: chBox.implicitHeight
+        color: pal.window
+    }
+
     Switch {
         id: chBox
         objectName: "chBox"
@@ -13,6 +19,8 @@ RowLayout {
         // property checked set by cpp
     }
     Icon {
+        x: chBox.implicitWidth
+        id: icon
         implicitHeight: chBox.height
         implicitWidth: chBox.height
         icon.source: chBox.iconPath
