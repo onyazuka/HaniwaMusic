@@ -30,7 +30,7 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     //sldProgress->setTickInterval(1);
     lProgress = new QLabel("0:00", this);
     sldVolume->setMaximumHeight(sldProgress->height() * 2);
-    tabPlaylists = new QTabWidget(this);
+    tabPlaylists = new QTabWidgetCustom(this);
     // hide tab bar if less than 2 tabs
     tabPlaylists->setTabBarAutoHide(true);
     // setting document mode true to get rid of double border

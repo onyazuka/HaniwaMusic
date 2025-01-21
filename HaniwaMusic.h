@@ -17,6 +17,7 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QTabWidget>
+#include "QTabWidgetCustom.hpp"
 
 #include "AudioPlayer.h"
 #include "QLabelElide.h"
@@ -94,7 +95,7 @@ protected:
     QMLSlider* sldProgress;
     QLabel* lProgress;
     // REQUIREMENT: should have at least 1 playlist, so don't allow to close last playlist
-    QTabWidget* tabPlaylists;
+    QTabWidgetCustom* tabPlaylists;
     QPlaylist* playlist;
     QMLMenuButton* btnOpen;
     QMLMenuButton* btnOpenDir;

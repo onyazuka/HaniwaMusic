@@ -33,6 +33,7 @@ SOURCES += \
     QMetadataDlg.cpp \
     QPlaylist.cpp \
     QPlaylistView.cpp \
+    QTabWidgetCustom.cpp \
     main.cpp \
     utils/UtilsString.cpp
 
@@ -61,6 +62,7 @@ HEADERS += \
     QMetadataDlg.hpp \
     QPlaylist.h \
     QPlaylistView.hpp \
+    QTabWidgetCustom.hpp \
     utils/UtilsString.hpp
 
 FORMS += \
