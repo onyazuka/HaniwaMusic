@@ -278,29 +278,9 @@ void QPlaylist::onCellDoubleClicked(int row, int col) {
 
 // got 'duration' in ms
 void QPlaylist::onUpdateMetainfo(Metainfo metainfo, int row) {
-    int durationMs = metainfo.durationMs;
-    QTableWidgetItem* it = item(row, Column::Duration);
-    if (!it) return;
-    /*if (duration < 0) {
-        duration = 0;
-    }*/
-    if (durationMs <= 0) {
-        durationMs = 0;
-        it->setData(Qt::ForegroundRole, QVariant(QColor(Qt::red)));
-    }
-    else {
-        it->setData(Qt::ForegroundRole, QVariant(QColor(Qt::black)));
-    }
-    it->setText(durationMsToStrDuration(durationMs));
-    item(row, Column::Duration)->setData(Qt::UserRole, (int)durationMs);
-
-    if (!metainfo.title.isEmpty() && !metainfo.artist.isEmpty()) {
-        it = item(row, Column::Title);
-        it->setText(metainfo.artist + " - " + metainfo.title);
-    }
-    QVariant vmetainfo;
-    vmetainfo.setValue(metainfo);
-    item(row, Column::Title)->setData(Qt::UserRole + (int)UserRoles::Metainfo, vmetainfo);
+    setDuration(row, metainfo.durationMs);
+    setTitle(row, getPath(row), metainfo.title, metainfo.artist);
+    setMetainfo(row, metainfo);
 }
 
 void QPlaylist::handleContextMenu(const QPoint& pos) {
@@ -341,18 +321,14 @@ void QPlaylist::initMenu() {
     itemShowMetadata = new QAction("Show metadata", this);
     connect(itemRemoveAction, &QAction::triggered, this, [this](){
         int row = itemRemoveAction->data().toInt();
-        QTableWidgetItem* it = item(row, Column::Duration);
-        if (!it) return;
-        if (it->text().isEmpty()) {
-            // duration not filled - not initialized - skipping
+        if (getDuration(row) == -1) {
             return;
         }
-        onRemoveTableWidgetItem(it);
+        onRemoveTableWidgetItem(row);
         removeRow(row);
     });
     connect(itemShowMetadata, &QAction::triggered, this, [this](){
-        QString path = item(currentRow(), Column::Title)->data(Qt::UserRole).toString();
-        QMetadataDlg dlg(path, this);
+        QMetadataDlg dlg(getPath(currentRow()), this);
         dlg.exec();
     });
     itemRightClickMenu = new QMenu();
@@ -366,17 +342,17 @@ void QPlaylist::initMenu() {
     Cleaning up on item remove
     (activeItem, history, ...)
 */
-void QPlaylist::onRemoveTableWidgetItem(QTableWidgetItem* it) {
+void QPlaylist::onRemoveTableWidgetItem(int row) {
     for (int i = 0; i < playHistory.size(); ++i) {
-        if (!playHistory[i] || it->row() == playHistory[i]->row()) {
+        if (!playHistory[i] || row == playHistory[i]->row()) {
             playHistory.erase(playHistory.begin() + i);
         }
     }
-    for (int i = it->row() + 1; i < rowCount(); ++i) {
+    for (int i = row + 1; i < rowCount(); ++i) {
         item(i, Column::Number)->setText(QString::number(i));
     }
     // setting activeItem AFTER history, because else we could get nullptr dereference attempt
-    if (activeRowNumber() == it->row()) {
+    if (activeRowNumber() == row) {
         resetActiveItem();
     }
 }

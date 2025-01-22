@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QTime>
 #include <QFileInfo>
+#include <assert.h>
 
 Metainfo::Metainfo(int durationMs)
     : durationMs{durationMs}
@@ -37,6 +38,7 @@ QPlaylistView::QPlaylistView(QWidget* parent)
     setColumnCount(Column::COUNT);
     setSelectionBehavior(QAbstractItemView::SelectRows);
     setGridStyle(Qt::PenStyle::NoPen);
+    setEditTriggers(QAbstractItemView::NoEditTriggers);
     horizontalHeader()->hide();
     verticalHeader()->hide();
     setSelectionMode(QAbstractItemView::SingleSelection);
@@ -46,6 +48,9 @@ QPlaylistView::QPlaylistView(QWidget* parent)
 }
 
 QString QPlaylistView::durationMsToStrDuration(qint64 durationMs) {
+    if (durationMs < 0) {
+        return "";
+    }
     if (durationMs < 1000 * 60 * 60) {
         return QTime(0,0,0).addMSecs(durationMs).toString("m:ss");
     }
@@ -79,6 +84,76 @@ int QPlaylistView::prevRow(int row) const {
     return row - 1;
 }
 
+void QPlaylistView::setDuration(int row, int durationMs) {
+    QTableWidgetItem* it = item(row, Column::Duration);
+    if (!it && row < rowCount()) {
+        it = new QTableWidgetItem();
+        setItem(row, Column::Duration, it);
+    }
+    if (!it) {
+        return;
+    }
+    item(row, Column::Duration)->setData(Qt::UserRole, (int)durationMs);
+    if (durationMs >= 0) {
+        it->setText(durationMsToStrDuration(durationMs));
+        if (durationMs == 0) {
+            it->setData(Qt::ForegroundRole, QColor(Qt::red));
+        }
+        else {
+            it->setData(Qt::ForegroundRole, QColor(Qt::black));
+        }
+    }
+}
+
+int QPlaylistView::getDuration(int row) const {
+    auto it = item(row, Column::Duration);
+    if (it) {
+        return it->data(Qt::UserRole).toInt();
+    }
+    return -1;
+}
+
+void QPlaylistView::setTitle(int row, const QString& path, const QString& title, const QString& artist) {
+    assert(!path.isEmpty());
+    QTableWidgetItem* it = item(row, Column::Title);
+    if (!it && row < rowCount()) {
+        it = new QTableWidgetItem();
+        setItem(row, Column::Title, it);
+    }
+    if (!it) {
+        return;
+    }
+    if (path.isEmpty() && (title.isEmpty() || artist.isEmpty())) {
+        return;
+    }
+    it->setText(!title.isEmpty() && !artist.isEmpty() ? (artist + " - " + title) : QFileInfo(path).completeBaseName());
+    it->setData(Qt::UserRole, path);
+}
+
+QString QPlaylistView::getPath(int row) const {
+    auto it = item(row, Column::Title);
+    if (it) {
+        return it->data(Qt::UserRole).toString();
+    }
+    return "";
+}
+
+void QPlaylistView::setMetainfo(int row, const Metainfo& metainfo) {
+    QVariant vmetainfo;
+    vmetainfo.setValue(metainfo);
+    item(row, Column::Title)->setData(Qt::UserRole + (int)UserRoles::Metainfo, vmetainfo);
+}
+
+Metainfo QPlaylistView::getMetainfo(int row) const {
+    auto it = item(row, Column::Title);
+    if (it) {
+        return it->data(Qt::UserRole + (int)UserRoles::Metainfo).value<Metainfo>();
+    }
+    else {
+        return Metainfo();
+    }
+}
+
 void QPlaylistView::clear() {
     QTableWidget::clear();
     setRowCount(0);
@@ -107,47 +182,20 @@ void QPlaylistView::swapRows(int sourceRow, int destRow) {
 
 int QPlaylistView::appendTrack(const Track& track) {
     int row = rowCount();
-    QString duration = track.metainfo.durationMs < 0 ? "" : durationMsToStrDuration(track.metainfo.durationMs);
     insertRow(rowCount());
     setItem(row, Column::Number, new QTableWidgetItem(QString::number(row + 1)));
-    QTableWidgetItem* titleItem = new QTableWidgetItem();
-    if (!track.metainfo.title.isEmpty() && !track.metainfo.artist.isEmpty()) {
-        titleItem->setText(track.metainfo.artist + " - " + track.metainfo.title);
-    }
-    else {
-        titleItem->setText(QFileInfo(track.path).completeBaseName());
-    }
-    titleItem->setData(Qt::UserRole, track.path);
-    setItem(row, Column::Title, titleItem);
-    setItem(row, Column::Duration, new QTableWidgetItem(duration));
-    if (track.metainfo.durationMs <= 0) {
-        item(row, Column::Duration)->setData(Qt::ForegroundRole, QVariant(QColor(Qt::red)));
-    }
-    for (int col = 0; col < Column::COUNT; ++col) {
-        auto curItem = item(row, col);
-        curItem->setFlags(curItem->flags() ^ Qt::ItemIsEditable);
-    }
-
-    if (duration.isEmpty()) {
-        item(row, Column::Duration)->setData(Qt::UserRole, -1);
-        item(row, Column::Duration)->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    }
-    else {
-        item(row, Column::Duration)->setData(Qt::UserRole, (int)track.metainfo.durationMs);
-        item(row, Column::Duration)->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
-    }
-    QVariant v;
-    v.setValue(track.metainfo);
-    item(row, Column::Title)->setData(Qt::UserRole + (int)UserRoles::Metainfo, v);
+    setTitle(row, track.path, track.metainfo.title, track.metainfo.artist);
+    setDuration(row, track.metainfo.durationMs);
+    setMetainfo(row, track.metainfo);
     if (rowCount() % 10 == 0) updateColumnWidths(width());
     return row;
 }
 
 Track QPlaylistView::track(int row) const {
     Track track;
-    track.path = item(row, Column::Title)->data(Qt::UserRole).toString();
-    track.metainfo.durationMs = item(row, Column::Duration)->data(Qt::UserRole).toInt();
-    Metainfo metainfo = item(row, Column::Title)->data(Qt::UserRole + (int)UserRoles::Metainfo).value<Metainfo>();
+    track.path = getPath(row);
+    track.metainfo.durationMs = getDuration(row);
+    Metainfo metainfo = getMetainfo(row);
     track.metainfo.title = metainfo.title;
     track.metainfo.artist = metainfo.artist;
     return track;

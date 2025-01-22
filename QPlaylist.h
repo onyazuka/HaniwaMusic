@@ -101,7 +101,7 @@ private:
     void mousePressEvent(QMouseEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void initMenu();
-    void onRemoveTableWidgetItem(QTableWidgetItem* item);
+    void onRemoveTableWidgetItem(int row);
     QThread durationGathererThread;
     DurationGatherer2* durationGatherer;
     QMenu* itemRightClickMenu = nullptr;

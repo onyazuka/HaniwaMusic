@@ -45,6 +45,12 @@ public:
     int nextRow(int row) const;
     int prevRow(int row) const;
     inline bool empty() const { return rowCount() == 0; }
+    void setDuration(int row, int durationMs);
+    int getDuration(int row) const;
+    void setTitle(int row, const QString& path, const QString& title, const QString& artist);
+    QString getPath(int row) const;
+    void setMetainfo(int row, const Metainfo& metainfo);
+    Metainfo getMetainfo(int row) const;
 public slots:
     void clear();
 protected:
