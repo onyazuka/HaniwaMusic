@@ -10,18 +10,29 @@ EXTINF EXTINF::fromStr(const std::string& s) {
     auto sv = strip(s);
     auto parts = split(sv, ",");
     EXTINF res;
-    if (parts.size() != 1 && parts.size() != 2) {
+    // titles can include ',' character
+    if (parts.size() < 1) {
          throw std::runtime_error("invalid string");
     }
     res.duration = std::stoull(std::string(parts[0].data(), parts[0].size()));
-    if (parts.size() == 2) {
-        res.title = std::string(parts[1].data(), parts[1].size());
+    res.title = "";
+    for (size_t i = 1; i < parts.size(); ++i) {
+        res.title += std::string(parts[i].data(), parts[i].size());
+        if (i != parts.size() - 1) {
+            res.title += ",";
+        }
     }
     return res;
 }
 
 void M3UEntry::dump(std::ostream& os) const {
+    if (auto iter = lParams.find("#EXTINF"); iter != lParams.end()) {
+        os << std::format("{0}{1}{2}\n", iter->first, iter->second.empty() ? "" : ":", iter->second);
+    }
     for (const auto& [key, val] : lParams) {
+        if (key == "#EXTINF") {
+            continue;
+        }
         os << std::format("{0}{1}{2}\n", key, val.empty() ? "" : ":", val);
     }
     os << _path << std::endl;
@@ -33,6 +44,21 @@ size_t M3UEntry::duration() const {
         return extinf.duration;
     }
     return 0;
+}
+
+std::string M3UEntry::title() const {
+    if (auto iter = lParams.find("#EXTINF"); iter != lParams.end()) {
+        auto extinf = EXTINF::fromStr(iter->second);
+        return extinf.title;
+    }
+    return "";
+}
+
+std::string M3UEntry::artist() const {
+    if (auto iter = lParams.find("#EXTART"); iter != lParams.end()) {
+        return iter->second;
+    }
+    return "";
 }
 
 void M3UPlaylist::add(const M3UEntry& entry) {

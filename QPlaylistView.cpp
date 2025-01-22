@@ -7,8 +7,26 @@
 #include <QTime>
 #include <QFileInfo>
 
-Track::Track(const QString& path, int durationMs)
-    : path{path}, durationMs{durationMs}
+Metainfo::Metainfo(int durationMs)
+    : durationMs{durationMs}
+{
+    ;
+}
+
+Metainfo::Metainfo(const QString& title, const QString& artist, int durationMs)
+    : title{title}, artist{artist}, durationMs{durationMs}
+{
+    ;
+}
+
+Track::Track(const QString& path)
+    : path{path}
+{
+    ;
+}
+
+Track::Track(const QString& path, const Metainfo& metainfo)
+    : path{path}, metainfo{metainfo}
 {
     ;
 }
@@ -89,14 +107,20 @@ void QPlaylistView::swapRows(int sourceRow, int destRow) {
 
 int QPlaylistView::appendTrack(const Track& track) {
     int row = rowCount();
-    QString duration = track.durationMs < 0 ? "" : durationMsToStrDuration(track.durationMs);
+    QString duration = track.metainfo.durationMs < 0 ? "" : durationMsToStrDuration(track.metainfo.durationMs);
     insertRow(rowCount());
     setItem(row, Column::Number, new QTableWidgetItem(QString::number(row + 1)));
-    QTableWidgetItem* titleItem = new QTableWidgetItem(QFileInfo(track.path).completeBaseName());
+    QTableWidgetItem* titleItem = new QTableWidgetItem();
+    if (!track.metainfo.title.isEmpty() && !track.metainfo.artist.isEmpty()) {
+        titleItem->setText(track.metainfo.artist + " - " + track.metainfo.title);
+    }
+    else {
+        titleItem->setText(QFileInfo(track.path).completeBaseName());
+    }
     titleItem->setData(Qt::UserRole, track.path);
     setItem(row, Column::Title, titleItem);
     setItem(row, Column::Duration, new QTableWidgetItem(duration));
-    if (track.durationMs <= 0) {
+    if (track.metainfo.durationMs <= 0) {
         item(row, Column::Duration)->setData(Qt::ForegroundRole, QVariant(QColor(Qt::red)));
     }
     for (int col = 0; col < Column::COUNT; ++col) {
@@ -109,9 +133,12 @@ int QPlaylistView::appendTrack(const Track& track) {
         item(row, Column::Duration)->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     }
     else {
-        item(row, Column::Duration)->setData(Qt::UserRole, (int)track.durationMs);
+        item(row, Column::Duration)->setData(Qt::UserRole, (int)track.metainfo.durationMs);
         item(row, Column::Duration)->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     }
+    QVariant v;
+    v.setValue(track.metainfo);
+    item(row, Column::Title)->setData(Qt::UserRole + (int)UserRoles::Metainfo, v);
     if (rowCount() % 10 == 0) updateColumnWidths(width());
     return row;
 }
@@ -119,7 +146,10 @@ int QPlaylistView::appendTrack(const Track& track) {
 Track QPlaylistView::track(int row) const {
     Track track;
     track.path = item(row, Column::Title)->data(Qt::UserRole).toString();
-    track.durationMs = item(row, Column::Duration)->data(Qt::UserRole).toInt();
+    track.metainfo.durationMs = item(row, Column::Duration)->data(Qt::UserRole).toInt();
+    Metainfo metainfo = item(row, Column::Title)->data(Qt::UserRole + (int)UserRoles::Metainfo).value<Metainfo>();
+    track.metainfo.title = metainfo.title;
+    track.metainfo.artist = metainfo.artist;
     return track;
 }
 

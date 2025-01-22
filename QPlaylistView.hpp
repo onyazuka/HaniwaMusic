@@ -2,11 +2,27 @@
 #define QPLAYLISTVIEW_HPP
 #include <QTableWidget>
 
+struct Metainfo {
+    Metainfo() = default;
+    Metainfo(int durationMs);
+    Metainfo(const QString& title, const QString& artist, int durationMs);
+    QString title;
+    QString artist;
+    int durationMs = -1;
+};
+Q_DECLARE_METATYPE(Metainfo);
+
 struct Track {
     Track() = default;
-    Track(const QString& path, int duration);
+    Track(const QString& path);
+    Track(const QString& path, const Metainfo& metainfo);
     QString path;
-    int durationMs;
+    Metainfo metainfo;
+};
+
+enum class UserRoles {
+    Path,
+    Metainfo
 };
 
 class QPlaylistView : public QTableWidget {

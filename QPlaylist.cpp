@@ -21,15 +21,23 @@ void DurationGatherer2::onAddFile(const QString& path, int row) {
     //taskQueue.append({path,row,0});
     //cnd.notify_one();
     static GetMetaInfoConfig config;
-    config.textual = false;
+    config.textual = true;
     config.duration = true;
     config.images = false;
+    Metainfo mt;
     try {
         auto metainfo = getMetainfo(path.toStdString(), config);
-        emit gotDuration((qint64)(QString::fromStdString(std::get<std::string>(metainfo["durationMs"])).toULongLong()), row);
+        mt.durationMs = (qint64)(QString::fromStdString(std::get<std::string>(metainfo["durationMs"])).toULongLong());
+        if (auto iter = metainfo.find("title"); iter != metainfo.end()) {
+            mt.title = QString::fromStdString(std::get<std::string>(metainfo["title"]));
+        }
+        if (auto iter = metainfo.find("artist"); iter != metainfo.end()) {
+            mt.artist = QString::fromStdString(std::get<std::string>(metainfo["artist"]));
+        }
+        emit gotMetainfo(mt, row);
     }
     catch (...) {
-        emit gotDuration(0, row);
+        emit gotMetainfo(mt, row);
     }
 }
 
@@ -42,7 +50,7 @@ QPlaylist::QPlaylist(QWidget* parent)
     connect(this, &QTableWidget::cellDoubleClicked, this, &QPlaylist::onCellDoubleClicked);
     connect(&durationGathererThread, &QThread::finished, durationGatherer, &QObject::deleteLater);
     connect(this, &QPlaylist::fileAddedWithUnknownDuration, durationGatherer, &DurationGatherer2::onAddFile);
-    connect(durationGatherer, &DurationGatherer2::gotDuration, this, &QPlaylist::onUpdateDuration);
+    connect(durationGatherer, &DurationGatherer2::gotMetainfo, this, &QPlaylist::onUpdateMetainfo);
     connect(this, &QWidget::customContextMenuRequested, this, &QPlaylist::handleContextMenu);
     durationGathererThread.start();
 }
@@ -53,18 +61,20 @@ QPlaylist::~QPlaylist() {
 }
 
 // 'duration' = 0 means unknown duration AFTER reading, -1 - default arg
-void QPlaylist::addFile(const QString& path, qint64 durationMs) {
-    int row = appendTrack(Track(path, durationMs));
+void QPlaylist::addFile(const QString& path, const Metainfo& metainfo) {
+    int row = appendTrack(Track(path, metainfo));
     // unknown duration - sending to duration gatherer
-    if (durationMs < 0) {
+    if (metainfo.durationMs < 0) {
         emit fileAddedWithUnknownDuration(path, row);
     }
 }
 
 void QPlaylist::addFileFromJson(const QJsonObject& obj) {
     QString path = obj.value("path").toString();
-    int duration = obj.value("duration").toInt();
-    addFile(path, duration);
+    int durationMs = obj.value("duration").toInt();
+    QString title = obj.value("title").toString();
+    QString artist = obj.value("artist").toString();
+    addFile(path, Metainfo(title, artist, durationMs));
 }
 
 void QPlaylist::addFiles(const QStringList& files) {
@@ -97,7 +107,9 @@ void QPlaylist::addFilesFromM3uPlaylist(const m3u::M3UPlaylist& playlist) {
     for (const auto& entry: entries) {
         const std::string& path = entry.path();
         size_t duration = entry.duration() * 1000;
-        addFile(QString::fromStdString(path), duration);
+        QString title = QString::fromStdString(entry.title());
+        QString artist = QString::fromStdString(entry.artist());
+        addFile(QString::fromStdString(path), Metainfo(title, artist, duration));
     }
 }
 
@@ -116,7 +128,9 @@ QJsonArray QPlaylist::toJson() const {
         Track tr = track(i);
         jArr.append(QJsonObject({
             {"path", tr.path},
-            {"duration", tr.durationMs}
+            {"duration", tr.metainfo.durationMs},
+            {"title", tr.metainfo.title},
+            {"artist", tr.metainfo.artist}
         }));
     }
     return jArr;
@@ -127,7 +141,8 @@ m3u::M3UPlaylist QPlaylist::toM3UPlaylist(const QString& title) const {
     writer.writeParam({"PLAYLIST", title.toStdString()});
     for(int i = 0; i < rowCount(); ++i) {
         Track tr = track(i);
-        writer.writeExtinf(std::pair<size_t, std::string>{(size_t)tr.durationMs / 1000, ""});
+        writer.writeExtinf(std::pair<size_t, std::string>{(size_t)tr.metainfo.durationMs / 1000, tr.metainfo.title.toStdString()});
+        writer.writeParam(std::pair<std::string, std::string>{"EXTART", tr.metainfo.artist.toStdString()});
         writer.writePath(tr.path.toStdString());
     }
     //writer.dumpToFile("/home/onyazuka/playlist.m3u");
@@ -262,7 +277,8 @@ void QPlaylist::onCellDoubleClicked(int row, int col) {
 }
 
 // got 'duration' in ms
-void QPlaylist::onUpdateDuration(qint64 durationMs, int row) {
+void QPlaylist::onUpdateMetainfo(Metainfo metainfo, int row) {
+    int durationMs = metainfo.durationMs;
     QTableWidgetItem* it = item(row, Column::Duration);
     if (!it) return;
     /*if (duration < 0) {
@@ -277,6 +293,14 @@ void QPlaylist::onUpdateDuration(qint64 durationMs, int row) {
     }
     it->setText(durationMsToStrDuration(durationMs));
     item(row, Column::Duration)->setData(Qt::UserRole, (int)durationMs);
+
+    if (!metainfo.title.isEmpty() && !metainfo.artist.isEmpty()) {
+        it = item(row, Column::Title);
+        it->setText(metainfo.artist + " - " + metainfo.title);
+    }
+    QVariant vmetainfo;
+    vmetainfo.setValue(metainfo);
+    item(row, Column::Title)->setData(Qt::UserRole + (int)UserRoles::Metainfo, vmetainfo);
 }
 
 void QPlaylist::handleContextMenu(const QPoint& pos) {

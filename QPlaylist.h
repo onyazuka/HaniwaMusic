@@ -53,7 +53,7 @@ public:
 public slots:
     void onAddFile(const QString& path, int row);
 signals:
-    void gotDuration(qint64 duration, int row);
+    void gotMetainfo(Metainfo metainfo, int row);
 private:
 };
 
@@ -69,7 +69,7 @@ class QPlaylist : public QPlaylistView {
 public:
     QPlaylist(QWidget* parent = nullptr);
     ~QPlaylist();
-    void addFile(const QString& path, qint64 durationMs = -1);
+    void addFile(const QString& path, const Metainfo& metainfo = {});
     void addFileFromJson(const QJsonObject& obj);
     void addFiles(const QStringList& files);
     void addFolder(const QString& path);
@@ -81,6 +81,7 @@ public:
     bool exportTo(const QString& title, const QString& path);
     bool importFrom(const QString& path);
     bool findNext(QString str);
+    bool empty() const;
 signals:
     void fileChanged(QString path);
     void fileAddedWithUnknownDuration(QString path, int row);
@@ -91,10 +92,9 @@ public slots:
     void prev();
     void prevRandom();
     bool select(int row);
-    bool empty() const;
 private slots:
     void onCellDoubleClicked(int row, int col);
-    void onUpdateDuration(qint64 duration, int row);
+    void onUpdateMetainfo(Metainfo metainfo, int row);
     void handleContextMenu(const QPoint& pos);
     void onNext();
 private:

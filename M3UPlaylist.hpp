@@ -24,6 +24,8 @@ namespace m3u {
         inline const std::string& path() const { return _path; }
         inline void setPath(const std::string& p) { _path = p; }
         size_t duration() const;
+        std::string title() const;
+        std::string artist() const;
         inline std::map<std::string, std::string>& params() { return lParams; }
     private:
         std::map<std::string, std::string> lParams;
