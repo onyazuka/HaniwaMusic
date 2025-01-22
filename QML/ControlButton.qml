@@ -14,12 +14,13 @@ Control {
         id: button
         objectName: "button"
         width: height
-        Text {
+        icon.color: pal.highlight
+        /*Text {
             id: text
             objectName: "text"
             anchors.centerIn: parent
             color: palette.highlight
             // text is set by qt
-        }
+        }*/
     }
 }

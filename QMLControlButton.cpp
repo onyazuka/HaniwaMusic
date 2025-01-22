@@ -1,10 +1,10 @@
 #include "QMLControlButton.hpp"
 
-QMLControlButton::QMLControlButton(const QString& txt, QWidget* parent)
+QMLControlButton::QMLControlButton(const QString& iconSource, QWidget* parent)
     : QMLWidgetBase(":/QML/ControlButton.qml", parent)
 {
-    text = QQmlProperty(findItem("text"), "text");
-    text.write(txt);
+    icon_source = QQmlProperty(base(), "icon.source");
+    icon_source.write(iconSource);
     setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 

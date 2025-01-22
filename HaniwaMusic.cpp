@@ -14,10 +14,10 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     ui->setupUi(this);
     centralWidget = new QWidget();
     setCentralWidget(centralWidget);
-    btnPlay = new QMLControlButton("⏵", this);
-    btnStop = new QMLControlButton("⏹", this);
-    btnNext = new QMLControlButton("⏭", this);
-    btnPrev = new QMLControlButton("⏮", this);
+    btnPlay = new QMLControlButton("qrc:/icons/play1.svg", this);
+    btnStop = new QMLControlButton("qrc:/icons/stop1.svg", this);
+    btnNext = new QMLControlButton("qrc:/icons/next1.svg", this);
+    btnPrev = new QMLControlButton("qrc:/icons/prev1.svg", this);
     chRandom = new QMLControlCheckbox("qrc:/icons/random.svg", false, this);
     chRepeat = new QMLControlCheckbox("qrc:/icons/repeat.svg", false, this);
     //qmlSlider = new QMLSlider(Qt::Orientation::Vertical, this);
@@ -153,10 +153,10 @@ void HaniwaMusic::configureAudio() {
     player->setOnAudioEndCb([this](){ onNext(); });
     player->setOnPlayStateChangeCb([this](AudioPlayer::PlayState state){
         if (state == AudioPlayer::PlayState::Play) {
-            btnPlay->text.write("⏸");
+            btnPlay->icon_source.write("qrc:/icons/pause1.svg");
         }
         else if (state == AudioPlayer::PlayState::Pause) {
-            btnPlay->text.write("⏵");
+            btnPlay->icon_source.write("qrc:/icons/play1.svg");
         }
     });
     player->setVolume(appSettings.volume);

@@ -5,9 +5,9 @@
 class QMLControlButton  : public QMLWidgetBase  {
     Q_OBJECT
 public:
-    QMLControlButton(const QString& text, QWidget* parent = nullptr);
+    QMLControlButton(const QString& iconSource, QWidget* parent = nullptr);
     QQuickItem* base() override;
-    QQmlProperty text;
+    QQmlProperty icon_source;
 };
 
 #endif // QMLCONTROLBUTTON_HPP
