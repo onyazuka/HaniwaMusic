@@ -23,4 +23,5 @@ Uses QMediaPlayer for playing audio.
 
 
 
-![Снимок экрана от 2025-01-11 12-31-59](https://github.com/user-attachments/assets/ed86af27-6204-41c8-8c1e-90d38771c828)
+![111](https://github.com/user-attachments/assets/37c6c975-2ca9-45da-a5ef-da6b61e59bb4)
+
