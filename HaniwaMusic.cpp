@@ -22,6 +22,7 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     chRepeat = new QMLControlCheckbox("qrc:/icons/repeat.svg", false, this);
     //qmlSlider = new QMLSlider(Qt::Orientation::Vertical, this);
     lFileName = new QLabelElide("", this);
+    lFileName->setMoving(true);
     //lFileName->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Maximum);
     iVolume = new QMLIcon("qrc:/icons/volume.svg", this);
     sldVolume = new QMLSlider(Qt::Orientation::Vertical, this);
