@@ -383,6 +383,63 @@ void HaniwaMusic::onClose() {
     changeFileNameLabel("File not selected", Qt::red);
 }
 
+void HaniwaMusic::addPlaylist(QString title) {
+    if (title.isEmpty()) {
+        title = QInputDialog::getText(this, "Add new playlist", "Title: ", QLineEdit::Normal);
+    }
+    tabPlaylists->setCurrentIndex(tabPlaylists->addTab(new QPlaylist(tabPlaylists), title));
+}
+
+void HaniwaMusic::removePlaylist() {
+    tabPlaylists->removeTab(tabPlaylists->currentIndex());
+    onClose();
+}
+
+void HaniwaMusic::clearPlaylist() {
+    onStopPress();
+    playlist->clear();
+    onClose();
+}
+
+void HaniwaMusic::importPlaylist() {
+    if (!playlist) {
+        return;
+    }
+    QString playlistPath = QFileDialog::getOpenFileName(this, "Select playlist file", appSettings.lastDir, "Playlist (*.m3u *.m3u8)");
+    if (!playlistPath.isEmpty()) {
+        std::ifstream ifs(playlistPath.toStdString());
+        if (!ifs) {
+            QMessageBox msg;
+            msg.warning(this, "Error", "Couldn't import playlist");
+            return;
+        }
+        m3u::M3UPlaylist playlist = m3u::M3UPlaylist::fromStream(ifs);
+        std::string stitle = playlist.title();
+        QString title = QString::fromStdString(stitle);
+        if (title.isEmpty()) {
+            title = QFileInfo(playlistPath).baseName();
+        }
+        addPlaylist(title);
+        this->playlist->addFilesFromM3uPlaylist(playlist);
+    }
+}
+
+void HaniwaMusic::exportPlaylist() {
+    if (!playlist || playlist->empty()) {
+        return;
+    }
+    QString playlistPath = QFileDialog::getSaveFileName(this, "Select playlist file", appSettings.lastDir, "Playlist (*.m3u *.m3u8)");
+    if (!playlistPath.endsWith(".m3u") && !playlistPath.endsWith(".m3u8")) {
+        playlistPath += ".m3u";
+    }
+    if (!playlistPath.isEmpty()) {
+        if (!playlist->exportTo(tabPlaylists->tabText(tabPlaylists->currentIndex()), playlistPath)) {
+            QMessageBox msg;
+            msg.warning(this, "Error", "Couldn't export playlist");
+        }
+    }
+}
+
 void HaniwaMusic::onMute() {
     auto oldVal = player->volume();
     if (oldVal) {
@@ -427,23 +484,32 @@ void HaniwaMusic::initPlaylistsMenu() {
     QAction* playlistsAddPlaylistAction = new QAction("Add playlist", this);
     QAction* playlistsRemovePlaylistAction = new QAction("Remove playlist", this);
     QAction* playlistsClearPlaylistAction = new QAction("Clear playlist", this);
+    QAction* playlistsImportPlaylistAction = new QAction("Import playlist", this);
+    QAction* playlistsExportPlaylistAction = new QAction("Export playlist", this);
     playlistsMenuActions.push_back(playlistsAddPlaylistAction);
     playlistsMenuActions.push_back(playlistsRemovePlaylistAction);
     playlistsMenuActions.push_back(playlistsClearPlaylistAction);
+    playlistsMenuActions.push_back(playlistsImportPlaylistAction);
+    playlistsMenuActions.push_back(playlistsExportPlaylistAction);
     connect(playlistsAddPlaylistAction, &QAction::triggered, this, [this](){
-        QString title = QInputDialog::getText(this, "Add new playlist", "Title: ", QLineEdit::Normal);
-        tabPlaylists->setCurrentIndex(tabPlaylists->addTab(new QPlaylist(tabPlaylists), title));
+        addPlaylist();
     });
     connect(playlistsRemovePlaylistAction, &QAction::triggered, this, [this](){
-        tabPlaylists->removeTab(tabPlaylists->currentIndex());
-        onClose();
+        removePlaylist();
     });
     connect(playlistsClearPlaylistAction, &QAction::triggered, this, [this](){
-        onStopPress();
-        playlist->clear();
-        onClose();
+        clearPlaylist();
+    });
+    connect(playlistsImportPlaylistAction, &QAction::triggered, this, [this](){
+        importPlaylist();
+    });
+    connect(playlistsExportPlaylistAction, &QAction::triggered, this, [this](){
+        exportPlaylist();
     });
     playlistsMenu->addAction(playlistsAddPlaylistAction);
     playlistsMenu->addAction(playlistsRemovePlaylistAction);
     playlistsMenu->addAction(playlistsClearPlaylistAction);
+    playlistsMenu->addSeparator();
+    playlistsMenu->addAction(playlistsImportPlaylistAction);
+    playlistsMenu->addAction(playlistsExportPlaylistAction);
 }

@@ -92,6 +92,15 @@ void QPlaylist::addFilesFromJson(const QJsonArray& json) {
     }
 }
 
+void QPlaylist::addFilesFromM3uPlaylist(const m3u::M3UPlaylist& playlist) {
+    const auto& entries = playlist.entries();
+    for (const auto& entry: entries) {
+        const std::string& path = entry.path();
+        size_t duration = entry.duration() * 1000;
+        addFile(QString::fromStdString(path), duration);
+    }
+}
+
 QStringList QPlaylist::toStringList() const {
     QStringList res;
     for(int i = 0; i < rowCount(); ++i) {
@@ -124,6 +133,26 @@ m3u::M3UPlaylist QPlaylist::toM3UPlaylist(const QString& title) const {
     //writer.dumpToFile("/home/onyazuka/playlist.m3u");
     //return "";
     return writer.playlist();
+}
+
+bool QPlaylist::exportTo(const QString& title, const QString& path) {
+    auto m3uPlaylist = toM3UPlaylist(title);
+    std::ofstream ofs(path.toStdString());
+    if (!ofs) {
+        return false;
+    }
+    m3uPlaylist.dump(ofs);
+    return true;
+}
+
+bool QPlaylist::importFrom(const QString& path) {
+    std::ifstream ifs(path.toStdString());
+    if (!ifs) {
+        return false;
+    }
+    m3u::M3UPlaylist playlist = m3u::M3UPlaylist::fromStream(ifs);
+    addFilesFromM3uPlaylist(playlist);
+    return true;
 }
 
 bool QPlaylist::findNext(QString str) {
@@ -217,6 +246,10 @@ bool QPlaylist::select(int row) {
     }
     setCurrentCell(row, Column::Title);
     return true;
+}
+
+bool QPlaylist::empty() const {
+    return rowCount() == 0;
 }
 
 void QPlaylist::onCellDoubleClicked(int row, int col) {

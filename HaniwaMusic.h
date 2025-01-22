@@ -49,6 +49,11 @@ public slots:
     void onPausePress();
     void onStopPress();
     void onClose();
+    void addPlaylist(QString title = "");
+    void removePlaylist();
+    void clearPlaylist();
+    void importPlaylist();
+    void exportPlaylist();
 protected slots:
     void onOpenPress();
     void onOpenDirPress();

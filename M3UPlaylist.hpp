@@ -23,6 +23,7 @@ namespace m3u {
         void dump(std::ostream& os) const;
         inline const std::string& path() const { return _path; }
         inline void setPath(const std::string& p) { _path = p; }
+        size_t duration() const;
         inline std::map<std::string, std::string>& params() { return lParams; }
     private:
         std::map<std::string, std::string> lParams;
@@ -35,6 +36,7 @@ namespace m3u {
         void add(const M3UEntry& entry);
         inline const std::vector<M3UEntry>& entries() const { return _entries; }
         void dump(std::ostream& os) const;
+        std::string title() const;
         static M3UPlaylist fromStream(std::istream& is);
         inline std::map<std::string, std::string>& params() { return gParams; }
     private:

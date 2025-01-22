@@ -74,9 +74,12 @@ public:
     void addFiles(const QStringList& files);
     void addFolder(const QString& path);
     void addFilesFromJson(const QJsonArray& json);
+    void addFilesFromM3uPlaylist(const m3u::M3UPlaylist& playlist);
     QStringList toStringList() const;
     QJsonArray toJson() const;
     m3u::M3UPlaylist toM3UPlaylist(const QString& title) const;
+    bool exportTo(const QString& title, const QString& path);
+    bool importFrom(const QString& path);
     bool findNext(QString str);
 signals:
     void fileChanged(QString path);
@@ -88,6 +91,7 @@ public slots:
     void prev();
     void prevRandom();
     bool select(int row);
+    bool empty() const;
 private slots:
     void onCellDoubleClicked(int row, int col);
     void onUpdateDuration(qint64 duration, int row);

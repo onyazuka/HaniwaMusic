@@ -27,6 +27,14 @@ void M3UEntry::dump(std::ostream& os) const {
     os << _path << std::endl;
 }
 
+size_t M3UEntry::duration() const {
+    if (auto iter = lParams.find("#EXTINF"); iter != lParams.end()) {
+        auto extinf = EXTINF::fromStr(iter->second);
+        return extinf.duration;
+    }
+    return 0;
+}
+
 void M3UPlaylist::add(const M3UEntry& entry) {
     _entries.push_back(entry);
 }
@@ -45,6 +53,13 @@ void M3UPlaylist::dump(std::ostream& os) const {
     for (const auto& entry : _entries) {
         entry.dump(os);
     }
+}
+
+std::string M3UPlaylist::title() const {
+    if (auto iter = gParams.find("#PLAYLIST"); iter != gParams.end()) {
+        return iter->second;
+    }
+    return "";
 }
 
 M3UPlaylist M3UPlaylist::fromStream(std::istream& is) {
