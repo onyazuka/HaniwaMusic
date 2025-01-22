@@ -8,12 +8,9 @@ qmake
 - Multiplatform (thanks Qt)
 - Basic functionality (random, repeat, search by name, playlists, seek etc)
 - Media keys support (for now only on Linux Gnome)
-
-## Will be done in nearest future
 - Media keys for Windows
 - Multiple playlists support
 - Import/export playlists
-- Some design
 
 ## Ambitions
 - Maybe try ffmpeg or even own lib, instead of QMediaPlayer, to play audio (?)
