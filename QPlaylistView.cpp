@@ -18,6 +18,7 @@ QPlaylistView::QPlaylistView(QWidget* parent)
 {
     setColumnCount(Column::COUNT);
     setSelectionBehavior(QAbstractItemView::SelectRows);
+    setGridStyle(Qt::PenStyle::NoPen);
     horizontalHeader()->hide();
     verticalHeader()->hide();
     setSelectionMode(QAbstractItemView::SingleSelection);
@@ -105,9 +106,11 @@ int QPlaylistView::appendTrack(const Track& track) {
 
     if (duration.isEmpty()) {
         item(row, Column::Duration)->setData(Qt::UserRole, -1);
+        item(row, Column::Duration)->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     }
     else {
         item(row, Column::Duration)->setData(Qt::UserRole, (int)track.durationMs);
+        item(row, Column::Duration)->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
     }
     if (rowCount() % 10 == 0) updateColumnWidths(width());
     return row;
