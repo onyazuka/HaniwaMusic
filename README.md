@@ -1,7 +1,7 @@
 Minimalistic audio player, written in C++ and Qt.
 
 ## Compilation
-qmake
+cmake
 
 ## Features
 - Can play .mp3, .flac audio
