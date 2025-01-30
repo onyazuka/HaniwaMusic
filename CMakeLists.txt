@@ -18,7 +18,7 @@ find_package(Qt${QT_VERSION_MAJOR} OPTIONAL_COMPONENTS Widgets)
 
 add_subdirectory(MetaTagsParser)
 
-qt_add_executable(HaniwaMusic MANUAL_FINALIZATION
+set(SOURCES
     AudioPlayer.h
     HaniwaMusic.cpp HaniwaMusic.h HaniwaMusic.ui
     M3UPlaylist.cpp M3UPlaylist.hpp
@@ -32,8 +32,6 @@ qt_add_executable(HaniwaMusic MANUAL_FINALIZATION
     QMLSlider.cpp QMLSlider.hpp
     QMLWidgetBase.cpp QMLWidgetBase.hpp
     QMLWidgets.hpp
-    QMediaKeysDBusAdaptor.cpp QMediaKeysDBusAdaptor.hpp
-    QMediaKeysWinapiAdaptor.cpp QMediaKeysWinapiAdaptor.hpp
     QMetadataDlg.cpp QMetadataDlg.hpp
     QPlaylist.cpp QPlaylist.h
     QPlaylistView.cpp QPlaylistView.hpp
@@ -41,6 +39,19 @@ qt_add_executable(HaniwaMusic MANUAL_FINALIZATION
     main.cpp
     utils/UtilsString.cpp utils/UtilsString.hpp
 )
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    message(STATUS "Using GCC compiler")
+    list(APPEND SOURCES QMediaKeysDBusAdaptor.cpp QMediaKeysDBusAdaptor.hpp)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    message(STATUS "Using MSVC compiler")
+    list(APPEND SOURCES QMediaKeysWinapiAdaptor.cpp QMediaKeysWinapiAdaptor.hpp)
+else()
+    message(FATAL_ERROR "Using unsupported compiler: only GCC and MSVC are supported! Exiting...")
+endif()
+
+qt_add_executable(HaniwaMusic MANUAL_FINALIZATION ${SOURCES})
+
 qt_add_qml_module(HaniwaMusic
     URI HaniwaMusicQml
     VERSION ${PROJECT_VERSION}

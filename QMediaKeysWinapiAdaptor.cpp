@@ -1,4 +1,4 @@
-#ifdef _MSC_VER
+
 
 #include "QMediaKeysWinapiAdaptor.hpp"
 #include <Windows.h>
@@ -90,4 +90,3 @@ bool QMediaKeysWinapiAdaptor::nativeEvent(const QByteArray &eventType, void *mes
     return false;
 }
 
-#endif
