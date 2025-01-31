@@ -318,7 +318,7 @@ void QPlaylist::keyPressEvent(QKeyEvent* event) {
 
 void QPlaylist::initMenu() {
     itemRemoveAction = new QAction("Remove from playlist", this);
-    itemShowMetadata = new QAction("Show metadata", this);
+    itemShowMetadata = new QAction(tr("Show metadata"), this);
     connect(itemRemoveAction, &QAction::triggered, this, [this](){
         int row = itemRemoveAction->data().toInt();
         if (getDuration(row) == -1) {

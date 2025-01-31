@@ -3,6 +3,8 @@
 #include <QAudioPlayer.h>
 #include <QKeyEvent>
 #include <QInputDialog>
+#include <QTranslator>
+#include <QOptionsDlg.hpp>
 
 static const std::string DEFAULT_PATH = "/home";
 static constexpr float DEFAULT_VOLUME = 0.5;
@@ -39,6 +41,7 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     btnOpen = new QMLMenuButton("qrc:/icons/openFile.svg", this);
     btnOpenDir = new QMLMenuButton("qrc:/icons/openFolder.svg", this);
     btnPlaylistsMenu = new QMLMenuButton("qrc:/icons/playlist.svg", this);
+    btnOptions = new QMLMenuButton("qrc:/icons/options.svg", this);
     lnSearch = new QLineEdit(this);
     //lnSearch->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     btnSearch = new QMLMenuButton("qrc:/icons/search.svg",this);
@@ -83,6 +86,7 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     connect(currentPlaylist(), &QPlaylist::fileChanged, this, &HaniwaMusic::onFileChanged);
     connect(tabPlaylists, &QTabWidget::currentChanged, this, &HaniwaMusic::onPlaylistChange);
     connect((QObject*)btnPlaylistsMenu->base(), SIGNAL(released()), this, SLOT(onPlaylistsMenuClicked()));
+    connect((QObject*)btnOptions->base(), SIGNAL(released()), this, SLOT(onOptions()));
     connect((QObject*)btnSearch->base(), SIGNAL(released()), this, SLOT(onSearchNext()));
 }
 
@@ -125,6 +129,7 @@ void HaniwaMusic::configureLayout(){
     l5->addWidget(btnOpen);
     l5->addWidget(btnOpenDir);
     l5->addWidget(btnPlaylistsMenu);
+    l5->addWidget(btnOptions);
     l5->addWidget(lnSearch);
     l5->addWidget(btnSearch);
     //l5->setAlignment(Qt::AlignRight);
@@ -258,6 +263,7 @@ void HaniwaMusic::loadSettings() {
     appSettings.lastTrackNumber = settings.value("LastTrackNumber", -1).toInt();
     chRandom->checked.write(settings.value("Random", false).toBool());
     chRepeat->checked.write(settings.value("Repeat", false).toBool());
+    appSettings.language = settings.value("Language", QOptionsDlg::defaultLanguage()).toString();
 }
 
 void HaniwaMusic::saveSettings() {
@@ -280,6 +286,7 @@ void HaniwaMusic::saveSettings() {
     settings.setValue("WindowRect", geometry());
     settings.setValue("Random", chRandom->checked.read());
     settings.setValue("Repeat", chRepeat->checked.read());
+    settings.setValue("Language", appSettings.language);
 }
 
 void HaniwaMusic::onNext() {
@@ -512,4 +519,10 @@ void HaniwaMusic::initPlaylistsMenu() {
     playlistsMenu->addSeparator();
     playlistsMenu->addAction(playlistsImportPlaylistAction);
     playlistsMenu->addAction(playlistsExportPlaylistAction);
+}
+
+void HaniwaMusic::onOptions() {
+    QOptionsDlg dlg(appSettings.language, this);
+    dlg.exec();
+    appSettings.language = dlg.language();
 }

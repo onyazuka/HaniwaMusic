@@ -38,7 +38,7 @@ QMetadataDlg::QMetadataDlg(const QString& path, QWidget *parent, Qt::WindowFlags
     config.duration = false;
     config.images = true;
     auto metainfo = getMetainfo(path.toStdString(), config);
-    lArtistHeader = new QLabel("Artist ");
+    lArtistHeader = new QLabel(tr("Artist "));
     lArtist = new QLabel(QString::fromStdString(std::get<std::string>(metainfo["artist"])));
     if (lArtist->text().isEmpty()) {
         lArtist->setText("-");
@@ -87,7 +87,7 @@ QMetadataDlg::QMetadataDlg(const QString& path, QWidget *parent, Qt::WindowFlags
         lImage->setPixmap(QPixmap::fromImage(qimage));
     }
     initLayout();
-    setWindowTitle("Metadata");
+    setWindowTitle(tr("Metadata"));
     setMinimumSize(200, 100);
 }
 

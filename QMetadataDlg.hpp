@@ -5,6 +5,7 @@
 #include <QGridLayout>
 
 class QMetadataDlg : public QDialog {
+    Q_OBJECT
 public:
     QMetadataDlg(const QString& path, QWidget *parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 private:

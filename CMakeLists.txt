@@ -33,6 +33,7 @@ set(SOURCES
     QMLWidgetBase.cpp QMLWidgetBase.hpp
     QMLWidgets.hpp
     QMetadataDlg.cpp QMetadataDlg.hpp
+    QOptionsDlg.hpp QOptionsDlg.cpp
     QPlaylist.cpp QPlaylist.h
     QPlaylistView.cpp QPlaylistView.hpp
     QTabWidgetCustom.cpp QTabWidgetCustom.hpp
@@ -89,6 +90,7 @@ qt_add_qml_module(HaniwaMusic
         icons/prev1.svg
         icons/stop1.svg
     NO_RESOURCE_TARGET_PATH
+    RESOURCES icons/options.svg
 )
 
 qt6_add_translations(HaniwaMusic TS_FILE_DIR translations QM_FILES_OUTPUT_VARIABLE qm_files)

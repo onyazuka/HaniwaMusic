@@ -65,6 +65,7 @@ protected slots:
     void onAudioError(AudioPlayer::Error error);
     void onPlaylistsMenuClicked();
     void onSearchNext();
+    void onOptions();
 protected:
     struct Settings {
         QString lastDir;
@@ -72,6 +73,7 @@ protected:
         QPoint pos;
         QRect windowRect;
         int lastTrackNumber = 0;
+        QString language;
     } appSettings;
 
     bool checkFile(const QString& file);
@@ -105,6 +107,7 @@ protected:
     QMLMenuButton* btnOpen;
     QMLMenuButton* btnOpenDir;
     QMLMenuButton* btnPlaylistsMenu;
+    QMLMenuButton* btnOptions;
     QLineEdit* lnSearch;
     QMLMenuButton* btnSearch;
 

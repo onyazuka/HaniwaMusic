@@ -8,6 +8,7 @@
 
 #include <QApplication>
 #include <QFontDatabase>
+#include "QOptionsDlg.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -17,11 +18,20 @@ int main(int argc, char *argv[])
     srand(time(0));
     QApplication a(argc, argv);
 
-    auto locale = QLocale::system();
+    QSettings settings(ORGANIZATION_NAME, APP_NAME);
+    QString language = settings.value("Language", QOptionsDlg::defaultLanguage()).toString();
     QTranslator Translator;
-    if (Translator.load("HaniwaMusic_ru.qm")) {
-        a.installTranslator(&Translator);
+    if (language == "rus") {
+        if (Translator.load("HaniwaMusic_ru.qm")) {
+            QApplication::installTranslator(&Translator);
+        }
+        else {
+            qWarning() << "couldn't apply russian localization";
+        }
     }
+    //if (Translator.load("HaniwaMusic_ru.qm")) {
+    //    a.installTranslator(&Translator);
+    //}
     if (QFontDatabase::addApplicationFont(":/fonts/Seven Segment.ttf") < 0) {
         qDebug() << "Couldn't register fonts";
     }
