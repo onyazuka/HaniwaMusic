@@ -17,6 +17,11 @@ int main(int argc, char *argv[])
     srand(time(0));
     QApplication a(argc, argv);
 
+    auto locale = QLocale::system();
+    QTranslator Translator;
+    if (Translator.load("HaniwaMusic_ru.qm")) {
+        a.installTranslator(&Translator);
+    }
     if (QFontDatabase::addApplicationFont(":/fonts/Seven Segment.ttf") < 0) {
         qDebug() << "Couldn't register fonts";
     }

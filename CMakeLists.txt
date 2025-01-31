@@ -13,7 +13,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Core)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS DBus Gui Multimedia Qml Quick QuickWidgets Test)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS DBus Gui Multimedia Qml Quick QuickWidgets Test LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} OPTIONAL_COMPONENTS Widgets)
 
 add_subdirectory(MetaTagsParser)
@@ -38,6 +38,7 @@ set(SOURCES
     QTabWidgetCustom.cpp QTabWidgetCustom.hpp
     main.cpp
     utils/UtilsString.cpp utils/UtilsString.hpp
+    resources.qrc
 )
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -49,6 +50,11 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 else()
     message(FATAL_ERROR "Using unsupported compiler: only GCC and MSVC are supported! Exiting...")
 endif()
+
+qt_standard_project_setup(
+    I18N_SOURCE_LANGUAGE en         # optional - this is the default
+    I18N_TRANSLATED_LANGUAGES ru
+)
 
 qt_add_executable(HaniwaMusic MANUAL_FINALIZATION ${SOURCES})
 
@@ -84,6 +90,12 @@ qt_add_qml_module(HaniwaMusic
         icons/stop1.svg
     NO_RESOURCE_TARGET_PATH
 )
+
+qt6_add_translations(HaniwaMusic TS_FILE_DIR translations QM_FILES_OUTPUT_VARIABLE qm_files)
+
+add_dependencies(HaniwaMusic HaniwaMusic_lupdate)
+add_dependencies(HaniwaMusic HaniwaMusic_lrelease)
+add_dependencies(HaniwaMusic update_translations)
 
 target_link_libraries(HaniwaMusic PUBLIC
     Qt::Core
@@ -125,6 +137,7 @@ install(TARGETS HaniwaMusic
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+install(FILES ${qm_files} DESTINATION "${CMAKE_BINARY_DIR}/translations")
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(HaniwaMusic)

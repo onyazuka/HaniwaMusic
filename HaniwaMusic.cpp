@@ -43,7 +43,7 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     //lnSearch->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     btnSearch = new QMLMenuButton("qrc:/icons/search.svg",this);
     setWindowTitle("Haniwa Music");
-    changeFileNameLabel("File not selected", Qt::red);
+    changeFileNameLabel(tr("File not selected"), Qt::red);
     loadSettings();
     if (tabPlaylists->count() == 0) {
         tabPlaylists->addTab(new QPlaylist(tabPlaylists), "Playlist");
@@ -179,23 +179,23 @@ bool HaniwaMusic::onFileChanged(QString newFile) {
 
 void HaniwaMusic::onAudioError(AudioPlayer::Error error) {
     if (error == AudioPlayer::Error::InvalidMedia) {
-        changeFileNameLabel("File not selected", Qt::red);
-        QMessageBox::warning(this, "Error", "Invalid media file");
+        changeFileNameLabel(tr("File not selected"), Qt::red);
+        QMessageBox::warning(this, tr("Error"), "Invalid media file");
     }
     else {
-        QMessageBox::critical(this, "Error", "Unknown error");
+        QMessageBox::critical(this, tr("Error"), tr("Unknown error"));
     }
 }
 
 bool HaniwaMusic::checkFile(const QString& path) {
     if (path.isEmpty()) {
         QMessageBox msg;
-        msg.warning(this, "Error", "Empty file path");
+        msg.warning(this, tr("Error"), tr("Empty file path"));
         return false;
     }
     if (!QFile::exists(path)) {
         QMessageBox msg;
-        msg.warning(this, "Error", "Invalid file path");
+        msg.warning(this, tr("Error"), tr("Invalid file path"));
         return false;
     }
     return true;
@@ -204,12 +204,12 @@ bool HaniwaMusic::checkFile(const QString& path) {
 bool HaniwaMusic::checkDir(const QString& path) {
     if (path.isEmpty()) {
         QMessageBox msg;
-        msg.warning(this, "Error", "Empty file path");
+        msg.warning(this, tr("Error"), tr("Empty file path"));
         return false;
     }
     if (!QFile::exists(path)) {
         QMessageBox msg;
-        msg.warning(this, "Error", "Invalid file path");
+        msg.warning(this, tr("Error"), tr("Invalid file path"));
         return false;
     }
     return true;
