@@ -43,27 +43,27 @@ QMetadataDlg::QMetadataDlg(const QString& path, QWidget *parent, Qt::WindowFlags
     if (lArtist->text().isEmpty()) {
         lArtist->setText("-");
     }
-    lTitleHeader = new QLabel("Title ");
+    lTitleHeader = new QLabel(tr("Title "));
     lTitle = new QLabel(QString::fromStdString(std::get<std::string>(metainfo["title"])));
     if (lTitle->text().isEmpty()) {
         lTitle->setText("-");
     }
-    lAlbumHeader = new QLabel("Album ");
+    lAlbumHeader = new QLabel(tr("Album "));
     lAlbum = new QLabel(QString::fromStdString(std::get<std::string>(metainfo["album"])));
     if (lAlbum->text().isEmpty()) {
         lAlbum->setText("-");
     }
-    lYearHeader = new QLabel("Year ");
+    lYearHeader = new QLabel(tr("Year "));
     lYear = new QLabel(QString::fromStdString(std::get<std::string>(metainfo["year"])));
     if (lYear->text().isEmpty()) {
         lYear->setText("-");
     }
-    lTrackNumberHeader = new QLabel("Track number ");
+    lTrackNumberHeader = new QLabel(tr("Track number "));
     lTrackNumber = new QLabel(QString::fromStdString(std::get<std::string>(metainfo["trackNumber"])));
     if (lTrackNumber->text().isEmpty()) {
         lTrackNumber->setText("-");
     }
-    lCommentHeader = new QLabel("Comment ");
+    lCommentHeader = new QLabel(tr("Comment "));
     lComment = new QLabel(QString::fromStdString(std::get<std::string>(metainfo["comment"])));
     if (lComment->text().isEmpty()) {
         lComment->setText("-");

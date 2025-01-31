@@ -185,7 +185,7 @@ bool HaniwaMusic::onFileChanged(QString newFile) {
 void HaniwaMusic::onAudioError(AudioPlayer::Error error) {
     if (error == AudioPlayer::Error::InvalidMedia) {
         changeFileNameLabel(tr("File not selected"), Qt::red);
-        QMessageBox::warning(this, tr("Error"), "Invalid media file");
+        QMessageBox::warning(this, tr("Error"), tr("Invalid media file"));
     }
     else {
         QMessageBox::critical(this, tr("Error"), tr("Unknown error"));
@@ -328,7 +328,7 @@ void HaniwaMusic::onOpenPress() {
     if (!playlist) {
         return;
     }
-    QString songPath = QFileDialog::getOpenFileName(this, "Select audio file", appSettings.lastDir, "Audio (*.mp3 *.flac)");
+    QString songPath = QFileDialog::getOpenFileName(this, tr("Select audio file"), appSettings.lastDir, tr("Audio (*.mp3 *.flac)"));
     if (checkFile(songPath)) {
         appSettings.lastDir = QFileInfo(songPath).absolutePath();
         playlist->clear();
@@ -340,7 +340,7 @@ void HaniwaMusic::onOpenDirPress() {
     if (!playlist) {
         return;
     }
-    auto dir = QFileDialog::getExistingDirectory(this, "Open directory", appSettings.lastDir);
+    auto dir = QFileDialog::getExistingDirectory(this, tr("Open directory"), appSettings.lastDir);
     if (checkDir(dir)) {
         appSettings.lastDir = dir;
         playlist->clear();
@@ -387,12 +387,12 @@ void HaniwaMusic::onStopPress() {
 
 void HaniwaMusic::onClose() {
     player->stop();
-    changeFileNameLabel("File not selected", Qt::red);
+    changeFileNameLabel(tr("File not selected"), Qt::red);
 }
 
 void HaniwaMusic::addPlaylist(QString title) {
     if (title.isEmpty()) {
-        title = QInputDialog::getText(this, "Add new playlist", "Title: ", QLineEdit::Normal);
+        title = QInputDialog::getText(this, tr("Add new playlist"), tr("Title: "), QLineEdit::Normal);
     }
     tabPlaylists->setCurrentIndex(tabPlaylists->addTab(new QPlaylist(tabPlaylists), title));
 }
@@ -412,12 +412,12 @@ void HaniwaMusic::importPlaylist() {
     if (!playlist) {
         return;
     }
-    QString playlistPath = QFileDialog::getOpenFileName(this, "Select playlist file", appSettings.lastDir, "Playlist (*.m3u *.m3u8)");
+    QString playlistPath = QFileDialog::getOpenFileName(this, tr("Select playlist file"), appSettings.lastDir, tr("Playlist (*.m3u *.m3u8)"));
     if (!playlistPath.isEmpty()) {
         std::ifstream ifs(playlistPath.toStdString());
         if (!ifs) {
             QMessageBox msg;
-            msg.warning(this, "Error", "Couldn't import playlist");
+            msg.warning(this, tr("Error"), tr("Couldn't import playlist"));
             return;
         }
         m3u::M3UPlaylist playlist = m3u::M3UPlaylist::fromStream(ifs);
@@ -435,14 +435,14 @@ void HaniwaMusic::exportPlaylist() {
     if (!playlist || playlist->empty()) {
         return;
     }
-    QString playlistPath = QFileDialog::getSaveFileName(this, "Select playlist file", appSettings.lastDir, "Playlist (*.m3u *.m3u8)");
+    QString playlistPath = QFileDialog::getSaveFileName(this, tr("Select playlist file"), appSettings.lastDir, tr("Playlist (*.m3u *.m3u8)"));
     if (!playlistPath.endsWith(".m3u") && !playlistPath.endsWith(".m3u8")) {
         playlistPath += ".m3u";
     }
     if (!playlistPath.isEmpty()) {
         if (!playlist->exportTo(tabPlaylists->tabText(tabPlaylists->currentIndex()), playlistPath)) {
             QMessageBox msg;
-            msg.warning(this, "Error", "Couldn't export playlist");
+            msg.warning(this, tr("Error"), tr("Couldn't export playlist"));
         }
     }
 }
@@ -488,11 +488,11 @@ void HaniwaMusic::onPlaylistsMenuClicked() {
 
 void HaniwaMusic::initPlaylistsMenu() {
     playlistsMenu = new QMenu();
-    QAction* playlistsAddPlaylistAction = new QAction("Add playlist", this);
-    QAction* playlistsRemovePlaylistAction = new QAction("Remove playlist", this);
-    QAction* playlistsClearPlaylistAction = new QAction("Clear playlist", this);
-    QAction* playlistsImportPlaylistAction = new QAction("Import playlist", this);
-    QAction* playlistsExportPlaylistAction = new QAction("Export playlist", this);
+    QAction* playlistsAddPlaylistAction = new QAction(tr("Add playlist"), this);
+    QAction* playlistsRemovePlaylistAction = new QAction(tr("Remove playlist"), this);
+    QAction* playlistsClearPlaylistAction = new QAction(tr("Clear playlist"), this);
+    QAction* playlistsImportPlaylistAction = new QAction(tr("Import playlist"), this);
+    QAction* playlistsExportPlaylistAction = new QAction(tr("Export playlist"), this);
     playlistsMenuActions.push_back(playlistsAddPlaylistAction);
     playlistsMenuActions.push_back(playlistsRemovePlaylistAction);
     playlistsMenuActions.push_back(playlistsClearPlaylistAction);
