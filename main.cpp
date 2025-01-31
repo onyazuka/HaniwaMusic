@@ -8,6 +8,7 @@
 
 #include <QApplication>
 #include <QFontDatabase>
+#include <QTranslator>
 #include "QOptionsDlg.hpp"
 
 int main(int argc, char *argv[])
@@ -29,6 +30,11 @@ int main(int argc, char *argv[])
         else {
             qWarning() << "couldn't apply russian localization";
         }
+    }
+    {
+        QPalette pal = a.palette();
+        pal.setColor(QPalette::ColorRole::Window, QColor("white"));
+        a.setPalette(pal);
     }
     if (mainColor.isValid()) {
         QPalette pal = a.palette();
