@@ -46,7 +46,7 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     //lnSearch->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     btnSearch = new QMLMenuButton("qrc:/icons/search.svg",this);
     setWindowTitle("Haniwa Music");
-    changeFileNameLabel(tr("File not selected"), Qt::red);
+    changeFileNameLabel(tr("File not selected"), Qt::black);
     loadSettings();
     if (tabPlaylists->count() == 0) {
         tabPlaylists->addTab(new QPlaylist(tabPlaylists), "Playlist");
@@ -184,7 +184,7 @@ bool HaniwaMusic::onFileChanged(QString newFile) {
 
 void HaniwaMusic::onAudioError(AudioPlayer::Error error) {
     if (error == AudioPlayer::Error::InvalidMedia) {
-        changeFileNameLabel(tr("File not selected"), Qt::red);
+        changeFileNameLabel(tr("File not selected"), Qt::black);
         QMessageBox::warning(this, tr("Error"), tr("Invalid media file"));
     }
     else {
@@ -264,6 +264,7 @@ void HaniwaMusic::loadSettings() {
     chRandom->checked.write(settings.value("Random", false).toBool());
     chRepeat->checked.write(settings.value("Repeat", false).toBool());
     appSettings.language = settings.value("Language", QOptionsDlg::defaultLanguage()).toString();
+    appSettings.mainColor = settings.value("MainColor", QColor()).value<QColor>();
 }
 
 void HaniwaMusic::saveSettings() {
@@ -287,6 +288,7 @@ void HaniwaMusic::saveSettings() {
     settings.setValue("Random", chRandom->checked.read());
     settings.setValue("Repeat", chRepeat->checked.read());
     settings.setValue("Language", appSettings.language);
+    settings.setValue("MainColor", appSettings.mainColor);
 }
 
 void HaniwaMusic::onNext() {
@@ -522,7 +524,8 @@ void HaniwaMusic::initPlaylistsMenu() {
 }
 
 void HaniwaMusic::onOptions() {
-    QOptionsDlg dlg(appSettings.language, this);
+    QOptionsDlg dlg(appSettings.mainColor, appSettings.language, this);
     dlg.exec();
     appSettings.language = dlg.language();
+    appSettings.mainColor = dlg.color();
 }

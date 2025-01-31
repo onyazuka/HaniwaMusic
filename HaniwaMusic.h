@@ -74,6 +74,7 @@ protected:
         QRect windowRect;
         int lastTrackNumber = 0;
         QString language;
+        QColor mainColor;
     } appSettings;
 
     bool checkFile(const QString& file);

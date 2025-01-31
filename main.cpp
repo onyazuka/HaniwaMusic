@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
 
     QSettings settings(ORGANIZATION_NAME, APP_NAME);
     QString language = settings.value("Language", QOptionsDlg::defaultLanguage()).toString();
+    QColor mainColor = settings.value("MainColor", QColor()).value<QColor>();
     QTranslator Translator;
     if (language == "rus") {
         if (Translator.load("HaniwaMusic_ru.qm")) {
@@ -28,6 +29,11 @@ int main(int argc, char *argv[])
         else {
             qWarning() << "couldn't apply russian localization";
         }
+    }
+    if (mainColor.isValid()) {
+        QPalette pal = a.palette();
+        pal.setColor(QPalette::ColorRole::Highlight, mainColor);
+        a.setPalette(pal);
     }
     //if (Translator.load("HaniwaMusic_ru.qm")) {
     //    a.installTranslator(&Translator);

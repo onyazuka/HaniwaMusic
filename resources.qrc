@@ -25,5 +25,6 @@
         <file>icons/play1.svg</file>
         <file>icons/prev1.svg</file>
         <file>icons/stop1.svg</file>
+        <file>QML/SwitchCustom.qml</file>
     </qresource>
 </RCC>

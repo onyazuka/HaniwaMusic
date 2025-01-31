@@ -10,12 +10,19 @@ Control {
         implicitHeight: chBox.implicitHeight
         color: pal.window
     }
-
     Switch {
         id: chBox
         objectName: "chBox"
         padding: 0
         property string iconPath
+        palette.light: pal.highlight
+        palette.dark: pal.highlight
+        palette.midlight: pal.highlight
+        //background: Rectangle {
+            //anchors.fill: parent
+            //color: pal.highlight
+        //}
+
         // property checked set by cpp
     }
     Icon {

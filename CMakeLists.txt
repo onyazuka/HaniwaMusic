@@ -91,6 +91,7 @@ qt_add_qml_module(HaniwaMusic
         icons/stop1.svg
     NO_RESOURCE_TARGET_PATH
     RESOURCES icons/options.svg
+    QML_FILES QML/SwitchCustom.qml
 )
 
 qt6_add_translations(HaniwaMusic TS_FILE_DIR translations QM_FILES_OUTPUT_VARIABLE qm_files)
