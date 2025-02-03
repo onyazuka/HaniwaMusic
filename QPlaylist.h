@@ -97,18 +97,22 @@ private slots:
     void onUpdateMetainfo(Metainfo metainfo, int row);
     void handleContextMenu(const QPoint& pos);
     void onNext();
+    void onAddToPlayQueue();
 private:
     void mousePressEvent(QMouseEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void initMenu();
     void onRemoveTableWidgetItem(int row);
+    void updatePlayQueueItems();
     QThread durationGathererThread;
     DurationGatherer2* durationGatherer;
     QMenu* itemRightClickMenu = nullptr;
     QAction* itemRemoveAction = nullptr;
     QAction* itemShowMetadata = nullptr;
+    QAction* itemAddToPlayQueue = nullptr;
     SearchCtx searchCtx;
     QList<QTableWidgetItem*> playHistory;
+    QList<QTableWidgetItem*> playQueue;
 };
 
 #endif // QPLAYLIST_H

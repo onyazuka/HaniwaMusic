@@ -219,14 +219,19 @@
 <context>
     <name>QPlaylist</name>
     <message>
-        <location filename="../QPlaylist.cpp" line="320"/>
+        <location filename="../QPlaylist.cpp" line="340"/>
         <source>Remove from playlist</source>
         <translation>Удалить из плейлиста</translation>
     </message>
     <message>
-        <location filename="../QPlaylist.cpp" line="321"/>
+        <location filename="../QPlaylist.cpp" line="341"/>
         <source>Show metadata</source>
         <translation>Показать метаданные</translation>
+    </message>
+    <message>
+        <location filename="../QPlaylist.cpp" line="342"/>
+        <source>Add to queue</source>
+        <translation>Добавить в очередь</translation>
     </message>
 </context>
 </TS>

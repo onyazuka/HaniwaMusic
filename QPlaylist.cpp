@@ -212,7 +212,12 @@ void QPlaylist::next() {
         return;
     }
     onNext();
-    onCellDoubleClicked(nextRow(activeRowNumber()), Column::Title);
+    int row = nextRow(activeRowNumber());
+    if (!playQueue.empty()) {
+        row = playQueue.front()->row();
+        updatePlayQueueItems();
+    }
+    onCellDoubleClicked(row, Column::Title);
 }
 
 void QPlaylist::nextRandom() {
@@ -220,7 +225,12 @@ void QPlaylist::nextRandom() {
         return;
     }
     onNext();
-    onCellDoubleClicked(rand() % rowCount(), Column::Title);
+    int row = rand() % rowCount();
+    if (!playQueue.empty()) {
+        row = playQueue.front()->row();
+        updatePlayQueueItems();
+    }
+    onCellDoubleClicked(row, Column::Title);
 }
 
 void QPlaylist::onNext() {
@@ -231,6 +241,13 @@ void QPlaylist::onNext() {
     if (activeRow >= 0) {
         playHistory.push_back(activeItem());
     }
+}
+
+void QPlaylist::onAddToPlayQueue() {
+    playQueue.append(currentItem());
+    int row = currentRow();
+    auto metainfo = getMetainfo(row);
+    setTitle(currentRow(), getPath(row), metainfo.title, metainfo.artist, playQueue.size());
 }
 
 void QPlaylist::prev() {
@@ -307,9 +324,12 @@ void QPlaylist::keyPressEvent(QKeyEvent* event) {
     if (event->key() == Qt::Key_Return) {
         onCellDoubleClicked(currentRow(), Column::Title);
     }
-    if (event->key() == Qt::Key_Delete) {
+    else if (event->key() == Qt::Key_Delete) {
         itemRemoveAction->setData(currentRow());
         itemRemoveAction->trigger();
+    }
+    else if (event->key() == Qt::Key_Q) {
+        onAddToPlayQueue();
     }
     else {
         QTableWidget::keyPressEvent(event);
@@ -319,6 +339,9 @@ void QPlaylist::keyPressEvent(QKeyEvent* event) {
 void QPlaylist::initMenu() {
     itemRemoveAction = new QAction(tr("Remove from playlist"), this);
     itemShowMetadata = new QAction(tr("Show metadata"), this);
+    itemAddToPlayQueue = new QAction(tr("Add to queue"), this);
+    itemAddToPlayQueue->setShortcut(QKeySequence(Qt::Key_Q));
+    itemRemoveAction->setShortcut(QKeySequence(Qt::Key_Delete));
     connect(itemRemoveAction, &QAction::triggered, this, [this](){
         int row = itemRemoveAction->data().toInt();
         if (getDuration(row) == -1) {
@@ -331,8 +354,12 @@ void QPlaylist::initMenu() {
         QMetadataDlg dlg(getPath(currentRow()), this);
         dlg.exec();
     });
+    connect(itemAddToPlayQueue, &QAction::triggered, this, [this](){
+        onAddToPlayQueue();
+    });
     itemRightClickMenu = new QMenu();
     itemRightClickMenu->addAction(itemShowMetadata);
+    itemRightClickMenu->addAction(itemAddToPlayQueue);
     itemRightClickMenu->addSeparator();
     itemRightClickMenu->addAction(itemRemoveAction);
     //itemRightClickMenu->platformMenu()
@@ -348,6 +375,11 @@ void QPlaylist::onRemoveTableWidgetItem(int row) {
             playHistory.erase(playHistory.begin() + i);
         }
     }
+    for (int i = 0; i < playQueue.size(); ++i) {
+        if (!playQueue[i] || row == playQueue[i]->row()) {
+            playQueue.erase(playQueue.begin() + i);
+        }
+    }
     for (int i = row + 1; i < rowCount(); ++i) {
         item(i, Column::Number)->setText(QString::number(i));
     }
@@ -357,4 +389,15 @@ void QPlaylist::onRemoveTableWidgetItem(int row) {
     }
 }
 
+void QPlaylist::updatePlayQueueItems() {
+    int i = 0;
+    for (auto iter = playQueue.begin(); iter < playQueue.end(); ++iter, ++i) {
+        QTableWidgetItem* item = *iter;
+        int row = item->row();
+        auto metainfo = getMetainfo(row);
+        setTitle(row, getPath(row), metainfo.title, metainfo.artist, i);
+        //item->setText(QString("%2 [%1]").arg(QString::number(i), item->text()));
+    }
+    playQueue.pop_front();
+}
 

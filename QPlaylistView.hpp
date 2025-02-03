@@ -47,7 +47,7 @@ public:
     inline bool empty() const { return rowCount() == 0; }
     void setDuration(int row, int durationMs);
     int getDuration(int row) const;
-    void setTitle(int row, const QString& path, const QString& title, const QString& artist);
+    void setTitle(int row, const QString& path, const QString& title, const QString& artist, int queueNum = 0);
     QString getPath(int row) const;
     void setMetainfo(int row, const Metainfo& metainfo);
     Metainfo getMetainfo(int row) const;

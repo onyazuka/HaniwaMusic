@@ -113,7 +113,7 @@ int QPlaylistView::getDuration(int row) const {
     return -1;
 }
 
-void QPlaylistView::setTitle(int row, const QString& path, const QString& title, const QString& artist) {
+void QPlaylistView::setTitle(int row, const QString& path, const QString& title, const QString& artist, int queueNum) {
     assert(!path.isEmpty());
     QTableWidgetItem* it = item(row, Column::Title);
     if (!it && row < rowCount()) {
@@ -126,7 +126,10 @@ void QPlaylistView::setTitle(int row, const QString& path, const QString& title,
     if (path.isEmpty() && (title.isEmpty() || artist.isEmpty())) {
         return;
     }
-    it->setText(!title.isEmpty() && !artist.isEmpty() ? (artist + " - " + title) : QFileInfo(path).completeBaseName());
+    it->setText((queueNum ? QString("[%1] ").arg(QString::number(queueNum)) : "") + (!title.isEmpty() && !artist.isEmpty() ? (artist + " - " + title) : QFileInfo(path).completeBaseName()));
+    QFont font = it->font();
+    font.setUnderline(queueNum > 0);
+    it->setFont(font);
     it->setData(Qt::UserRole, path);
 }
 
