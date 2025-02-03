@@ -7,10 +7,12 @@ cmake
 - Can play .mp3, .flac audio
 - Multiplatform (thanks Qt)
 - Basic functionality (random, repeat, search by name, playlists, seek etc)
-- Media keys support (for now only on Linux Gnome)
-- Media keys for Windows
+- Media keys support 
 - Multiple playlists support
 - Import/export playlists
+- Play queue
+- Localization (English and Russian)
+- Styling
 
 ## Ambitions
 - Maybe try ffmpeg or even own lib, instead of QMediaPlayer, to play audio (?)
