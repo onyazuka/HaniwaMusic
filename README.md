@@ -12,7 +12,7 @@ cmake
 - Import/export playlists
 - Play queue
 - Localization (English and Russian)
-- Styling
+- Styling customization
 
 ## Ambitions
 - Maybe try ffmpeg or even own lib, instead of QMediaPlayer, to play audio (?)
