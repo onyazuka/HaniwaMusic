@@ -20,8 +20,14 @@ HaniwaMusic::HaniwaMusic(QWidget *parent)
     btnStop = new QMLControlButton("qrc:/icons/stop1.svg", this);
     btnNext = new QMLControlButton("qrc:/icons/next1.svg", this);
     btnPrev = new QMLControlButton("qrc:/icons/prev1.svg", this);
+    //btnNext->setToolTip(tr("Next"));
+    //btnPrev->setToolTip(tr("Previous"));
+    //btnStop->setToolTip(tr("Stop"));
+    //btnPlay->setToolTip(tr("Play/Pause"));
     chRandom = new QMLControlCheckbox("qrc:/icons/random.svg", false, this);
     chRepeat = new QMLControlCheckbox("qrc:/icons/repeat.svg", false, this);
+    //chRandom->setToolTip(tr("Random play"));
+    //chRepeat->setToolTip(tr("Repeat"));
     //qmlSlider = new QMLSlider(Qt::Orientation::Vertical, this);
     lFileName = new QLabelElide("", this);
     lFileName->setMoving(true);
@@ -330,7 +336,7 @@ void HaniwaMusic::onOpenPress() {
     if (!playlist) {
         return;
     }
-    QString songPath = QFileDialog::getOpenFileName(this, tr("Select audio file"), appSettings.lastDir, tr("Audio (*.mp3 *.flac)"));
+    QString songPath = QFileDialog::getOpenFileName(this, tr("Select audio file"), appSettings.lastDir, tr("Audio (*.mp3 *.flac *.wav)"));
     if (checkFile(songPath)) {
         appSettings.lastDir = QFileInfo(songPath).absolutePath();
         playlist->clear();

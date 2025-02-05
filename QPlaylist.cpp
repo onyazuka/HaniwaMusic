@@ -84,7 +84,7 @@ void QPlaylist::addFiles(const QStringList& files) {
 }
 
 void QPlaylist::addFolder(const QString& path) {
-    QDirIterator it(path, QStringList({"*.mp3", "*.flac"}), QDir::Files, QDirIterator::Subdirectories);
+    QDirIterator it(path, QStringList({"*.mp3", "*.flac", "*.wav"}), QDir::Files, QDirIterator::Subdirectories);
     while (it.hasNext()) {
         addFile(it.nextFileInfo().absoluteFilePath());
     }
