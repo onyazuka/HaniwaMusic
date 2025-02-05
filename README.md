@@ -17,7 +17,7 @@ cmake
 ## Ambitions
 - Maybe try ffmpeg or even own lib, instead of QMediaPlayer, to play audio (?)
 
-Uses own library for parsing .mp3 and .flac metadata tags and audio duration. 
+Uses own library for parsing .mp3, .flac and .wav metadata tags and audio duration. 
 Uses QMediaPlayer for playing audio.
 
 
