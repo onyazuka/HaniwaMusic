@@ -51,9 +51,9 @@ public:
     DurationGatherer2();
     ~DurationGatherer2();
 public slots:
-    void onAddFile(const QString& path, int row);
+    void onAddFile(const QString& path, QTableWidgetItem* it);
 signals:
-    void gotMetainfo(Metainfo metainfo, int row);
+    void gotMetainfo(Metainfo metainfo, QTableWidgetItem* it);
 private:
 };
 
@@ -84,7 +84,7 @@ public:
     bool empty() const;
 signals:
     void fileChanged(QString path);
-    void fileAddedWithUnknownDuration(QString path, int row);
+    void fileAddedWithUnknownDuration(QString path, QTableWidgetItem* it);
 public slots:
     void current();
     void next();
@@ -94,7 +94,7 @@ public slots:
     bool select(int row);
 private slots:
     void onCellDoubleClicked(int row, int col);
-    void onUpdateMetainfo(Metainfo metainfo, int row);
+    void onUpdateMetainfo(Metainfo metainfo, QTableWidgetItem* it);
     void handleContextMenu(const QPoint& pos);
     void onNext();
     void onAddToPlayQueue();

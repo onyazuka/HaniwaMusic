@@ -17,7 +17,7 @@ DurationGatherer2::~DurationGatherer2() {
     ;
 }
 
-void DurationGatherer2::onAddFile(const QString& path, int row) {
+void DurationGatherer2::onAddFile(const QString& path, QTableWidgetItem* it) {
     //taskQueue.append({path,row,0});
     //cnd.notify_one();
     static GetMetaInfoConfig config;
@@ -34,10 +34,10 @@ void DurationGatherer2::onAddFile(const QString& path, int row) {
         if (auto iter = metainfo.find("artist"); iter != metainfo.end()) {
             mt.artist = QString::fromStdString(std::get<std::string>(metainfo["artist"]));
         }
-        emit gotMetainfo(mt, row);
+        emit gotMetainfo(mt, it);
     }
     catch (...) {
-        emit gotMetainfo(mt, row);
+        emit gotMetainfo(mt, it);
     }
 }
 
@@ -65,7 +65,7 @@ void QPlaylist::addFile(const QString& path, const Metainfo& metainfo) {
     int row = appendTrack(Track(path, metainfo));
     // unknown duration - sending to duration gatherer
     if (metainfo.durationMs < 0) {
-        emit fileAddedWithUnknownDuration(path, row);
+        emit fileAddedWithUnknownDuration(path, item(row, Column::Title));
     }
 }
 
@@ -294,10 +294,13 @@ void QPlaylist::onCellDoubleClicked(int row, int col) {
 }
 
 // got 'duration' in ms
-void QPlaylist::onUpdateMetainfo(Metainfo metainfo, int row) {
-    setDuration(row, metainfo.durationMs);
-    setTitle(row, getPath(row), metainfo.title, metainfo.artist);
-    setMetainfo(row, metainfo);
+void QPlaylist::onUpdateMetainfo(Metainfo metainfo, QTableWidgetItem* it) {
+    if (!it) {
+        return;
+    }
+    setDuration(it->row(), metainfo.durationMs);
+    setTitle(it->row(), getPath(it->row()), metainfo.title, metainfo.artist);
+    setMetainfo(it->row(), metainfo);
 }
 
 void QPlaylist::handleContextMenu(const QPoint& pos) {
