@@ -25,6 +25,7 @@ Uses own library for parsing .mp3, .flac and .wav metadata tags and audio durati
 Uses QMediaPlayer for playing audio.
 
 
+![Снимок экрана от 2025-02-19 20-03-48](https://github.com/user-attachments/assets/bb6a1f04-490d-4855-993f-35045424d6df)
 
-![111](https://github.com/user-attachments/assets/37c6c975-2ca9-45da-a5ef-da6b61e59bb4)
+
 
