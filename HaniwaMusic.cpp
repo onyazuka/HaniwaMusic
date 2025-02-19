@@ -416,6 +416,34 @@ void HaniwaMusic::clearPlaylist() {
     onClose();
 }
 
+void HaniwaMusic::sortPlaylistByTitle() {
+    if (!playlist) {
+        return;
+    }
+    playlist->sortByTitle();
+}
+
+void HaniwaMusic::sortPlaylistByArtist() {
+    if (!playlist) {
+        return;
+    }
+    playlist->sortByArtist();
+}
+
+void HaniwaMusic::sortPlaylistByDuration() {
+    if (!playlist) {
+        return;
+    }
+    playlist->sortByDuration();
+}
+
+void HaniwaMusic::sortPlaylistByPath() {
+    if (!playlist) {
+        return;
+    }
+    playlist->sortByPath();
+}
+
 void HaniwaMusic::importPlaylist() {
     if (!playlist) {
         return;
@@ -499,11 +527,20 @@ void HaniwaMusic::initPlaylistsMenu() {
     QAction* playlistsAddPlaylistAction = new QAction(tr("Add playlist"), this);
     QAction* playlistsRemovePlaylistAction = new QAction(tr("Remove playlist"), this);
     QAction* playlistsClearPlaylistAction = new QAction(tr("Clear playlist"), this);
+    QMenu* playlistsSortPlaylistMenu = new QMenu(tr("Sort playlist"), this);
+    QAction* playlistsSortByTitleAction = new QAction(tr("By title"), this);
+    QAction* playlistsSortByArtistAction = new QAction(tr("By artist"), this);
+    QAction* playlistsSortByDurationAction = new QAction(tr("By duration"), this);
+    QAction* playlistsSortByPathAction = new QAction(tr("By path"), this);
     QAction* playlistsImportPlaylistAction = new QAction(tr("Import playlist"), this);
     QAction* playlistsExportPlaylistAction = new QAction(tr("Export playlist"), this);
     playlistsMenuActions.push_back(playlistsAddPlaylistAction);
     playlistsMenuActions.push_back(playlistsRemovePlaylistAction);
     playlistsMenuActions.push_back(playlistsClearPlaylistAction);
+    playlistsMenuActions.push_back(playlistsSortByTitleAction);
+    playlistsMenuActions.push_back(playlistsSortByArtistAction);
+    playlistsMenuActions.push_back(playlistsSortByDurationAction);
+    playlistsMenuActions.push_back(playlistsSortByPathAction);
     playlistsMenuActions.push_back(playlistsImportPlaylistAction);
     playlistsMenuActions.push_back(playlistsExportPlaylistAction);
     connect(playlistsAddPlaylistAction, &QAction::triggered, this, [this](){
@@ -515,6 +552,18 @@ void HaniwaMusic::initPlaylistsMenu() {
     connect(playlistsClearPlaylistAction, &QAction::triggered, this, [this](){
         clearPlaylist();
     });
+    connect(playlistsSortByTitleAction, &QAction::triggered, this, [this](){
+        sortPlaylistByTitle();
+    });
+    connect(playlistsSortByArtistAction, &QAction::triggered, this, [this](){
+        sortPlaylistByArtist();
+    });
+    connect(playlistsSortByDurationAction, &QAction::triggered, this, [this](){
+        sortPlaylistByDuration();
+    });
+    connect(playlistsSortByPathAction, &QAction::triggered, this, [this](){
+        sortPlaylistByPath();
+    });
     connect(playlistsImportPlaylistAction, &QAction::triggered, this, [this](){
         importPlaylist();
     });
@@ -524,6 +573,11 @@ void HaniwaMusic::initPlaylistsMenu() {
     playlistsMenu->addAction(playlistsAddPlaylistAction);
     playlistsMenu->addAction(playlistsRemovePlaylistAction);
     playlistsMenu->addAction(playlistsClearPlaylistAction);
+    playlistsSortPlaylistMenu->addAction(playlistsSortByTitleAction);
+    playlistsSortPlaylistMenu->addAction(playlistsSortByArtistAction);
+    playlistsSortPlaylistMenu->addAction(playlistsSortByDurationAction);
+    playlistsSortPlaylistMenu->addAction(playlistsSortByPathAction);
+    playlistsMenu->addMenu(playlistsSortPlaylistMenu);
     playlistsMenu->addSeparator();
     playlistsMenu->addAction(playlistsImportPlaylistAction);
     playlistsMenu->addAction(playlistsExportPlaylistAction);

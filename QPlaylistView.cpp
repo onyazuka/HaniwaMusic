@@ -163,6 +163,93 @@ void QPlaylistView::clear() {
     _activeItem = nullptr;
 }
 
+void QPlaylistView::sortByTitle() {
+    QList<QTableWidgetItem*> items;
+    for (size_t i = 0; i < rowCount(); ++i) {
+        items.push_back(item(i, Column::Title));
+    }
+    std::sort(items.begin(), items.end(), [this](QTableWidgetItem* it1, QTableWidgetItem* it2) {
+        auto meta1 = getMetainfo(it1->row());
+        auto meta2 = getMetainfo(it2->row());
+        // want to items without titles to go down on the list
+        if (meta1.title.isEmpty() && !meta2.title.isEmpty()) {
+            return false;
+        }
+        if (!meta1.title.isEmpty() && meta2.title.isEmpty()) {
+            return true;
+        }
+        if (meta1.title.isEmpty() && meta2.title.isEmpty()) {
+            auto path1 = getPath(it1->row());
+            auto path2 = getPath(it2->row());
+            return path1 < path2;
+        }
+        return meta1.title < meta2.title;
+    });
+    for (size_t i = 0; i < items.size(); ++i) {
+        swapRows(i, items[i]->row());
+    }
+}
+
+void QPlaylistView::sortByArtist() {
+    QList<QTableWidgetItem*> items;
+    for (size_t i = 0; i < rowCount(); ++i) {
+        items.push_back(item(i, Column::Title));
+    }
+    std::sort(items.begin(), items.end(), [this](QTableWidgetItem* it1, QTableWidgetItem* it2) {
+        auto meta1 = getMetainfo(it1->row());
+        auto meta2 = getMetainfo(it2->row());
+        // want to items without titles to go down on the list
+        if (meta1.artist.isEmpty() && !meta2.artist.isEmpty()) {
+            return false;
+        }
+        if (!meta1.artist.isEmpty() && meta2.artist.isEmpty()) {
+            return true;
+        }
+        if (meta1.artist.isEmpty() && meta2.artist.isEmpty()) {
+            auto path1 = getPath(it1->row());
+            auto path2 = getPath(it2->row());
+            return path1 < path2;
+        }
+        if (meta1.artist == meta2.artist) {
+            return meta1.title < meta2.title;
+        }
+        return meta1.artist < meta2.artist;
+    });
+    for (size_t i = 0; i < items.size(); ++i) {
+        swapRows(i, items[i]->row());
+    }
+}
+
+void QPlaylistView::sortByDuration() {
+    QList<QTableWidgetItem*> items;
+    for (size_t i = 0; i < rowCount(); ++i) {
+        items.push_back(item(i, Column::Title));
+    }
+    std::sort(items.begin(), items.end(), [this](QTableWidgetItem* it1, QTableWidgetItem* it2) {
+        auto dur1 = getDuration(it1->row());
+        auto dur2 = getDuration(it2->row());
+        return dur1 < dur2;
+    });
+    for (size_t i = 0; i < items.size(); ++i) {
+        swapRows(i, items[i]->row());
+    }
+}
+
+void QPlaylistView::sortByPath() {
+    QList<QTableWidgetItem*> items;
+    for (size_t i = 0; i < rowCount(); ++i) {
+        items.push_back(item(i, Column::Title));
+    }
+    std::sort(items.begin(), items.end(), [this](QTableWidgetItem* it1, QTableWidgetItem* it2) {
+        auto path1 = getPath(it1->row());
+        auto path2 = getPath(it2->row());
+        return path1 < path2;
+    });
+    for (size_t i = 0; i < items.size(); ++i) {
+        swapRows(i, items[i]->row());
+    }
+}
+
 void QPlaylistView::swapRows(int sourceRow, int destRow) {
     if (sourceRow < 0 || sourceRow >= rowCount() || destRow < 0 || destRow >= rowCount()) {
         return;

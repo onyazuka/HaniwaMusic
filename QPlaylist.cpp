@@ -28,6 +28,9 @@ void DurationGatherer2::onAddFile(const QString& path, QTableWidgetItem* it) {
     try {
         auto metainfo = getMetainfo(path.toStdString(), config);
         mt.durationMs = (qint64)(QString::fromStdString(std::get<std::string>(metainfo["durationMs"])).toULongLong());
+        if (mt.durationMs < 0) {
+            mt.durationMs = 0;
+        }
         if (auto iter = metainfo.find("title"); iter != metainfo.end()) {
             mt.title = QString::fromStdString(std::get<std::string>(metainfo["title"]));
         }

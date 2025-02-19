@@ -53,6 +53,10 @@ public:
     Metainfo getMetainfo(int row) const;
 public slots:
     void clear();
+    void sortByTitle();
+    void sortByArtist();
+    void sortByDuration();
+    void sortByPath();
 protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;

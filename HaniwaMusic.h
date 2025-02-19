@@ -52,6 +52,10 @@ public slots:
     void addPlaylist(QString title = "");
     void removePlaylist();
     void clearPlaylist();
+    void sortPlaylistByTitle();
+    void sortPlaylistByArtist();
+    void sortPlaylistByDuration();
+    void sortPlaylistByPath();
     void importPlaylist();
     void exportPlaylist();
 protected slots:

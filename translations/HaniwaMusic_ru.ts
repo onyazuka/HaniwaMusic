@@ -41,8 +41,8 @@
         <location filename="../HaniwaMusic.cpp" line="209"/>
         <location filename="../HaniwaMusic.cpp" line="218"/>
         <location filename="../HaniwaMusic.cpp" line="223"/>
-        <location filename="../HaniwaMusic.cpp" line="428"/>
-        <location filename="../HaniwaMusic.cpp" line="453"/>
+        <location filename="../HaniwaMusic.cpp" line="456"/>
+        <location filename="../HaniwaMusic.cpp" line="481"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
@@ -80,7 +80,7 @@
     <message>
         <location filename="../HaniwaMusic.cpp" line="339"/>
         <source>Audio (*.mp3 *.flac *.wav)</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Аудио (*.mp3 *.flac *.wav)</translation>
     </message>
     <message>
         <location filename="../HaniwaMusic.cpp" line="351"/>
@@ -98,49 +98,74 @@
         <translation>Название: </translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="423"/>
-        <location filename="../HaniwaMusic.cpp" line="446"/>
+        <location filename="../HaniwaMusic.cpp" line="451"/>
+        <location filename="../HaniwaMusic.cpp" line="474"/>
         <source>Select playlist file</source>
         <translation>Выбрать файл плейлиста</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="423"/>
-        <location filename="../HaniwaMusic.cpp" line="446"/>
+        <location filename="../HaniwaMusic.cpp" line="451"/>
+        <location filename="../HaniwaMusic.cpp" line="474"/>
         <source>Playlist (*.m3u *.m3u8)</source>
         <translation>Плейлист (*.m3u *.m3u8)</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="428"/>
+        <location filename="../HaniwaMusic.cpp" line="456"/>
         <source>Couldn&apos;t import playlist</source>
         <translation>Не удалось импортировать плейлист</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="453"/>
+        <location filename="../HaniwaMusic.cpp" line="481"/>
         <source>Couldn&apos;t export playlist</source>
         <translation>Не удалось экспортировать плейлист</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="499"/>
+        <location filename="../HaniwaMusic.cpp" line="527"/>
         <source>Add playlist</source>
         <translation>Добавить плейлист</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="500"/>
+        <location filename="../HaniwaMusic.cpp" line="528"/>
         <source>Remove playlist</source>
         <translation>Удалить плейлист</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="501"/>
+        <location filename="../HaniwaMusic.cpp" line="529"/>
         <source>Clear playlist</source>
         <translation>Очистить плейлист</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="502"/>
+        <location filename="../HaniwaMusic.cpp" line="530"/>
+        <source>Sort playlist</source>
+        <translation>Сортировать плейлист</translation>
+    </message>
+    <message>
+        <location filename="../HaniwaMusic.cpp" line="531"/>
+        <source>By title</source>
+        <translation>По названию</translation>
+    </message>
+    <message>
+        <location filename="../HaniwaMusic.cpp" line="532"/>
+        <source>By artist</source>
+        <translation>По исполнителю</translation>
+    </message>
+    <message>
+        <location filename="../HaniwaMusic.cpp" line="533"/>
+        <source>By duration</source>
+        <translation>По продолжительности</translation>
+    </message>
+    <message>
+        <location filename="../HaniwaMusic.cpp" line="534"/>
+        <source>By path</source>
+        <translation>По пути к файлу</translation>
+    </message>
+    <message>
+        <location filename="../HaniwaMusic.cpp" line="535"/>
         <source>Import playlist</source>
         <translation>Импортировать плейлист</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="503"/>
+        <location filename="../HaniwaMusic.cpp" line="536"/>
         <source>Export playlist</source>
         <translation>Экспортировать плейлист</translation>
     </message>
@@ -247,17 +272,17 @@
 <context>
     <name>QPlaylist</name>
     <message>
-        <location filename="../QPlaylist.cpp" line="343"/>
+        <location filename="../QPlaylist.cpp" line="346"/>
         <source>Remove from playlist</source>
         <translation>Удалить из плейлиста</translation>
     </message>
     <message>
-        <location filename="../QPlaylist.cpp" line="344"/>
+        <location filename="../QPlaylist.cpp" line="347"/>
         <source>Show metadata</source>
         <translation>Показать метаданные</translation>
     </message>
     <message>
-        <location filename="../QPlaylist.cpp" line="345"/>
+        <location filename="../QPlaylist.cpp" line="348"/>
         <source>Add to queue</source>
         <translation>Добавить в очередь</translation>
     </message>
