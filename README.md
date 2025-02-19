@@ -3,6 +3,9 @@ Minimalistic audio player, written in C++ and Qt.
 ## Compilation
 cmake
 
+## License 
+MIT
+
 ## Features
 - Can play .mp3, .flac, .wav audio
 - Multiplatform (thanks Qt)
@@ -13,6 +16,7 @@ cmake
 - Play queue
 - Localization (English and Russian)
 - Styling customization
+- Playlist sorting
 
 ## Ambitions
 - Maybe try ffmpeg or even own lib, instead of QMediaPlayer, to play audio (?)
