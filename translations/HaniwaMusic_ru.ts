@@ -28,48 +28,48 @@
         <translation type="vanished">Повтор</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="55"/>
-        <location filename="../HaniwaMusic.cpp" line="193"/>
-        <location filename="../HaniwaMusic.cpp" line="398"/>
+        <location filename="../HaniwaMusic.cpp" line="56"/>
+        <location filename="../HaniwaMusic.cpp" line="194"/>
+        <location filename="../HaniwaMusic.cpp" line="399"/>
         <source>File not selected</source>
         <translation>Файл не выбран</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="194"/>
-        <location filename="../HaniwaMusic.cpp" line="197"/>
-        <location filename="../HaniwaMusic.cpp" line="204"/>
-        <location filename="../HaniwaMusic.cpp" line="209"/>
-        <location filename="../HaniwaMusic.cpp" line="218"/>
-        <location filename="../HaniwaMusic.cpp" line="223"/>
-        <location filename="../HaniwaMusic.cpp" line="456"/>
-        <location filename="../HaniwaMusic.cpp" line="481"/>
+        <location filename="../HaniwaMusic.cpp" line="195"/>
+        <location filename="../HaniwaMusic.cpp" line="198"/>
+        <location filename="../HaniwaMusic.cpp" line="205"/>
+        <location filename="../HaniwaMusic.cpp" line="210"/>
+        <location filename="../HaniwaMusic.cpp" line="219"/>
+        <location filename="../HaniwaMusic.cpp" line="224"/>
+        <location filename="../HaniwaMusic.cpp" line="457"/>
+        <location filename="../HaniwaMusic.cpp" line="482"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="194"/>
+        <location filename="../HaniwaMusic.cpp" line="195"/>
         <source>Invalid media file</source>
         <translation>Неправильный медиа файл</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="197"/>
+        <location filename="../HaniwaMusic.cpp" line="198"/>
         <source>Unknown error</source>
         <translation>Неизвестная ошибка</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="204"/>
-        <location filename="../HaniwaMusic.cpp" line="218"/>
+        <location filename="../HaniwaMusic.cpp" line="205"/>
+        <location filename="../HaniwaMusic.cpp" line="219"/>
         <source>Empty file path</source>
         <translation>Пустой путь к файлу</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="209"/>
-        <location filename="../HaniwaMusic.cpp" line="223"/>
+        <location filename="../HaniwaMusic.cpp" line="210"/>
+        <location filename="../HaniwaMusic.cpp" line="224"/>
         <source>Invalid file path</source>
         <translation>Неправильный путь к файлу</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="339"/>
+        <location filename="../HaniwaMusic.cpp" line="340"/>
         <source>Select audio file</source>
         <translation>Выбрать аудио файл</translation>
     </message>
@@ -78,94 +78,94 @@
         <translation type="vanished">Аудио (*.mp3 *.flac)</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="339"/>
+        <location filename="../HaniwaMusic.cpp" line="340"/>
         <source>Audio (*.mp3 *.flac *.wav)</source>
         <translation type="unfinished">Аудио (*.mp3 *.flac *.wav)</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="351"/>
+        <location filename="../HaniwaMusic.cpp" line="352"/>
         <source>Open directory</source>
         <translation>Открыть папку</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="403"/>
+        <location filename="../HaniwaMusic.cpp" line="404"/>
         <source>Add new playlist</source>
         <translation>Добавить новый плейлист</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="403"/>
+        <location filename="../HaniwaMusic.cpp" line="404"/>
         <source>Title: </source>
         <translation>Название: </translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="451"/>
-        <location filename="../HaniwaMusic.cpp" line="474"/>
+        <location filename="../HaniwaMusic.cpp" line="452"/>
+        <location filename="../HaniwaMusic.cpp" line="475"/>
         <source>Select playlist file</source>
         <translation>Выбрать файл плейлиста</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="451"/>
-        <location filename="../HaniwaMusic.cpp" line="474"/>
+        <location filename="../HaniwaMusic.cpp" line="452"/>
+        <location filename="../HaniwaMusic.cpp" line="475"/>
         <source>Playlist (*.m3u *.m3u8)</source>
         <translation>Плейлист (*.m3u *.m3u8)</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="456"/>
+        <location filename="../HaniwaMusic.cpp" line="457"/>
         <source>Couldn&apos;t import playlist</source>
         <translation>Не удалось импортировать плейлист</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="481"/>
+        <location filename="../HaniwaMusic.cpp" line="482"/>
         <source>Couldn&apos;t export playlist</source>
         <translation>Не удалось экспортировать плейлист</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="527"/>
+        <location filename="../HaniwaMusic.cpp" line="528"/>
         <source>Add playlist</source>
         <translation>Добавить плейлист</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="528"/>
+        <location filename="../HaniwaMusic.cpp" line="529"/>
         <source>Remove playlist</source>
         <translation>Удалить плейлист</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="529"/>
+        <location filename="../HaniwaMusic.cpp" line="530"/>
         <source>Clear playlist</source>
         <translation>Очистить плейлист</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="530"/>
+        <location filename="../HaniwaMusic.cpp" line="531"/>
         <source>Sort playlist</source>
         <translation>Сортировать плейлист</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="531"/>
+        <location filename="../HaniwaMusic.cpp" line="532"/>
         <source>By title</source>
         <translation>По названию</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="532"/>
+        <location filename="../HaniwaMusic.cpp" line="536"/>
         <source>By artist</source>
         <translation>По исполнителю</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="533"/>
+        <location filename="../HaniwaMusic.cpp" line="539"/>
         <source>By duration</source>
         <translation>По продолжительности</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="534"/>
+        <location filename="../HaniwaMusic.cpp" line="542"/>
         <source>By path</source>
         <translation>По пути к файлу</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="535"/>
+        <location filename="../HaniwaMusic.cpp" line="551"/>
         <source>Import playlist</source>
         <translation>Импортировать плейлист</translation>
     </message>
     <message>
-        <location filename="../HaniwaMusic.cpp" line="536"/>
+        <location filename="../HaniwaMusic.cpp" line="552"/>
         <source>Export playlist</source>
         <translation>Экспортировать плейлист</translation>
     </message>

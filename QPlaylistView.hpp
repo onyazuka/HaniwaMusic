@@ -25,6 +25,13 @@ enum class UserRoles {
     Metainfo
 };
 
+enum class SortOrder {
+    Title,
+    Artist,
+    Duration,
+    Path
+};
+
 class QPlaylistView : public QTableWidget {
     Q_OBJECT
 public:
@@ -53,10 +60,10 @@ public:
     Metainfo getMetainfo(int row) const;
 public slots:
     void clear();
-    void sortByTitle();
-    void sortByArtist();
-    void sortByDuration();
-    void sortByPath();
+    void sortByTitle(bool asc);
+    void sortByArtist(bool asc);
+    void sortByDuration(bool asc);
+    void sortByPath(bool asc);
 protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;

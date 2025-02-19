@@ -52,10 +52,10 @@ public slots:
     void addPlaylist(QString title = "");
     void removePlaylist();
     void clearPlaylist();
-    void sortPlaylistByTitle();
-    void sortPlaylistByArtist();
-    void sortPlaylistByDuration();
-    void sortPlaylistByPath();
+    void sortPlaylistByTitle(bool asc);
+    void sortPlaylistByArtist(bool asc);
+    void sortPlaylistByDuration(bool asc);
+    void sortPlaylistByPath(bool asc);
     void importPlaylist();
     void exportPlaylist();
 protected slots:
@@ -117,6 +117,8 @@ protected:
     QMLMenuButton* btnSearch;
 
     QMenu* playlistsMenu = nullptr;
+    QMenu* playlistsSortPlaylistMenu = nullptr;
+    QActionGroup* playlistSortActions = nullptr;
     QList<QAction*> playlistsMenuActions;
     float memoVolume = 0.0f;
 
